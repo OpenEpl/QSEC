@@ -1,0 +1,82 @@
+﻿.程序集 Double
+
+.子程序 Double_NaN, 双精度小数型, 公开
+
+置入代码 ({201, 49, 192, 186, 0, 0, 248, 255, 195})
+' leave
+' xor eax,eax
+' mov edx,0FFF80000h
+' ret
+返回 (0)
+.子程序 Double_Infinity, 双精度小数型, 公开
+
+置入代码 ({201, 49, 192, 186, 0, 0, 240, 127, 195})
+' leave
+' xor eax,eax
+' mov edx,07FF00000h
+' ret
+返回 (0)
+.子程序 Double_NegInfinity, 双精度小数型, 公开
+
+置入代码 ({201, 49, 192, 186, 0, 0, 240, 255, 195})
+' leave
+' xor eax,eax
+' mov edx,0FFF00000h
+' ret
+返回 (0)
+.子程序 Double_IsNaN, 逻辑型, 公开
+.参数 value, 双精度小数型
+
+置入代码 ({201, 139, 76, 36, 8, 137, 200, 37, 0, 0, 240, 127, 53, 0, 0, 240, 127, 116, 8, 184, 0, 0, 0, 0, 194, 8, 0, 129, 225, 255, 255, 15, 0, 117, 16, 139, 68, 36, 4, 9, 192, 117, 8, 184, 0, 0, 0, 0, 194, 8, 0, 184, 1, 0, 0, 0, 194, 8, 0})
+' leave
+' mov ecx,[esp+8]
+' mov eax,ecx
+' and eax,07FF00000h
+' xor eax,07FF00000h
+' jz _c
+' mov eax,0
+' ret 8
+' _c:
+' and ecx,0FFFFFh
+' jnz _t
+' mov eax,[esp+4]
+' or eax,eax
+' jnz _t
+' mov eax,0
+' ret 8
+' _t:
+' mov eax,1
+' ret 8
+返回 (假)
+.子程序 Double_IsInfinity, 逻辑型, 公开, -Infinity 将导致返回 假
+.参数 value, 双精度小数型
+
+置入代码 ({201, 139, 68, 36, 8, 53, 0, 0, 240, 127, 117, 18, 247, 68, 36, 4, 0, 0, 0, 0, 117, 8, 184, 1, 0, 0, 0, 194, 8, 0, 184, 0, 0, 0, 0, 194, 8, 0})
+' leave
+' mov eax,[esp+8]
+' xor eax,07FF00000h
+' jnz _f
+' test dword [esp+4],0h
+' jnz _f
+' mov eax,1
+' ret 8
+' _f:
+' mov eax,0
+' ret 8
+返回 (假)
+.子程序 Double_IsNegInfinity, 逻辑型, 公开, +Infinity 将导致返回 假
+.参数 value, 双精度小数型
+
+置入代码 ({201, 139, 68, 36, 8, 53, 0, 0, 240, 255, 117, 18, 247, 68, 36, 4, 0, 0, 0, 0, 117, 8, 184, 1, 0, 0, 0, 194, 8, 0, 184, 0, 0, 0, 0, 194, 8, 0})
+' leave
+' mov eax,[esp+8]
+' xor eax,0FFF00000h
+' jnz _f
+' test dword [esp+4],0h
+' jnz _f
+' mov eax,1
+' ret 8
+' _f:
+' mov eax,0
+' ret 8
+返回 (假)

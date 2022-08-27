@@ -1,0 +1,8 @@
+.ninja_log
+*.tmp.e
+*.gen.ninja
+node_modules/
+_Build/
+_DemoBuild/
+_IntermediateBuild/
+_Publish/

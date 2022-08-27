@@ -1,0 +1,17 @@
+﻿.数据类型 TV_INSERTSTRUCT, , TV_INSERTSTRUCT
+    .成员 hParent, 整数型, , , 父项目句柄
+    .成员 hInsertAfter, 整数型, , , 插入标志
+    .成员 item, TV_ITEM, , , TV_ITEM item ;
+
+.数据类型 TV_ITEM
+    .成员 mask, 整数型, , , 掩码
+    .成员 hItem, 整数型, , , 项目句柄
+    .成员 state, 整数型, , , 状态
+    .成员 stateMask, 整数型, , , 状态掩码
+    .成员 pszText, 文本型, , , 项目文本
+    .成员 cchTextMax, 整数型, , , 最长文本（系统最大允许260个字符
+    .成员 iImage, 整数型, , , 图片索引
+    .成员 iSelectedImage, 整数型, , , 选中图片索引
+    .成员 cChildren, 整数型, , , 是否有子
+    .成员 lParam, 整数型, , , 项目数值
+

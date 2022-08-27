@@ -1,0 +1,7 @@
+﻿.程序集 FontPoolUtils
+
+.子程序 FontPool_DeleteElem
+.参数 pElem, 整数型
+.参数 lParam, 整数型
+
+DeleteObject (哈希表_字节集_整数型_元素_取值 (pElem))

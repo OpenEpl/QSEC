@@ -1,0 +1,55 @@
+﻿.长文本 TestJson
+.常量
+.常量 QSJson_值类型_文本, "0", 公开
+.常量 QSJson_值类型_长整数, "1", 公开
+.常量 QSJson_值类型_双精度小数, "2", 公开
+.常量 QSJson_值类型_对象, "3", 公开
+.常量 QSJson_值类型_数组, "4", 公开
+.常量 QSJson_值类型_逻辑, "5", 公开
+.常量 QSJson_值类型_空, "6", 公开
+.常量
+.常量 QSJson_编码_Ansi, "0", 公开
+.常量 QSJson_编码_UTF8, "65001", 公开
+.常量
+.常量 HEAP_GENERATE_EXCEPTIONS, "4"
+.常量 HEAP_ZERO_MEMORY, "8"
+.常量 E_NOINTERFACE, "2147500034"
+.常量
+.常量 AsciiCode_Backspace, "8"
+.常量 AsciiCode_HorizontalTab, "9"
+.常量 AsciiCode_LineFeed, "10"
+.常量 AsciiCode_FormFeed, "12"
+.常量 AsciiCode_CarriageReturn, "13"
+.常量 AsciiCode_Space, "32"
+.常量 AsciiCode_DoubleQuotation, "34"
+.常量 AsciiCode_SingleQuotation, "39"
+.常量 AsciiCode_Asterisk, "42", , *
+.常量 AsciiCode_Plus, "43", , +
+.常量 AsciiCode_Comma, "44", , ,
+.常量 AsciiCode_Minus, "45", , -
+.常量 AsciiCode_Dot, "46", , .
+.常量 AsciiCode_Solidus, "47", , /
+.常量 AsciiCode_0, "48"
+.常量 AsciiCode_1, "49"
+.常量 AsciiCode_9, "57"
+.常量 AsciiCode_Colon, "58", , :
+.常量 AsciiCode_A_UpperCase, "65"
+.常量 AsciiCode_E_UpperCase, "69"
+.常量 AsciiCode_F_UpperCase, "70"
+.常量 AsciiCode_X_UpperCase, "88"
+.常量 AsciiCode_Z_UpperCase, "90"
+.常量 AsciiCode_LeftSquareBracket, "91", , [
+.常量 AsciiCode_ReverseSolidus, "92", , \
+.常量 AsciiCode_RightSquareBracket, "93", , ]
+.常量 AsciiCode_A_LowerCase, "97"
+.常量 AsciiCode_B_LowerCase, "98"
+.常量 AsciiCode_E_LowerCase, "101"
+.常量 AsciiCode_F_LowerCase, "102"
+.常量 AsciiCode_N_LowerCase, "110"
+.常量 AsciiCode_R_LowerCase, "114"
+.常量 AsciiCode_T_LowerCase, "116"
+.常量 AsciiCode_U_LowerCase, "117"
+.常量 AsciiCode_X_LowerCase, "120"
+.常量 AsciiCode_Z_LowerCase, "122"
+.常量 AsciiCode_LeftCurlyBracket, "123", , {
+.常量 AsciiCode_RightCurlyBracket, "125", , }

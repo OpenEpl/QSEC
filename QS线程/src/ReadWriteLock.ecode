@@ -1,0 +1,43 @@
+﻿.程序集 ReadWriteLock
+
+.子程序 读写锁_创建, 整数型, 公开, 支持锁重入，不支持锁升级。读写锁（ReadWriteLock）适用于读多写少的场景：当读锁（有时也称共享锁）被获取时，任何线程不能获取写锁，但多个线程可同时获取读锁。当写锁（有时也称互斥锁）被获取时，其他线程不能获取读锁和写锁。
+.局部变量 p, 整数型
+
+' CRITICAL_SECTION WriteLock
+' uint32_t ReaderCount
+' HANDLE NoReaderEvent
+p = HeapAlloc (GetProcessHeap (), 位或 (#HEAP_ZERO_MEMORY, #HEAP_GENERATE_EXCEPTIONS), 32)
+InitializeCriticalSectionAndSpinCount_Int (p, 4000)
+asm_写整型内存_指定偏移 (p, CreateEvent (#NULL, #TRUE, #TRUE, #NULL), 28)
+返回 (p)
+.子程序 读写锁_开始读, , 公开, 获取读锁
+.参数 p, 整数型
+
+EnterCriticalSection_Int (p)
+.如果真 (InterlockedIncrement_ByVal (asm_整数加法 (p, 24)) == 1)
+    ResetEvent (asm_读整型内存_指定偏移 (p, 28))
+.如果真结束
+LeaveCriticalSection_Int (p)
+.子程序 读写锁_结束读, , 公开, 释放读锁
+.参数 p, 整数型
+
+.如果真 (InterlockedDecrement_ByVal (asm_整数加法 (p, 24)) == 0)
+    SetEvent (asm_读整型内存_指定偏移 (p, 28))
+.如果真结束
+
+.子程序 读写锁_开始写, , 公开, 获取写锁
+.参数 p, 整数型
+
+EnterCriticalSection_Int (p)
+WaitForSingleObject (asm_读整型内存_指定偏移 (p, 28), #INFINITE)
+.子程序 读写锁_结束写, , 公开, 释放写锁
+.参数 p, 整数型
+
+LeaveCriticalSection_Int (p)
+.子程序 读写锁_销毁, , 公开
+.参数 p, 整数型
+
+WaitForSingleObject (asm_读整型内存_指定偏移 (p, 28), #INFINITE)
+CloseHandle (asm_读整型内存_指定偏移 (p, 28))
+DeleteCriticalSection_Int (p)
+HeapFree (GetProcessHeap (), 0, p)

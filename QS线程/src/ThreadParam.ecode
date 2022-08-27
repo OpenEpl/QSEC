@@ -1,0 +1,78 @@
+﻿.程序集 ThreadParam
+
+.子程序 线程_传递字节集, 整数型, 公开, 必须被接收，否则将产生内存泄漏！
+.参数 Bin, 字节集, 参考
+.局部变量 New, 字节集
+
+New = Bin  ' Clone
+' AsmToECode代码:@arg Bin
+' AsmToECode代码:@local New
+' AsmToECode代码:mov eax,New
+' AsmToECode代码:@ret
+置入代码 ({139, 69, 252, 201, 194, 4, 0})
+返回 (0)
+.子程序 线程_接收字节集, , 公开
+.参数 SourcePtr, 整数型, , 不可多次接收，否则将出现不可意料的后果！
+.参数 Bin, 字节集
+
+Bin = 取空白字节集 (0)  ' Bin = NULL，不同于“Bin = {}”
+' AsmToECode代码:@arg SourcePtr
+' AsmToECode代码:@arg Bin
+' AsmToECode代码:mov eax,SourcePtr
+' AsmToECode代码:mov ecx,Bin
+' AsmToECode代码:mov [ecx],eax
+' AsmToECode代码:@ret
+置入代码 ({139, 69, 8, 139, 77, 12, 137, 1, 201, 194, 8, 0})
+
+.子程序 线程_传递文本, 整数型, 公开, 必须被接收，否则将产生内存泄漏！
+.参数 Text, 文本型, 参考
+.局部变量 New, 文本型
+
+New = Text  ' Clone
+' AsmToECode代码:@arg Text
+' AsmToECode代码:@local New
+' AsmToECode代码:mov eax,New
+' AsmToECode代码:@ret
+置入代码 ({139, 69, 252, 201, 194, 4, 0})
+返回 (0)
+.子程序 线程_接收文本, , 公开
+.参数 SourcePtr, 整数型, , 不可多次接收，否则将出现不可意料的后果！
+.参数 Text, 文本型
+
+Text = 取空白文本 (0)  ' Text = NULL，不同于“Text = ""”
+' AsmToECode代码:@arg SourcePtr
+' AsmToECode代码:@arg Text
+' AsmToECode代码:mov eax,SourcePtr
+' AsmToECode代码:mov ecx,Text
+' AsmToECode代码:mov [ecx],eax
+' AsmToECode代码:@ret
+置入代码 ({139, 69, 8, 139, 77, 12, 137, 1, 201, 194, 8, 0})
+.子程序 线程_传递类变量, 整数型, 公开, 必须被接收，否则将产生内存泄漏！
+.参数 ClassObject, 通用型, 参考, 必须为用户定义的类对象，不能是其他类型变量（如库定义的类型、系统基本类型。如有需要，请在外面套一层类）
+
+置入代码 ({139, 69, 8, 139, 0, 139, 24, 201, 255, 83, 4, 194, 4, 0})
+' mov eax,[ebp+8]
+' mov eax,[eax]
+' mov ebx,[eax]
+' leave
+' call dword ptr [ebx+4] ;复制函数是通过eax传递this指针的
+' retn 4
+返回 (0)
+.子程序 线程_接收类变量, , 公开
+.参数 ThisPtr, 整数型, , 不可多次接收，否则将出现不可意料的后果！
+.参数 EClassObj, 通用型, 参考, 类型必须与传递的一致，否则将出现不可意料的后果！
+.局部变量 OldThis, 整数型
+
+' AsmToECode代码:@arg ThisPtr
+' AsmToECode代码:@arg EClassObj
+' AsmToECode代码:@local OldThis
+' AsmToECode代码:mov ebx,EClassObj
+' AsmToECode代码:mov ebx,[ebx]
+' AsmToECode代码:mov OldThis,ebx
+' AsmToECode代码:mov ecx,[ebx]
+' AsmToECode代码:call dword ptr [ecx] ;析构函数是通过ebx传递this指针的
+' AsmToECode代码:mov ebx,EClassObj
+' AsmToECode代码:mov eax,ThisPtr
+' AsmToECode代码:mov [ebx],eax
+置入代码 ({139, 93, 12, 139, 27, 137, 93, 252, 139, 11, 255, 17, 139, 93, 12, 139, 69, 8, 137, 3})
+HeapFree (GetProcessHeap (), 0, OldThis)

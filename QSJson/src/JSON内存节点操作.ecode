@@ -1,0 +1,282 @@
+﻿.程序集 JSON内存节点操作
+
+.子程序 __JSON内存节点_虚表地址, 整数型, , 模拟COM对象来实现ARC
+
+' 注：
+' { &__JSON内存节点_QueryInterface, &JSON内存节点_引用加, &JSON内存节点_引用减 }
+' 这块数据的地址在常量段
+' 不是运行时动态分配的在堆上的内存
+
+返回 (取变量数据地址_子程序指针数组 ({&__JSON内存节点_QueryInterface, &JSON内存节点_引用加, &JSON内存节点_引用减}))
+.子程序 __JSON内存节点_QueryInterface, 整数型, , 模拟COM对象来实现ARC
+.参数 对象地址, 整数型
+.参数 iid, 整数型
+.参数 ppv, 整数型, 参考
+
+返回 (#E_NOINTERFACE)
+.子程序 JSON内存节点_创建, 整数型, , 初始引用次数：1
+.局部变量 地址, 整数型
+.局部变量 虚表地址, 整数型
+
+地址 = HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, 20)  ' 子程序指针[] 虚表地址/*模拟COM对象来实现ARC*/, 整数型 引用次数, 整数型 类型, 长整数型 数据
+虚表地址 = __JSON内存节点_虚表地址 ()
+' AsmToECode代码:@local 地址
+' AsmToECode代码:@local 虚表地址
+' AsmToECode代码:mov eax,地址
+' AsmToECode代码:mov dword ptr [eax+4],1 ;引用次数=1
+' AsmToECode代码:mov ecx,虚表地址
+' AsmToECode代码:mov dword ptr [eax+8],6 ;类型=#QSJson_值类型_空
+' AsmToECode代码:mov dword ptr [eax],ecx
+置入代码 ({139, 69, 252, 199, 64, 4, 1, 0, 0, 0, 139, 77, 248, 199, 64, 8, 6, 0, 0, 0, 137, 8})
+返回 (地址)
+.子程序 JSON内存节点_引用加
+.参数 地址, 整数型
+
+' AsmToECode代码:@arg p
+' AsmToECode代码:mov eax,p
+' AsmToECode代码:lock inc dword ptr [eax+4]
+置入代码 ({139, 69, 8, 240, 255, 64, 4})
+.子程序 JSON内存节点_引用减但不销毁, 逻辑型
+.参数 地址, 整数型
+
+' AsmToECode代码:@arg p
+' AsmToECode代码:mov ecx,p
+' AsmToECode代码:xor eax,eax
+' AsmToECode代码:lock dec dword ptr [ecx+4]
+' AsmToECode代码:setz al
+' AsmToECode代码:pop ebp
+' AsmToECode代码:retn 4
+置入代码 ({139, 77, 8, 51, 192, 240, 255, 73, 4, 15, 148, 192, 93, 194, 4, 0})
+返回 (假)
+.子程序 JSON内存节点_引用减
+.参数 地址, 整数型
+
+.如果真 (JSON内存节点_引用减但不销毁 (地址))
+    JSON内存节点_析构函数 (地址)
+    HeapFree (GetProcessHeap (), 0, 地址)
+.如果真结束
+
+.子程序 JSON内存节点_取类型, 整数型
+.参数 地址, 整数型
+
+' 汇编代码（需要使用AsmToECode程序编译）:
+' @arg 地址
+' mov eax,地址
+' mov eax,[eax+8]
+' @ret
+置入代码 ({139, 69, 8, 139, 64, 8, 201, 194, 4, 0})
+返回 (0)
+.子程序 JSON内存节点_析构函数, , , 同时释放子节点，非递归实现
+.参数 pCurrentNode, 整数型
+.局部变量 type, 整数型
+.局部变量 stack, 整数型
+.局部变量 pTemp, 整数型
+.局部变量 i, 整数型
+.局部变量 length, 整数型
+
+stack = ArrayList_New ()
+
+type = JSON内存节点_取类型 (pCurrentNode)
+.判断开始 (type == #QSJson_值类型_文本)
+    HeapFree (GetProcessHeap (), 0, asm_读整型内存_指定偏移 (pCurrentNode, 12))
+.判断 (type == #QSJson_值类型_对象)
+    pTemp = JSON内存节点_对象_取地址 (pCurrentNode)
+    i = 哈希表_字节集_整数型_元素_首个 (pTemp)
+    .判断循环首 (i != 0)
+        ArrayList_Add (stack, 哈希表_字节集_整数型_元素_取值 (i))
+        i = 哈希表_字节集_整数型_元素_取下一元素 (i)
+    .判断循环尾 ()
+    哈希表_字节集_整数型_销毁 (pTemp)
+.判断 (type == #QSJson_值类型_数组)
+    pTemp = JSON内存节点_数组_取地址 (pCurrentNode)
+    i = 0
+    length = JSON数组_取数量 (pTemp)
+    .判断循环首 (i < length)
+        ArrayList_Add (stack, JSON数组_取 (pTemp, i))
+        i = i + 1
+    .判断循环尾 ()
+    ArrayList_Delete (pTemp)
+.默认
+    
+.判断结束
+
+.判断循环首 (ArrayList_GetLength (stack) != 0)
+    pCurrentNode = ArrayList_Pop (stack)
+    .如果真 (JSON内存节点_引用减但不销毁 (pCurrentNode))
+        type = JSON内存节点_取类型 (pCurrentNode)
+        .判断开始 (type == #QSJson_值类型_文本)
+            HeapFree (GetProcessHeap (), 0, asm_读整型内存_指定偏移 (pCurrentNode, 12))
+        .判断 (type == #QSJson_值类型_对象)
+            pTemp = JSON内存节点_对象_取地址 (pCurrentNode)
+            i = 哈希表_字节集_整数型_元素_首个 (pTemp)
+            .判断循环首 (i != 0)
+                ArrayList_Add (stack, 哈希表_字节集_整数型_元素_取值 (i))
+                i = 哈希表_字节集_整数型_元素_取下一元素 (i)
+            .判断循环尾 ()
+            哈希表_字节集_整数型_销毁 (pTemp)
+        .判断 (type == #QSJson_值类型_数组)
+            pTemp = JSON内存节点_数组_取地址 (pCurrentNode)
+            i = 0
+            length = JSON数组_取数量 (pTemp)
+            .判断循环首 (i < length)
+                ArrayList_Add (stack, JSON数组_取 (pTemp, i))
+                i = i + 1
+            .判断循环尾 ()
+            ArrayList_Delete (pTemp)
+        .默认
+            
+        .判断结束
+        HeapFree (GetProcessHeap (), 0, pCurrentNode)
+    .如果真结束
+    
+.判断循环尾 ()
+
+ArrayList_Delete (stack)
+.子程序 JSON内存节点_置为空
+.参数 地址, 整数型
+
+JSON内存节点_析构函数 (地址)
+' AsmToECode代码:@arg 地址
+' AsmToECode代码:mov eax,地址
+' AsmToECode代码:mov dword ptr [eax+8],6 ;6=#QSJson_值类型_空
+' AsmToECode代码:mov dword ptr [eax+12],0
+' AsmToECode代码:mov dword ptr [eax+24],0
+置入代码 ({139, 69, 8, 199, 64, 8, 6, 0, 0, 0, 199, 64, 12, 0, 0, 0, 0, 199, 64, 24, 0, 0, 0, 0})
+.子程序 JSON内存节点_置长整数
+.参数 地址, 整数型
+.参数 新数据, 长整数型
+
+JSON内存节点_析构函数 (地址)
+' 汇编代码（需要使用AsmToECode程序编译）:
+' @arg 地址
+' @arg l新数据
+' @arg h新数据
+' mov eax,地址
+' mov ecx,l新数据
+' mov edx,h新数据
+' mov dword ptr [eax+8],1 ;1=#QSJson_值类型_长整数
+' mov dword ptr [eax+12],ecx
+' mov dword ptr [eax+16],edx
+置入代码 ({139, 69, 8, 139, 77, 12, 139, 85, 16, 199, 64, 8, 1, 0, 0, 0, 137, 72, 12, 137, 80, 16})
+.子程序 JSON内存节点_取长整数, 长整数型, , 未做类型判断！
+.参数 地址, 整数型
+
+返回 (指针到长整数 (地址 + 12))
+.子程序 JSON内存节点_置文本
+.参数 地址, 整数型
+.参数 新数据, 文本型
+.局部变量 内部数据地址, 整数型
+.局部变量 len, 整数型
+
+JSON内存节点_析构函数 (地址)
+len = 取文本长度 (新数据)
+.如果真 (len != 0)
+    内部数据地址 = HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, len)
+    CopyMemoryFromString (内部数据地址, 新数据, len)
+.如果真结束
+asm_写整型内存_指定偏移 (地址, #QSJson_值类型_文本, 8)
+asm_写整型内存_指定偏移 (地址, 内部数据地址, 12)
+asm_写整型内存_指定偏移 (地址, len, 16)
+.子程序 JSON内存节点_置文本_字节集
+.参数 地址, 整数型
+.参数 新数据, 字节集, , 不要带有终止符{0}
+.局部变量 内部数据地址, 整数型
+.局部变量 len, 整数型
+
+JSON内存节点_析构函数 (地址)
+len = 取字节集长度 (新数据)
+.如果真 (len != 0)
+    内部数据地址 = HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, len)
+    CopyMemoryFromBin (内部数据地址, 新数据, len)
+.如果真结束
+asm_写整型内存_指定偏移 (地址, #QSJson_值类型_文本, 8)
+asm_写整型内存_指定偏移 (地址, 内部数据地址, 12)
+asm_写整型内存_指定偏移 (地址, len, 16)
+.子程序 JSON内存节点_取文本, 文本型, , 未做类型判断！
+.参数 地址, 整数型
+.局部变量 pData, 整数型
+.局部变量 len, 整数型
+.局部变量 pResult, 整数型
+
+pData = asm_读整型内存_指定偏移 (地址, 12)
+len = asm_读整型内存_指定偏移 (地址, 16)
+.如果真 (len == 0)
+    返回 (“”)
+.如果真结束
+pResult = HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, len + 1)
+memcpy (pResult, pData, len)
+置入代码 ({139, 69, 244, 139, 77, 248, 198, 4, 8, 0, 201, 194, 4, 0})
+' mov eax,[ebp-12];pResult
+' mov ecx,[ebp-8];len
+' mov byte [eax+ecx],0
+' leave
+' retn 4
+返回 (“”)
+.子程序 JSON内存节点_取文本_内存地址, , , 未做类型判断！
+.参数 地址, 整数型
+.参数 pData, 整数型, 参考
+.参数 len, 整数型, 参考
+
+pData = asm_读整型内存_指定偏移 (地址, 12)
+len = asm_读整型内存_指定偏移 (地址, 16)
+.子程序 JSON内存节点_取文本_字节集, 字节集
+.参数 地址, 整数型
+.局部变量 pData, 整数型
+.局部变量 len, 整数型
+
+pData = asm_读整型内存_指定偏移 (地址, 12)
+len = asm_读整型内存_指定偏移 (地址, 16)
+返回 (指针到字节集 (pData, len))
+.子程序 JSON内存节点_置双精度小数
+.参数 地址, 整数型
+.参数 新数据, 双精度小数型
+
+JSON内存节点_析构函数 (地址)
+asm_写整型内存_指定偏移 (地址, #QSJson_值类型_双精度小数, 8)
+写到内存 (新数据, 地址 + 12, 8)
+.子程序 JSON内存节点_取双精度小数, 双精度小数型, , 未做类型判断！
+.参数 地址, 整数型
+
+返回 (指针到双精度小数 (地址 + 12))
+.子程序 JSON内存节点_置逻辑
+.参数 地址, 整数型
+.参数 新数据, 逻辑型
+
+JSON内存节点_析构函数 (地址)
+asm_写整型内存_指定偏移 (地址, #QSJson_值类型_逻辑, 8)
+asm_写整型内存_指定偏移 (地址, 到整数 (新数据), 12)
+.子程序 JSON内存节点_取逻辑, 逻辑型, , 未做类型判断！
+.参数 地址, 整数型
+
+返回 (asm_读整型内存_指定偏移 (地址, 12) != 0)
+.子程序 JSON内存节点_置为空对象
+.参数 地址, 整数型
+.局部变量 数据指针, 整数型
+
+JSON内存节点_析构函数 (地址)
+数据指针 = 哈希表_字节集_整数型_创建 ()
+
+' 汇编代码（需要使用AsmToECode程序编译）:
+' @arg 地址
+' @local 数据指针
+' mov eax,地址
+' mov ecx,数据指针
+' mov dword ptr [eax+12],ecx
+' mov dword ptr [eax+8],3 ;3=#QSJson_ValueType_Object
+置入代码 ({139, 69, 8, 139, 77, 252, 137, 72, 12, 199, 64, 8, 3, 0, 0, 0})
+.子程序 JSON内存节点_对象_取地址, 整数型
+.参数 地址, 整数型
+
+返回 (asm_读整型内存_指定偏移 (地址, 12))
+.子程序 JSON内存节点_置为空数组
+.参数 地址, 整数型
+.局部变量 数据指针, 整数型
+
+JSON内存节点_析构函数 (地址)
+数据指针 = ArrayList_New ()
+asm_写整型内存_指定偏移 (地址, 数据指针, 12)
+asm_写整型内存_指定偏移 (地址, #QSJson_值类型_数组, 8)
+.子程序 JSON内存节点_数组_取地址, 整数型
+.参数 地址, 整数型
+
+返回 (asm_读整型内存_指定偏移 (地址, 12))

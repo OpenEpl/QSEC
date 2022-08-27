@@ -1,0 +1,6 @@
+﻿.DLL命令 GetCurrentThreadId, 整数型, kernel32.dll, GetCurrentThreadId, , 获取当前线程一个唯一的线程标识符  当前的线程标识符
+
+
+.DLL命令 OutputDebugString, , kernel32.dll, OutputDebugStringA, , 向调试发送字符串
+    .参数 lpOutputString, 文本型
+

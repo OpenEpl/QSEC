@@ -1,0 +1,23 @@
+﻿{
+  "Name": "",
+  "Version": "1.0.0.0",
+  "ProjectType": "WindowsApp",
+  "SourceSet": "src",
+  "OutFile": "..\\..\\_DemoBuild\\随机数分布测试（易）.exe",
+  "Dependencies": [
+    {
+      "Kind": "ELib",
+      "Name": "系统核心支持库",
+      "FileName": "krnln",
+      "Guid": "d09f2340818511d396f6aaf844c7e325",
+      "Version": "5.7"
+    },
+    {
+      "Kind": "ELib",
+      "Name": "位图操作支持库",
+      "FileName": "BmpOperate",
+      "Guid": "42305932-06E6-47a5-AC79-8BDCDC58DF61",
+      "Version": "2.0"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+﻿{
+  "Name": "",
+  "Version": "1.0.0.0",
+  "ProjectType": "WindowsApp",
+  "SourceSet": "src",
+  "OutFile": "../../_DemoBuild/Diff工具.exe",
+  "Dependencies": [
+    {
+      "Kind": "ELib",
+      "Name": "系统核心支持库",
+      "FileName": "krnln",
+      "Guid": "d09f2340818511d396f6aaf844c7e325",
+      "Version": "5.3"
+    },
+    {
+      "Kind": "ELib",
+      "Name": "扩展界面支持库二",
+      "FileName": "iext2",
+      "Guid": "AF6AD80AA4244A59AFB3D83ECF5173CC",
+      "Version": "2.0"
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QS线程",
+      "Path": "../../_Build/QS序列操作.ec",
+      "ReExport": false
+    }
+  ]
+}

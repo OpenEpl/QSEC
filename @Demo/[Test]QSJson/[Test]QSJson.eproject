@@ -1,0 +1,28 @@
+﻿{
+  "Name": "",
+  "Version": "1.0.0.0",
+  "ProjectType": "WindowsApp",
+  "SourceSet": "src",
+  "OutFile": "..\\..\\_DemoBuild\\[Test]QSJson.exe",
+  "Dependencies": [
+    {
+      "Kind": "ELib",
+      "Name": "系统核心支持库",
+      "FileName": "krnln",
+      "Guid": "d09f2340818511d396f6aaf844c7e325",
+      "Version": "5.7"
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QS速度测试",
+      "Path": "../../_Build/QS速度测试.ec",
+      "ReExport": false
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QSJson",
+      "Path": "../../_Build/QSJson.ec",
+      "ReExport": false
+    }
+  ]
+}

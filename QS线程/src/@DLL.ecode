@@ -1,0 +1,155 @@
+﻿.DLL命令 InitializeCriticalSection_Int, , kernel32.dll, InitializeCriticalSection, , 初始化临界段对象
+    .参数 lpCriticalSection, 整数型
+
+.DLL命令 DeleteCriticalSection_Int, , kernel32.dll, DeleteCriticalSection, , 删除临界部分
+    .参数 lpCriticalSection, 整数型
+
+.DLL命令 EnterCriticalSection_Int, , kernel32.dll, EnterCriticalSection, , 加入临界部分
+    .参数 lpCriticalSection, 整数型
+
+.DLL命令 LeaveCriticalSection_Int, , kernel32.dll, LeaveCriticalSection, , 保留前一个输入临界段
+    .参数 lpCriticalSection, 整数型
+
+.DLL命令 InterlockedIncrement, 整数型, kernel32.dll, InterlockedIncrement, , 增加LONG
+    .参数 lpAddend, 整数型, 传址
+
+.DLL命令 InterlockedDecrement, 整数型, kernel32.dll, InterlockedDecrement, , 原子减
+    .参数 lpAddend, 整数型, 传址
+
+.DLL命令 InterlockedIncrement_ByVal, 整数型, kernel32.dll, InterlockedIncrement, , 增加LONG
+    .参数 lpAddend, 整数型
+
+.DLL命令 InterlockedDecrement_ByVal, 整数型, kernel32.dll, InterlockedDecrement, , 原子减
+    .参数 lpAddend, 整数型
+
+.DLL命令 InitializeCriticalSectionAndSpinCount_Int, 整数型, kernel32.dll, InitializeCriticalSectionAndSpinCount
+    .参数 lpCriticalSection, 整数型
+    .参数 dwSpinCount, 整数型
+
+.DLL命令 CreateEvent, 整数型, kernel32.dll, CreateEventA, , 创建一个事件对象  如执行成功，返回事件对象句柄；零表示出错。会设置GetLastError。即使返回一个有效的句柄，但同时指出指定的名字已经存在，GetLastError也会设为ERROR_ALREADY_EXISTS
+    .参数 lpEventAttributes, 整数型, , SECURITY_ATTRIBUTES，指定一个结构，用于设置对象的安全特性。如变成ByVal As 并传递零值，则表明使用对象默认的安全设置
+    .参数 bManualReset, 整数型, , 如果为TRUE，表示创建一个人工重设事件；如果为FALSE，表示创建一个自动重设事件
+    .参数 bInitialState, 整数型, , 如事件应内部进入触发状态，则为TRUE
+    .参数 lpName, 整数型, , 指定事件对象的名字。用vbNull创建一个未命名事件对象。如已经存在拥有这个名字的一个事件，则现有的命名事件就会打开。这个名字可能不与一个现有互斥体、信号机、可等待计时器或文件映射的名字相符;
+
+.DLL命令 CloseHandle, 整数型, kernel32.dll, CloseHandle, , 关闭一个内核对象。其中包括文件、文件映射、进程、线程、安全和同步对象等。涉及文件处理时，这个函数通常与vb的close命令相似。应尽可能的使用close，因为它支持vb的差错控制。注意这个函数使用的文件句柄与vb的文件编号是完全不同的  非零表示成功，零表示失败。会设置GetLastError
+    .参数 hObject, 整数型, , 欲关闭的一个对象的句柄;
+
+.DLL命令 ResetEvent, 整数型, kernel32.dll, ResetEvent, , 复位事件对象
+    .参数 hEvent, 整数型
+
+.DLL命令 SetEvent, 整数型, kernel32.dll, SetEvent, , 设置事件对象
+    .参数 hEvent, 整数型
+
+.DLL命令 WaitForSingleObject, 整数型, kernel32.dll, WaitForSingleObject, , 监测一个对象
+    .参数 hHandle, 整数型
+    .参数 dwMilliseconds, 整数型
+
+.DLL命令 HeapAlloc, 整数型, kernel32.dll, HeapAlloc, , 从堆中分配内存
+    .参数 hHeap, 整数型
+    .参数 dwFlags, 整数型
+    .参数 dwBytes, 整数型
+
+.DLL命令 GetProcessHeap, 整数型, kernel32.dll, GetProcessHeap, , 获取调用过程堆句柄
+
+
+.DLL命令 HeapFree, 整数型, kernel32.dll, HeapFree, , 释放从堆中分配的内存
+    .参数 hHeap, 整数型
+    .参数 dwFlags, 整数型
+    .参数 lpMem, 整数型
+
+.DLL命令 CreateThread, 整数型, kernel32.dll, CreateThread
+    .参数 lpThreadAttributes, 整数型, , 默认SECURITY_ATTRIBUTES结构
+    .参数 dwStackSize, 整数型, , 设置初始栈的大小，以字节为单位，如果为0，那么默认将使用与调用该函数的线程相同的栈空间大小。任何情况下，Windows根据需要动态延长堆栈的大小
+    .参数 lpStartAddress, 整数型, , 指向线程函数的指针，形式：@函数名，函数名称没有限制，但是必须以下列形式声明
+    .参数 lpParameter, 整数型, , 向线程函数传递的参数，是一个指向结构的指针，不需传递参数时，为NULL
+    .参数 dwCreationFlags, 整数型, , 线程标志,0立即激活
+    .参数 lpThreadId, 整数型, , 保存新线程的id
+
+.DLL命令 CopyMemory, , kernel32.dll, RtlMoveMemory
+    .参数 pDest, 整数型
+    .参数 pSrc, 整数型
+    .参数 ByteLen, 整数型
+
+.DLL命令 CreateThread_SubPtr, 整数型, kernel32.dll, CreateThread
+    .参数 lpThreadAttributes, 整数型, , 默认SECURITY_ATTRIBUTES结构
+    .参数 dwStackSize, 整数型, , 设置初始栈的大小，以字节为单位，如果为0，那么默认将使用与调用该函数的线程相同的栈空间大小。任何情况下，Windows根据需要动态延长堆栈的大小
+    .参数 lpStartAddress, 子程序指针, , 指向线程函数的指针，形式：@函数名，函数名称没有限制，但是必须以下列形式声明
+    .参数 lpParameter, 整数型, , 向线程函数传递的参数，是一个指向结构的指针，不需传递参数时，为NULL
+    .参数 dwCreationFlags, 整数型, , 线程标志,0立即激活
+    .参数 lpThreadId, 整数型, , 保存新线程的id
+
+.DLL命令 InitializeCriticalSectionAndSpinCount, 整数型, kernel32.dll, InitializeCriticalSectionAndSpinCount
+    .参数 lpCriticalSection, CRITICAL_SECTION, 传址
+    .参数 dwSpinCount, 整数型
+
+.DLL命令 InitializeCriticalSection, , kernel32.dll, InitializeCriticalSection, , 初始化临界段对象
+    .参数 lpCriticalSection, CRITICAL_SECTION
+
+.DLL命令 DeleteCriticalSection, , kernel32.dll, DeleteCriticalSection, , 删除临界部分
+    .参数 lpCriticalSection, CRITICAL_SECTION
+
+.DLL命令 EnterCriticalSection, , kernel32.dll, EnterCriticalSection, , 加入临界部分
+    .参数 lpCriticalSection, CRITICAL_SECTION
+
+.DLL命令 LeaveCriticalSection, , kernel32.dll, LeaveCriticalSection, , 保留前一个输入临界段
+    .参数 lpCriticalSection, CRITICAL_SECTION
+
+.DLL命令 GetCurrentThreadId, 整数型, kernel32.dll, GetCurrentThreadId, , 获取当前线程一个唯一的线程标识符  当前的线程标识符
+
+
+.DLL命令 CreateSemaphore, 整数型, kernel32.dll, CreateSemaphoreA, , 创建一个新的信号机  如执行成功，返回信号机对象的句柄；零表示出错。会设置GetLastError。即使返回一个有效的句柄，但倘若它指出同名的一个信号机已经存在，那么GetLastError也会返回ERROR_ALREADY_EXISTS
+    .参数 lpSemaphoreAttributes, 整数型, , SECURITY_ATTRIBUTES，指定一个SECURITY_ATTRIBUTES结构，或传递零值（将参数声明为ByVal As 并传递零值）——表示采用不允许继承的默认描述符。该参数定义了信号机的安全特性
+    .参数 lInitialCount, 整数型, , 设置信号机的初始计数。可设置零到lMaximumCount之间的一个值
+    .参数 lMaximumCount, 整数型, , 设置信号机的最大计数
+    .参数 lpName, 整数型, , 指定信号机对象的名称。用vbNull可创建一个未命名的信号机对象。如果已经存在拥有这个名字的一个信号机，就直接打开现成的信号机。这个名字可能不与一个现有的互斥体、事件、可等待计时器或文件映射的名称相符;
+
+.DLL命令 ReleaseSemaphore, 整数型, kernel32.dll, ReleaseSemaphore, , 释放信号量对象
+    .参数 hSemaphore, 整数型
+    .参数 lReleaseCount, 整数型
+    .参数 lpPreviousCount, 整数型
+
+.DLL命令 ExitThread, , kernel32.dll, ExitThread, , 退出当前线索
+    .参数 dwExitCode, 整数型
+
+.DLL命令 WaitForMultipleObjects, 整数型, kernel32.dll, WaitForMultipleObjects, , 监测多个对象
+    .参数 nCount, 整数型
+    .参数 lpHandles, 整数型, 数组
+    .参数 bWaitAll, 整数型
+    .参数 dwMilliseconds, 整数型
+
+.DLL命令 GetProcAddress, 整数型, kernel32.dll, GetProcAddress, , 返回函数地址
+    .参数 hModule, 整数型
+    .参数 lpProcName, 文本型
+
+.DLL命令 GetModuleHandle, 整数型, kernel32.dll, GetModuleHandleA, , 获取一个应用程序或动态链接库的模块句柄  如执行成功成功，则返回模块句柄。零表示失败。会设置GetLastError
+    .参数 lpModuleName, 文本型, , 指定模块名，这通常是与模块的文件名相同的一个名字。例如，NOTEPAD.EXE程序的模块文件名就叫作NOTEPAD;
+
+.DLL命令 MsgWaitForMultipleObjectsEx, 整数型, user32.dll, MsgWaitForMultipleObjectsEx
+    .参数 nCount, 整数型
+    .参数 pHandles, 整数型
+    .参数 dwMilliseconds, 整数型
+    .参数 dwWakeMask, 整数型
+    .参数 dwFlags, 整数型
+
+.DLL命令 线程_等待, 整数型, kernel32.dll, WaitForSingleObject, 公开, 【0 表示成功，#等待_超时 表示 超时】
+    .参数 hHandle, 整数型, , 句柄
+    .参数 dwMilliseconds, 整数型, , 单位：毫秒
+
+.DLL命令 CoInitializeEx, , ole32.dll, CoInitializeEx
+    .参数 pvReserved, 整数型
+    .参数 dwCoInit, 整数型
+
+.DLL命令 CoUninitialize, , ole32.dll, CoUninitialize
+
+
+.DLL命令 GetExitCodeThread, 整数型, kernel32.dll, GetExitCodeThread
+    .参数 hThread, 整数型
+    .参数 lpExitCode, 整数型, 传址
+
+.DLL命令 线程_暂停, 整数型, kernel32.dll, SuspendThread, 公开, 【若被暂停多次，则需调用恢复多次】 成功返回（之前）已被暂停的次数，失败返回-1
+    .参数 hThread, 整数型
+
+.DLL命令 线程_恢复, 整数型, kernel32.dll, ResumeThread, 公开, 【若被暂停多次，则需调用恢复多次】 成功返回（之前）已被暂停的次数，失败返回-1
+    .参数 hThread, 整数型
+

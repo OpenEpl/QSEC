@@ -1,0 +1,7 @@
+﻿.程序集 窗口程序集_窗口1, 窗口: 窗口1
+.程序集变量 scale, SmartScale
+
+.子程序 _窗口1_创建完毕
+
+scale.Init (取窗口句柄 ())
+scale.MoveToCenter ()

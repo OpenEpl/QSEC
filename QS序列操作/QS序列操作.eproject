@@ -1,0 +1,37 @@
+﻿{
+  "Name": "QS序列操作",
+  "Version": "1.0.0.0",
+  "ProjectType": "WindowsECom",
+  "SourceSet": "src",
+  "OutFile": "../_Build/QS序列操作.ec",
+  "Description": "\r\n@备注:\r\n测试阶段，随时修改API",
+  "Author": "QIQI",
+  "Dependencies": [
+    {
+      "Kind": "ELib",
+      "Name": "系统核心支持库",
+      "FileName": "krnln",
+      "Guid": "d09f2340818511d396f6aaf844c7e325",
+      "Version": "5.7"
+    },
+    {
+      "Kind": "ELib",
+      "Name": "特殊功能支持库",
+      "FileName": "spec",
+      "Guid": "A512548E76954B6E92C21055517615B0",
+      "Version": "3.1"
+    },
+    {
+      "Kind": "ECom",
+      "Name": "ArrayList",
+      "Path": "../_IntermediateBuild/ArrayList.ec",
+      "ReExport": false
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QS欢迎",
+      "Path": "../_IntermediateBuild/QS欢迎.ec",
+      "ReExport": false
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+﻿.数据类型 LOGFONT
+    .成员 lfHeight, 整数型
+    .成员 lfWidth, 整数型
+    .成员 lfEscapement, 整数型
+    .成员 lfOrientation, 整数型
+    .成员 lfWeight, 整数型
+    .成员 lfItalic, 字节型
+    .成员 lfUnderline, 字节型
+    .成员 lfStrikeOut, 字节型
+    .成员 lfCharSet, 字节型
+    .成员 lfOutPrecision, 字节型
+    .成员 lfClipPrecision, 字节型
+    .成员 lfQuality, 字节型
+    .成员 lfPitchAndFamily, 字节型
+    .成员 lfFaceName, 字节型, , "32"
+
+.数据类型 WNDCLASSEX
+    .成员 cbSize, 整数型
+    .成员 style, 整数型
+    .成员 lpfnWndProc, 整数型
+    .成员 cbClsExtra, 整数型
+    .成员 cbWndExtra, 整数型
+    .成员 hInstance, 整数型
+    .成员 hIcon, 整数型
+    .成员 hCursor, 整数型
+    .成员 hbrBackground, 整数型
+    .成员 lpszMenuName, 文本型
+    .成员 lpszClassName, 文本型
+    .成员 hIconSm, 整数型
+

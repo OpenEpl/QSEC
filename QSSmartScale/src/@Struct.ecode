@@ -1,0 +1,53 @@
+﻿.数据类型 WindowRecord, 公开
+    .成员 hWnd, 整数型
+    .成员 Controls, ArrayListOfControlInfos
+    .成员 ClientWidth96, 整数型, , , pixels in dpi 96
+    .成员 ClientHeight96, 整数型, , , pixels in dpi 96
+
+.数据类型 ControlRecord, 公开
+    .成员 hWnd, 整数型
+    .成员 hParent, 整数型
+    .成员 RelativeLeft, 双精度小数型
+    .成员 RelativeTop, 双精度小数型
+    .成员 RelativeWidth, 双精度小数型
+    .成员 RelativeHeight, 双精度小数型
+    .成员 FontSize, 整数型
+    .成员 EplFontProperties, EplFontPropertiesRecord
+
+.数据类型 EplFontPropertiesRecord, 公开
+    .成员 CWnd, 整数型
+    .成员 Getter, 整数型
+    .成员 Setter, 整数型
+    .成员 PropertyIds, 整数型, , "1"
+    .成员 FontSizes, 整数型, , "1"
+
+.数据类型 RECT
+    .成员 left, 整数型
+    .成员 top, 整数型
+    .成员 right, 整数型
+    .成员 bottom, 整数型
+
+.数据类型 POINT
+    .成员 x, 整数型
+    .成员 y, 整数型
+
+.数据类型 LOGFONTW, 公开
+    .成员 lfHeight, 整数型
+    .成员 lfWidth, 整数型
+    .成员 lfEscapement, 整数型
+    .成员 lfOrientation, 整数型
+    .成员 lfWeight, 整数型
+    .成员 lfItalic, 字节型
+    .成员 lfUnderline, 字节型
+    .成员 lfStrikeOut, 字节型
+    .成员 lfCharSet, 字节型
+    .成员 lfOutPrecision, 字节型
+    .成员 lfClipPrecision, 字节型
+    .成员 lfQuality, 字节型
+    .成员 lfPitchAndFamily, 字节型
+    .成员 lfFaceName, 短整数型, , "32"
+
+.数据类型 DataBlock
+    .成员 addr, 整数型
+    .成员 length, 整数型
+

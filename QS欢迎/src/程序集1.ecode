@@ -1,0 +1,64 @@
+﻿.程序集 程序集1
+.程序集变量 BkColor, 整数型
+.程序集变量 BkColor_Brush, 整数型
+.程序集变量 hWnd_Static, 整数型
+
+.子程序 _启动子程序, 整数型, , 请在本子程序中放置易模块初始化代码
+
+.如果真 (是否为调试版 ())
+    .如果真 (GetEnvironmentVariable (“___QuickAndSimpleEC_HideWelcome”, 字符 (0), 0) == 0)
+        SetEnvironmentVariable (“___QuickAndSimpleEC_HideWelcome”, “1”)
+        ShowLogo ()
+    .如果真结束
+    
+.如果真结束
+_临时子程序 ()  ' 在初始化代码执行完毕后调用测试代码
+返回 (0)  ' 可以根据您的需要返回任意数值
+.子程序 _临时子程序
+
+' 本名称子程序用作测试程序用，仅在开发及调试环境中有效，编译发布程序前将被系统自动清空，请将所有用作测试的临时代码放在本子程序中。 ***注意不要修改本子程序的名称、参数及返回值类型。
+.子程序 ShowLogo
+.局部变量 WindowClassEx, WNDCLASSEX
+.局部变量 hWnd, 整数型
+.局部变量 hFont, 整数型
+.局部变量 font, LOGFONT
+
+输出调试文本 (“欢迎使用Quick And Simple EC，官方QQ群：605310933”)
+
+WindowClassEx.cbSize = 48
+WindowClassEx.style = 位或 (#CS_HREDRAW, #CS_VREDRAW, #CS_DBLCLKS)
+WindowClassEx.hIcon = 0
+WindowClassEx.hCursor = LoadCursor (0, #IDC_ARROW)
+WindowClassEx.hbrBackground = #COLOR_3DSHADOW
+WindowClassEx.hIconSm = 0
+WindowClassEx.lpfnWndProc = 到整数 (&MyWndProc)
+WindowClassEx.hInstance = 0
+WindowClassEx.lpszClassName = “___QuickAndSimpleEC_Welcome”
+.如果真 (RegisterClassEx (WindowClassEx) != 0)
+    font.lfHeight = 28
+    font.lfCharSet = #GB2312_CHARSET
+    CopyMemoryFromStringToByteArray (font.lfFaceName, “Microsoft YaHei”, 取文本长度 (“Microsoft YaHei”) + 1)
+    hFont = CreateFontIndirect (font)
+    
+    hWnd = CreateWindowEx (#WS_EX_TOPMOST, “___QuickAndSimpleEC_Welcome”, “”, #WS_POPUP, (取屏幕宽度 () - 320) / 2, 20, 320, 32, 0, 0, 0, 0)
+    hWnd_Static = CreateWindowEx (0, “Static”, “欢迎使用Quick And Simple EC”, 位或 (#SS_CENTER, #SS_CENTERIMAGE, #WS_VISIBLE, #WS_CHILD), 0, 0, 320, 32, hWnd, 0, 0, 0)
+    SendMessage (hWnd_Static, #WM_SETFONT, hFont, 0)
+    BkColor = #黄色
+    BkColor_Brush = CreateSolidBrush (BkColor)
+    SetWindowLongA (hWnd, #GWL_EXSTYLE, 位或 (GetWindowLong (hWnd, #GWL_EXSTYLE), #WS_EX_TRANSPARENT, #WS_EX_LAYERED, #WS_EX_NOACTIVATE))
+    SetLayeredWindowAttributes (hWnd, 0, 255, #LWA_ALPHA)
+    SetWindowLongA (hWnd, #GWL_STYLE, 位或 (GetWindowLong (hWnd, #GWL_STYLE), #WS_VISIBLE))  ' *
+    处理事件 ()
+.如果真结束
+
+.子程序 MyWndProc, 整数型
+.参数 hwnd, 整数型, , 窗口句柄
+.参数 msg, 整数型, , 消息值
+.参数 wparam, 整数型, , 附加参数1
+.参数 lParam, 整数型, , 附加参数2
+
+.如果真 (msg == #WM_CTLCOLORSTATIC)
+    SetBkColor (wparam, BkColor)
+    返回 (BkColor_Brush)
+.如果真结束
+返回 (DefWindowProc (hwnd, msg, wparam, lParam))

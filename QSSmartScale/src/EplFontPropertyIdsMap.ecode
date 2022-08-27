@@ -1,0 +1,66 @@
+﻿.程序集 EplFontPropertyIdsMap, <对象>
+.程序集变量 map, 整数型
+
+.子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
+
+map = 哈希表_整数型_字节集_创建 ()
+.子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
+
+哈希表_整数型_字节集_销毁 (map)
+.子程序 Get, , 公开
+.参数 DataType, 整数型
+.参数 Getter, 整数型, 参考
+.参数 Setter, 整数型, 参考
+.参数 PropertyIds, 整数型, 参考 数组
+.局部变量 pDataTypeInfo, 整数型
+.局部变量 nPropertyCount, 整数型
+.局部变量 pPropertyBegin, 整数型
+.局部变量 pfnGetInterface, 整数型
+.局部变量 i, 整数型
+.局部变量 pProperty, 整数型
+.局部变量 shtType, 整数型
+.局部变量 dataBlock, DataBlock
+.局部变量 cache, 字节集
+.局部变量 idsBytes, 整数型
+.局部变量 pBin, 整数型
+
+清除数组 (PropertyIds)
+cache = 哈希表_整数型_字节集_取 (map, DataType)
+.如果 (取字节集长度 (cache) == 0)
+    pDataTypeInfo = 调用易系统功能 (1002, DataType, 0)  ' NAS_GET_LIB_DATA_TYPE_INFO
+    .如果真 (pDataTypeInfo != 0)
+        nPropertyCount = 指针到整数 (pDataTypeInfo + 36)
+        pPropertyBegin = 指针到整数 (pDataTypeInfo + 40)
+        pfnGetInterface = 指针到整数 (pDataTypeInfo + 44)
+        Getter = Call_1 (pfnGetInterface, 6)
+        Setter = Call_1 (pfnGetInterface, 4)
+        i = 8  ' 8个系统固有属性
+        .判断循环首 (i < nPropertyCount)
+            pProperty = pPropertyBegin + i * 20
+            shtType = 指针到短整数 (pProperty + 12)
+            .如果真 (shtType == 1013)  ' 字体
+                加入成员 (PropertyIds, i - 8)
+            .如果真结束
+            i = i + 1
+        .判断循环尾 ()
+    .如果真结束
+    idsBytes = 左移 (取数组下标 (PropertyIds, ), 2)
+    cache = 取空白字节集 (idsBytes + 8)
+    pBin = 取变量数据地址 (cache)
+    写到内存 (Getter, pBin, )
+    写到内存 (Setter, pBin + 4, )
+    .如果真 (idsBytes != 0)
+        memcpy (pBin + 8, 取变量地址 (PropertyIds[1]), idsBytes)
+    .如果真结束
+    哈希表_整数型_字节集_置 (map, DataType, cache)
+.否则
+    idsBytes = 取字节集长度 (cache) - 8
+    pBin = 取变量数据地址 (cache)
+    Getter = 指针到整数 (pBin)
+    Setter = 指针到整数 (pBin + 4)
+    重定义数组 (PropertyIds, 假, 右移 (idsBytes, 2))
+    .如果真 (idsBytes != 0)
+        memcpy (取变量地址 (PropertyIds[1]), pBin + 8, idsBytes)
+    .如果真结束
+    
+.如果结束

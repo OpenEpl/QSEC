@@ -1,0 +1,26 @@
+﻿.DLL命令 HeapAlloc, 整数型, kernel32.dll, HeapAlloc, , 从堆中分配内存
+    .参数 hHeap, 整数型
+    .参数 dwFlags, 整数型
+    .参数 dwBytes, 整数型
+
+.DLL命令 GetProcessHeap, 整数型, kernel32.dll, GetProcessHeap, , 获取调用过程堆句柄
+
+
+.DLL命令 HeapFree, 整数型, kernel32.dll, HeapFree, , 释放从堆中分配的内存
+    .参数 hHeap, 整数型
+    .参数 dwFlags, 整数型
+    .参数 lpMem, 整数型
+
+.DLL命令 memcpy, , ntdll.dll, @memcpy
+    .参数 pDest, 整数型
+    .参数 pSrc, 整数型
+    .参数 ByteLen, 整数型
+
+.DLL命令 memmove, , ntdll.dll, @memmove
+    .参数 pDest, 整数型
+    .参数 pSrc, 整数型
+    .参数 ByteLen, 整数型
+
+.DLL命令 反汇编子程序, 文本型, eva.fne, Dasm_Sub
+    .参数 子程序指针, 子程序指针
+

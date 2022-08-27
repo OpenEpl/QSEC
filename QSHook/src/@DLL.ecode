@@ -1,0 +1,81 @@
+﻿.DLL命令 GetProcAddress, 整数型, kernel32.dll, GetProcAddress
+    .参数 模块句柄, 整数型, , hModule
+    .参数 进程名称, 文本型, , lpProcName
+
+.DLL命令 GetModuleHandle, 整数型, kernel32.dll, GetModuleHandleA
+    .参数 lpModuleName, 文本型, , 指定模块名，这通常是与模块的文件名相同的一个名字。例如，NOTEPAD.EXE程序的模块文件名就叫作NOTEPAD;
+
+.DLL命令 VirtualAlloc, 整数型, kernel32.dll, VirtualAlloc, , 保留虚拟页
+    .参数 分配文本地址, 整数型, , lpAddress
+    .参数 分配大小, 整数型, , dwSize
+    .参数 分配类型, 整数型, , flAllocationType
+    .参数 内存保护标志, 整数型, , flProtect
+
+.DLL命令 VirtualFree, 整数型, kernel32.dll, VirtualFree
+    .参数 分配文本地址, 整数型, , lpAddress
+    .参数 分配大小, 整数型, , dwSize
+    .参数 释放类型, 整数型, , dwFreeType
+
+.DLL命令 memcpy, , ntdll.dll, @memcpy
+    .参数 pDest, 整数型
+    .参数 pSrc, 整数型
+    .参数 ByteLen, 整数型
+
+.DLL命令 VirtualProtect, 整数型, kernel32.dll, VirtualProtect, , 设置虚拟页的保护属性。,
+    .参数 内存指针, 整数型, , lpAddress 。
+    .参数 大小, 整数型, , dwsize
+    .参数 保护模式, 整数型, , flNewProtect 见PAGE_常量。
+    .参数 原保护模式, 整数型, 传址, lpfloldprotect 4字节指针，返回旧的保护模式。如果不需要可以设为NULL。
+
+.DLL命令 CreateToolhelp32Snapshot, 整数型, kernel32.dll, CreateToolhelp32Snapshot
+    .参数 标志, 整数型, , lFlags
+    .参数 进程标识符, 整数型, , lProcessID
+
+.DLL命令 Thread32First, 整数型, kernel32.dll, Thread32First
+    .参数 快照句柄, 整数型, , hSnapshot
+    .参数 线程信息, THREADENTRY32, , lppe
+
+.DLL命令 GetCurrentProcessId, 整数型, kernel32.dll, GetCurrentProcessId
+
+
+.DLL命令 GetCurrentThreadId, 整数型, kernel32.dll, GetCurrentThreadId
+
+
+.DLL命令 CloseHandle, 整数型, kernel32.dll, CloseHandle
+    .参数 hObject, 整数型, , 欲关闭的一个对象的句柄;
+
+.DLL命令 Thread32Next, 整数型, kernel32.dll, Thread32Next
+    .参数 快照句柄, 整数型, , hSnapshot
+    .参数 线程信息, THREADENTRY32, , lppe
+
+.DLL命令 OpenThread, 整数型, kernel32.dll, OpenThread, , 线程_打开
+    .参数 dwDesiredAccess, 整数型, , 线程对象的访问,2032639
+    .参数 bInheritHandle, 整数型, , 如果这个值是TRUE的,这个进程将继承该句柄的进程,否则进程不继承此句柄
+    .参数 dwThreadId, 整数型, , 线程的id
+
+.DLL命令 SuspendThread, 整数型, kernel32.dll, SuspendThread, , 暂停指定线程。系统维护一个暂停计数，当计数大于0时系统不会安排给线程执行时间，如果成功返回暂停计数值，失败返回-1,
+    .参数 线程句柄, 整数型, , hThread
+
+.DLL命令 ResumeThread, 整数型, kernel32.dll, ResumeThread, , 如果被多次挂起，需要多次执行才能恢复。,
+    .参数 线程句柄, 整数型, , hThread
+
+.DLL命令 GetThreadContext, 整数型, kernel32.dll, GetThreadContext
+    .参数 线程句柄, 整数型, , hThread
+    .参数 运行信息, CONTEXT, , lpContext
+
+.DLL命令 SetThreadContext, 整数型, kernel32.dll, SetThreadContext, , 在执行函数前,必须设置 CONTEXT 结构中的ContextFlags字段,这个字段表示需要操作的寄存器的范围. 访问通用寄存器可以指定 CONTEXT_INTEGER, 访问段寄存器可以指定 CONTEXT_SEGMENTS, 要访问全部的寄存器则指定为 CONTEXT_FULL.函数返回返回指定线程描术表.,
+    .参数 线程句柄, 整数型, , hThread
+    .参数 运行信息, CONTEXT, , lpContext
+
+.DLL命令 MessageBox, 整数型, user32.dll, MessageBoxA
+    .参数 hwnd, 整数型, , 窗口句柄
+    .参数 lpText, 文本型, , 提示内容
+    .参数 lpCaption, 文本型, , 提示标题
+    .参数 wType, 整数型, , 提示钮类型#MB_
+
+.DLL命令 FreeLibrary, 整数型, kernel32.dll, FreeLibrary
+    .参数 hLibModule, 整数型, , 要释放的一个库句柄在VB里使用只能用这个函数释放那些由应用程序明确装载的DLL。对LoadLibrary的每一次调用都应该有一个对应的FreeLibrary调用;
+
+.DLL命令 LoadLibrary, 整数型, kernel32.dll, LoadLibraryA
+    .参数 lpLibFileName, 文本型, , 指定要载入的动态链接库的名称。采用与CreateProcess函数的lpCommandLine参数指定的同样的搜索顺序;
+

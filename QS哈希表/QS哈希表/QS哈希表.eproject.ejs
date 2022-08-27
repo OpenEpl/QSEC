@@ -1,0 +1,35 @@
+﻿<%
+	/*
+	EJS File
+	https://github.com/mde/ejs
+	*/
+if(typeof(ValueType) == "undefined"){
+	ValueType = null;
+}
+var model = {
+  "Version": "1.0.0.0",
+  "ProjectType": "WindowsECom",
+  "SourceSet": "src",
+  "Dependencies": [
+    {
+      "Kind": "ELib",
+      "Name": "系统核心支持库",
+      "FileName": "krnln",
+      "Guid": "d09f2340818511d396f6aaf844c7e325",
+      "Version": "5.3"
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QS底层哈希表",
+      "Path": "../../../_Build/QS哈希表/QS底层哈希表.ec",
+      "ReExport": false
+    }
+  ]
+};
+model.Description = "本模块提供的所有实例方法均为非线程安全，禁止多线程同时访问同一个哈希表对象（如有需要请在模块外部自行加锁），但可以多线程同时访问不同的哈希表对象。\r\n[开发信息]本模块于" + new Date().toISOString() + "自动生成";
+if(ValueType){
+	model.Name = "QS哈希表_" + KeyType + "_" + ValueType;
+}else{
+	model.Name = "QS哈希集合_" + KeyType;
+}
+%><%-JSON.stringify(model)%>

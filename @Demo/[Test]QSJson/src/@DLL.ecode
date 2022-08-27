@@ -1,0 +1,3 @@
+﻿.DLL命令 GetAsyncKeyState, 短整数型, user32.dll, GetAsyncKeyState
+    .参数 vKey, 整数型
+

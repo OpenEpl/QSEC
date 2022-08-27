@@ -1,0 +1,138 @@
+﻿.程序集 QSJsonPointer, <对象>, 公开, RFC6901规范：https://tools.ietf.org/html/rfc6901
+.程序集变量 ReferenceToken, 文本型, , "0", 转义后
+
+.子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
+
+
+.子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
+
+
+.子程序 创建, , 公开
+.参数 Pointer, 文本型, , 注意：1、数组索引从0开始！ 2、没有实现URI片段形式的Pointer的支持（#/%20 这种）
+.局部变量 i, 整数型
+
+ReferenceToken = 分割文本 (Pointer, “/”, )
+.如果真 (取数组下标 (ReferenceToken, ) > 0)
+    .如果真 (ReferenceToken[1] != “”)
+        输出调试文本 (“错误：（必须使用/开头）无效的JsonPointer：” + Pointer)
+        清除数组 (ReferenceToken)
+        返回 ()
+    .如果真结束
+    删除成员 (ReferenceToken, 1, )
+.如果真结束
+.计次循环首 (取数组下标 (ReferenceToken, ), i)
+    ReferenceToken[i] = 子文本替换 (ReferenceToken[i], “~1”, “/”, , , 真)
+    ReferenceToken[i] = 子文本替换 (ReferenceToken[i], “~0”, “~”, , , 真)
+.计次循环尾 ()
+.子程序 取值, QSJson_Ref, 公开
+.参数 Root, QSJson_Ref, , 根节点
+.参数 Has, 逻辑型, 参考 可空
+.局部变量 NakedNodePtr, 整数型
+.局部变量 Type, 整数型
+.局部变量 i, 整数型
+.局部变量 Result, QSJson_Ref
+.局部变量 Index, 整数型
+
+NakedNodePtr = Root.Internal_GetNakedNodePtr ()
+.计次循环首 (取数组下标 (ReferenceToken, ), i)
+    Type = JSON内存节点_取类型 (NakedNodePtr)
+    .判断开始 (Type == #QSJson_值类型_对象)
+        NakedNodePtr = JSON对象_取 (JSON内存节点_对象_取地址 (NakedNodePtr), ReferenceToken[i])
+        .如果真 (NakedNodePtr == 0)
+            跳出循环 ()
+        .如果真结束
+        
+    .判断 (Type == #QSJson_值类型_数组)
+        Index = 到整数 (ReferenceToken[i])
+        .如果真 (Index < 0 || Index >= JSON数组_取数量 (JSON内存节点_数组_取地址 (NakedNodePtr)))
+            NakedNodePtr = 0
+            跳出循环 ()
+        .如果真结束
+        NakedNodePtr = JSON数组_取 (JSON内存节点_数组_取地址 (NakedNodePtr), Index)
+        
+    .默认
+        NakedNodePtr = 0
+        跳出循环 ()
+    .判断结束
+    
+.计次循环尾 ()
+.如果 (NakedNodePtr == 0)
+    Has = 假
+.否则
+    Result.Internal_SetNakedNodePtrAndAddRef (NakedNodePtr)
+    Has = 真
+.如果结束
+返回 (Result)
+.子程序 置值, , 公开
+.参数 Root, QSJson_Ref, , 根节点
+.参数 NewValue, QSJson_Ref
+.局部变量 NakedNodePtr, 整数型
+.局部变量 ParentNodePtr, 整数型
+.局部变量 Type, 整数型
+.局部变量 i, 整数型
+.局部变量 Index, 整数型
+
+' 这是一个写的非常乱的方法......
+
+
+NakedNodePtr = Root.Internal_GetNakedNodePtr ()
+.计次循环首 (取数组下标 (ReferenceToken, ), i)
+    ParentNodePtr = NakedNodePtr
+    
+    Type = JSON内存节点_取类型 (NakedNodePtr)
+    .如果真 (Type != #QSJson_值类型_对象 && Type != #QSJson_值类型_数组)
+        .如果 (ReferenceToken[i] == “0” || ReferenceToken[i] == “-” || 取代码 (ReferenceToken[i], ) >= #AsciiCode_1 && 取代码 (ReferenceToken[i], ) <= #AsciiCode_9)  ' 与规范一致，前导0是不被支持的
+            JSON内存节点_置为空数组 (NakedNodePtr)
+        .否则
+            JSON内存节点_置为空对象 (NakedNodePtr)
+        .如果结束
+        Type = JSON内存节点_取类型 (NakedNodePtr)
+    .如果真结束
+    
+    .判断开始 (Type == #QSJson_值类型_对象)
+        NakedNodePtr = JSON对象_取 (JSON内存节点_对象_取地址 (NakedNodePtr), ReferenceToken[i])
+        .如果真 (NakedNodePtr == 0)
+            NakedNodePtr = JSON内存节点_创建 ()
+            JSON对象_置 (JSON内存节点_对象_取地址 (ParentNodePtr), ReferenceToken[i], NakedNodePtr)
+        .如果真结束
+        
+    .判断 (Type == #QSJson_值类型_数组)
+        .如果 (ReferenceToken[i] == “-”)
+            NakedNodePtr = JSON内存节点_创建 ()
+            JSON数组_加 (JSON内存节点_数组_取地址 (ParentNodePtr), NakedNodePtr)
+        .否则
+            Index = 到整数 (ReferenceToken[i])
+            .如果真 (Index < 0)
+                返回 ()
+            .如果真结束
+            .判断循环首 (Index >= JSON数组_取数量 (JSON内存节点_数组_取地址 (NakedNodePtr)))
+                JSON数组_加 (JSON内存节点_数组_取地址 (ParentNodePtr), JSON内存节点_创建 ())
+            .判断循环尾 ()
+            NakedNodePtr = JSON数组_取 (JSON内存节点_数组_取地址 (ParentNodePtr), Index)
+        .如果结束
+        
+    .默认
+        
+    .判断结束
+    
+.计次循环尾 ()
+
+.如果 (ParentNodePtr == 0)
+    Root.Internal_SetNakedNodePtr (NewValue.Internal_GetNakedNodePtrAndAddRef ())
+.否则
+    i = 取数组下标 (ReferenceToken, )
+    Type = JSON内存节点_取类型 (ParentNodePtr)
+    .判断开始 (Type == #QSJson_值类型_对象)
+        JSON对象_置 (JSON内存节点_对象_取地址 (ParentNodePtr), ReferenceToken[i], NewValue.Internal_GetNakedNodePtrAndAddRef ())
+    .判断 (Type == #QSJson_值类型_数组)
+        .如果 (ReferenceToken[i] == “-”)
+            Index = JSON数组_取数量 (JSON内存节点_数组_取地址 (ParentNodePtr)) - 1
+        .否则
+            Index = 到整数 (ReferenceToken[i])
+        .如果结束
+        JSON数组_置 (JSON内存节点_数组_取地址 (ParentNodePtr), Index, NewValue.Internal_GetNakedNodePtrAndAddRef ())
+    .默认
+        
+    .判断结束
+    
+.如果结束

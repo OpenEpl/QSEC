@@ -1,0 +1,258 @@
+﻿.程序集 数组列表
+
+.子程序 ____________warning, , , *********************这是用于存储警告信息（纯注释）的子程序*********************
+
+' 请不要随意修改代码
+' 因为用了内联汇编
+
+
+' 易语言5.5调试模式下的测试结果表明
+' 局部变量在栈中的顺序，取决于在代码中第一次使用的顺序
+' 伪代码：
+' ------------
+' 整数型 a//声明
+' 整数型 b//声明
+' 子程序1(a)
+' 子程序1(b)
+' a=[ebp-4] b=[ebp-8]
+' ------------
+' 整数型 a//声明
+' 整数型 b//声明
+' 子程序1(b)
+' 子程序1(a)
+' a=[ebp-8] b=[ebp-4]
+' ------------
+
+.子程序 ArrayList_New, 整数型, 公开, new
+.局部变量 地址, 整数型
+.局部变量 缓冲区地址, 整数型
+
+地址 = HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, 12)  ' [成员数] [缓冲区可容纳成员数] [缓冲区地址]
+缓冲区地址 = HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, 16)  ' 16=4*4
+' 汇编代码（需要使用AsmToECode程序编译）:
+' @local 地址
+' @local 缓冲区地址
+' mov eax,地址
+' mov dword ptr [eax],0
+' mov dword ptr [eax+4],4
+' mov ecx,缓冲区地址
+' mov [eax+8],ecx
+' @ret
+置入代码 ({139, 69, 252, 199, 0, 0, 0, 0, 0, 199, 64, 4, 4, 0, 0, 0, 139, 77, 248, 137, 72, 8, 201, 195})
+返回 (0)
+.子程序 ArrayList_GetLength, 整数型, 公开
+.参数 地址, 整数型
+
+' 汇编代码（需要使用AsmToECode程序编译）:
+' @arg pList
+' mov eax,pList
+' mov eax,[eax]
+' @ret
+置入代码 ({139, 69, 8, 139, 0, 201, 194, 4, 0})
+返回 (0)
+.子程序 ArrayList_GetBufferCapacity, 整数型, 公开
+.参数 地址, 整数型
+
+' 汇编代码（需要使用AsmToECode程序编译）:
+' @arg pList
+' mov eax,pList
+' mov eax,[eax+4]
+' @ret
+置入代码 ({139, 69, 8, 139, 64, 4, 201, 194, 4, 0})
+返回 (0)
+.子程序 ArrayList_GetBufferPtr, 整数型, 公开
+.参数 地址, 整数型
+
+' 汇编代码（需要使用AsmToECode程序编译）:
+' @arg pList
+' mov eax,pList
+' mov eax,[eax+8]
+' @ret
+置入代码 ({139, 69, 8, 139, 64, 8, 201, 194, 4, 0})
+返回 (0)
+.子程序 ArrayList_Add, , 公开
+.参数 地址, 整数型
+.参数 数据, 整数型
+.局部变量 需要扩容, 整数型
+.局部变量 新缓冲区地址, 整数型
+.局部变量 目标大小_字节, 整数型, , , 增长因子：1.5，cache-friendly
+.局部变量 原缓冲区地址, 整数型
+.局部变量 原始大小_字节, 整数型
+.局部变量 新缓冲区可容纳成员数, 整数型
+
+' 汇编代码（需要使用AsmToECode程序编译）:
+' @arg 地址
+' @arg 数据
+' @local 需要扩容
+' @local 新缓冲区地址
+' @local 目标大小_字节
+' @local 原缓冲区地址
+' @local 原始大小_字节
+' @local 新缓冲区可容纳成员数
+' mov eax,地址
+' mov ecx,[eax];ecx=成员数
+' mov eax,[eax+4];eax=可容纳成员数
+' .if ecx==eax
+' mov 需要扩容,1
+' shl eax,2
+' mov 原始大小_字节,eax
+' mov eax,ecx
+' shr eax,1;eax=eax/2
+' add eax,ecx
+' mov 新缓冲区可容纳成员数,eax
+' shl eax,2;eax=eax*4
+' mov 目标大小_字节,eax
+' .endif
+置入代码 ({139, 69, 8, 139, 8, 139, 64, 4, 59, 200, 117, 28, 199, 69, 252, 1, 0, 0, 0, 193, 224, 2, 137, 69, 236, 139, 193, 209, 232, 3, 193, 137, 69, 232, 193, 224, 2, 137, 69, 244})
+
+.如果真 (需要扩容 != 0)
+    新缓冲区地址 = HeapAlloc (GetProcessHeap (), 0, 目标大小_字节)
+    .如果真 (新缓冲区地址 == 0)
+        ' 汇编代码（需要使用AsmToECode程序编译）:
+        ' @arg 地址
+        ' @arg 数据
+        ' @local 需要扩容
+        ' @local 新缓冲区地址
+        ' @local 目标大小_字节
+        ' @local 原缓冲区地址
+        ' @local 原始大小_字节
+        ' @local 新缓冲区可容纳成员数
+        ' mov eax,地址
+        ' mov eax,[eax];eax=成员数
+        ' inc eax
+        ' mov 新缓冲区可容纳成员数,eax
+        ' shl eax,2
+        ' mov 目标大小_字节,eax
+        置入代码 ({139, 69, 8, 139, 0, 64, 137, 69, 232, 193, 224, 2, 137, 69, 244})
+        
+        新缓冲区地址 = HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, 目标大小_字节)
+    .如果真结束
+    
+    ' 汇编代码（需要使用AsmToECode程序编译）:
+    ' @arg 地址
+    ' @arg 数据
+    ' @local 需要扩容
+    ' @local 新缓冲区地址
+    ' @local 目标大小_字节
+    ' @local 原缓冲区地址
+    ' @local 原始大小_字节
+    ' @local 新缓冲区可容纳成员数
+    ' mov eax,地址
+    ' mov ecx,[eax+8]
+    ' mov 原缓冲区地址,ecx
+    ' mov ecx,新缓冲区地址
+    ' mov [eax+8],ecx
+    ' mov ecx,新缓冲区可容纳成员数
+    ' mov [eax+4],ecx
+    置入代码 ({139, 69, 8, 139, 72, 8, 137, 77, 240, 139, 77, 248, 137, 72, 8, 139, 77, 232, 137, 72, 4})
+    
+    memcpy (新缓冲区地址, 原缓冲区地址, 原始大小_字节)
+    HeapFree (GetProcessHeap (), 0, 原缓冲区地址)
+.如果真结束
+
+' 汇编代码（需要使用AsmToECode程序编译）:
+' @arg 地址
+' @arg 数据
+' @local 需要扩容
+' @local 新缓冲区地址
+' @local 目标大小_字节
+' @local 原缓冲区地址
+' @local 原始大小_字节
+' @local 新缓冲区可容纳成员数
+' mov eax,地址
+' mov ecx,[eax+8];ecx=缓冲区地址
+' mov eax,[eax];eax=成员数
+' lea ecx,[ecx+eax*4]
+' mov eax,数据
+' mov [ecx],eax
+' mov eax,地址
+' inc dword ptr [eax]
+' @ret
+置入代码 ({139, 69, 8, 139, 72, 8, 139, 0, 141, 12, 129, 139, 69, 12, 137, 1, 139, 69, 8, 255, 0, 201, 194, 8, 0})
+
+' 汇编中已返回，以下代码永不会执行
+
+新缓冲区可容纳成员数 = 0  ' 保证 存在性（易语言自动删除从未在易代码中使用变量，即使汇编中进行了使用）
+.子程序 ArrayList_Remove, , 公开, 自行保证项目存在
+.参数 地址, 整数型
+.参数 索引, 整数型, , 从0开始
+.局部变量 缓冲区地址, 整数型
+.局部变量 成员数, 整数型
+
+缓冲区地址 = ArrayList_GetBufferPtr (地址)
+成员数 = ArrayList_GetLength (地址)
+memmove (缓冲区地址 + 索引 * 4, 缓冲区地址 + (索引 + 1) * 4, (成员数 - 索引 - 1) * 4)
+成员数 = 成员数 - 1
+asm_写整型内存 (地址, 成员数)
+.子程序 ArrayList_RemoveLast, , 公开, 自行保证项目存在
+.参数 地址, 整数型
+
+置入代码 ({139, 69, 8, 255, 8})
+' mov eax,[ebp+8]
+' dec dword [eax]
+.子程序 ArrayList_Peek, 整数型, 公开, 自行保证项目存在
+.参数 地址, 整数型
+
+置入代码 ({139, 69, 8, 139, 8, 139, 64, 8, 139, 68, 136, 252, 201, 194, 4, 0})
+' mov eax,[ebp+8]
+' mov ecx,[eax]
+' mov eax,[eax+8]
+' mov eax,[eax+ecx*4-4]
+' leave
+' retn 4
+返回 (0)
+.子程序 ArrayList_Pop, 整数型, 公开, 自行保证项目存在
+.参数 地址, 整数型
+
+置入代码 ({139, 69, 8, 255, 8, 139, 8, 139, 64, 8, 139, 4, 136, 201, 194, 4, 0})
+' mov eax,[ebp+8]
+' dec dword [eax]
+' mov ecx,[eax]
+' mov eax,[eax+8]
+' mov eax,[eax+ecx*4]
+' leave
+' retn 4
+返回 (0)
+.子程序 ArrayList_Get, 整数型, 公开, 自行保证项目存在
+.参数 地址, 整数型
+.参数 索引, 整数型, , 从0开始
+
+' 汇编代码（需要使用AsmToECode程序编译）:
+' @arg 地址
+' @arg 索引
+' mov eax,地址
+' mov ecx,索引
+' mov eax,[eax+8]
+' mov eax,[eax+ecx*4]
+' @ret
+置入代码 ({139, 69, 8, 139, 77, 12, 139, 64, 8, 139, 4, 136, 201, 194, 8, 0})
+返回 (0)
+.子程序 ArrayList_Set, 整数型, 公开, 返回 原值。自行保证项目存在
+.参数 地址, 整数型
+.参数 索引, 整数型, , 从0开始
+.参数 新值, 整数型
+
+' AsmToECode代码:@arg 地址
+' AsmToECode代码:@arg 索引
+' AsmToECode代码:@arg 新值
+' AsmToECode代码:mov eax,地址
+' AsmToECode代码:mov ecx,索引
+' AsmToECode代码:mov eax,[eax+8]
+' AsmToECode代码:mov edx,新值
+' AsmToECode代码:lea ecx,[eax+ecx*4]
+' AsmToECode代码:mov eax,[ecx]
+' AsmToECode代码:mov [ecx],edx
+' AsmToECode代码:@ret
+置入代码 ({139, 69, 8, 139, 77, 12, 139, 64, 8, 139, 85, 16, 141, 12, 136, 139, 1, 137, 17, 201, 194, 12, 0})
+返回 (0)
+.子程序 ArrayList_Delete, , 公开
+.参数 地址, 整数型
+
+HeapFree (GetProcessHeap (), 0, ArrayList_GetBufferPtr (地址))
+HeapFree (GetProcessHeap (), 0, 地址)
+.子程序 asm_写整型内存, 逻辑型
+.参数 内存地址, 整数型
+.参数 内容, 整数型
+
+置入代码 ({139, 77, 12, 139, 69, 8, 137, 8, 139, 229, 93, 195})
+返回 (假)

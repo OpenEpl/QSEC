@@ -1,0 +1,23 @@
+﻿{
+  "Name": "QS速度测试",
+  "Version": "1.0.0.0",
+  "ProjectType": "WindowsECom",
+  "SourceSet": "src",
+  "Author": "QIQI",
+  "OutFile": "../_Build/QS速度测试.ec",
+  "Dependencies": [
+    {
+      "Kind": "ELib",
+      "Name": "系统核心支持库",
+      "FileName": "krnln",
+      "Guid": "d09f2340818511d396f6aaf844c7e325",
+      "Version": "5.3"
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QS欢迎",
+      "Path": "../_IntermediateBuild/QS欢迎.ec",
+      "ReExport": false
+    }
+  ]
+}

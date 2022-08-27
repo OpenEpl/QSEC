@@ -1,0 +1,190 @@
+﻿.程序集 DpiUtils
+.程序集变量 pSetProcessDPIAware, 整数型
+.程序集变量 pSetProcessDpiAwareness, 整数型
+.程序集变量 pSetProcessDpiAwarenessContext, 整数型
+.程序集变量 pGetDpiForSystem, 整数型
+.程序集变量 pGetDpiForWindow, 整数型
+.程序集变量 pAdjustWindowRectExForDpi, 整数型
+
+.子程序 DpiAwareSystem, , 公开
+
+.如果真 (pSetProcessDpiAwarenessContext == 0)  ' win10 1703 or newer
+    pSetProcessDpiAwarenessContext = GetProcAddress (GetModuleHandle (“user32.dll”), “SetProcessDpiAwarenessContext”)
+.如果真结束
+.如果真 (pSetProcessDpiAwarenessContext != 0)
+    Call_1 (pSetProcessDpiAwarenessContext, #DPI_AWARENESS_CONTEXT_SYSTEM_AWARE)
+    返回 ()
+.如果真结束
+
+.如果真 (pSetProcessDpiAwareness == 0)  ' win8.1 or newer
+    pSetProcessDpiAwareness = GetProcAddress (GetModuleHandle (“Shcore.dll”), “SetProcessDpiAwareness”)
+.如果真结束
+.如果真 (pSetProcessDpiAwareness != 0)
+    Call_1 (pSetProcessDpiAwareness, #PROCESS_SYSTEM_DPI_AWARE)
+    返回 ()
+.如果真结束
+
+.如果真 (pSetProcessDPIAware == 0)  ' vista/win7 or newer
+    pSetProcessDPIAware = GetProcAddress (GetModuleHandle (“user32.dll”), “SetProcessDPIAware”)
+.如果真结束
+.如果真 (pSetProcessDPIAware != 0)
+    Call_0 (pSetProcessDPIAware)
+.如果真结束
+
+.子程序 DpiGdiScaledOrUnaware, , 公开
+
+.如果真 (pSetProcessDpiAwarenessContext == 0)
+    pSetProcessDpiAwarenessContext = GetProcAddress (GetModuleHandle (“user32.dll”), “SetProcessDpiAwarenessContext”)
+.如果真结束
+.如果真 (pSetProcessDpiAwarenessContext != 0)
+    Call_1 (pSetProcessDpiAwarenessContext, #DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED)  ' gdi scaled not supported
+    返回 ()
+.如果真结束
+
+.如果真 (pSetProcessDpiAwareness == 0)
+    pSetProcessDpiAwareness = GetProcAddress (GetModuleHandle (“Shcore.dll”), “SetProcessDpiAwareness”)
+.如果真结束
+.如果真 (pSetProcessDpiAwareness != 0)
+    Call_1 (pSetProcessDpiAwareness, #PROCESS_DPI_UNAWARE)
+.如果真结束
+
+.子程序 DpiUnaware, , 公开
+
+.如果真 (pSetProcessDpiAwarenessContext == 0)
+    pSetProcessDpiAwarenessContext = GetProcAddress (GetModuleHandle (“user32.dll”), “SetProcessDpiAwarenessContext”)
+.如果真结束
+.如果真 (pSetProcessDpiAwarenessContext != 0)
+    Call_1 (pSetProcessDpiAwarenessContext, #DPI_AWARENESS_CONTEXT_UNAWARE)
+    返回 ()
+.如果真结束
+
+.如果真 (pSetProcessDpiAwareness == 0)
+    pSetProcessDpiAwareness = GetProcAddress (GetModuleHandle (“Shcore.dll”), “SetProcessDpiAwareness”)
+.如果真结束
+.如果真 (pSetProcessDpiAwareness != 0)
+    Call_1 (pSetProcessDpiAwareness, #PROCESS_DPI_UNAWARE)
+.如果真结束
+
+.子程序 DpiAwarePerMonitorOrCompatible, , 公开
+
+.如果真 (pSetProcessDpiAwarenessContext == 0)
+    pSetProcessDpiAwarenessContext = GetProcAddress (GetModuleHandle (“user32.dll”), “SetProcessDpiAwarenessContext”)
+.如果真结束
+.如果真 (pSetProcessDpiAwarenessContext != 0)
+    Call_1 (pSetProcessDpiAwarenessContext, #DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE)
+    返回 ()
+.如果真结束
+
+.如果真 (pSetProcessDpiAwareness == 0)
+    pSetProcessDpiAwareness = GetProcAddress (GetModuleHandle (“Shcore.dll”), “SetProcessDpiAwareness”)
+.如果真结束
+.如果真 (pSetProcessDpiAwareness != 0)
+    Call_1 (pSetProcessDpiAwareness, #PROCESS_PER_MONITOR_DPI_AWARE)
+    返回 ()
+.如果真结束
+
+.如果真 (pSetProcessDPIAware == 0)
+    pSetProcessDPIAware = GetProcAddress (GetModuleHandle (“user32.dll”), “SetProcessDPIAware”)
+.如果真结束
+.如果真 (pSetProcessDPIAware != 0)
+    Call_0 (pSetProcessDPIAware)  ' only system aware supported
+.如果真结束
+
+.子程序 DpiAwarePerMonitorV2OrCompatible, , 公开
+
+.如果真 (pSetProcessDpiAwarenessContext == 0)
+    pSetProcessDpiAwarenessContext = GetProcAddress (GetModuleHandle (“user32.dll”), “SetProcessDpiAwarenessContext”)
+.如果真结束
+.如果真 (pSetProcessDpiAwarenessContext != 0)
+    Call_1 (pSetProcessDpiAwarenessContext, #DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)
+    返回 ()
+.如果真结束
+
+.如果真 (pSetProcessDpiAwareness == 0)
+    pSetProcessDpiAwareness = GetProcAddress (GetModuleHandle (“Shcore.dll”), “SetProcessDpiAwareness”)
+.如果真结束
+.如果真 (pSetProcessDpiAwareness != 0)
+    Call_1 (pSetProcessDpiAwareness, #PROCESS_PER_MONITOR_DPI_AWARE)  ' only v1 supported
+    返回 ()
+.如果真结束
+
+.如果真 (pSetProcessDPIAware == 0)
+    pSetProcessDPIAware = GetProcAddress (GetModuleHandle (“user32.dll”), “SetProcessDPIAware”)
+.如果真结束
+.如果真 (pSetProcessDPIAware != 0)
+    Call_0 (pSetProcessDPIAware)  ' only system aware supported
+.如果真结束
+
+.子程序 GetDpiForWindow, 整数型, 公开
+.参数 hWnd, 整数型
+
+.如果真 (pGetDpiForWindow == 0)
+    pGetDpiForWindow = GetProcAddress (GetModuleHandle (“user32.dll”), “GetDpiForWindow”)
+    .如果真 (pGetDpiForWindow == 0)
+        pGetDpiForWindow = 到整数 (&_Compatible_GetDpiForWindow)
+    .如果真结束
+    
+.如果真结束
+返回 (Call_1 (pGetDpiForWindow, hWnd))
+.子程序 GetDpiForSystem, 整数型, 公开
+
+.如果真 (pGetDpiForSystem == 0)
+    pGetDpiForSystem = GetProcAddress (GetModuleHandle (“user32.dll”), “GetDpiForSystem”)
+    .如果真 (pGetDpiForSystem == 0)
+        pGetDpiForSystem = 到整数 (&_Compatible_GetDpiForSystem)
+    .如果真结束
+    
+.如果真结束
+返回 (Call_0 (pGetDpiForSystem))
+.子程序 _Compatible_GetDpiForSystem, 整数型
+.局部变量 hWndDesktop, 整数型
+.局部变量 hDC, 整数型
+.局部变量 dpi, 整数型
+
+hWndDesktop = GetDesktopWindow ()
+hDC = GetDC (hWndDesktop)
+dpi = GetDeviceCaps (hDC, #LOGPIXELSX)
+ReleaseDC (hWndDesktop, hDC)
+返回 (dpi)
+.子程序 _Compatible_GetDpiForWindow, 整数型
+.参数 hWnd, 整数型
+
+返回 (_Compatible_GetDpiForSystem ())
+.子程序 ScaleCoordinateForDpi, 整数型, 公开
+.参数 v96, 整数型
+.参数 dpi, 整数型
+
+返回 (四舍五入 (v96 * dpi / #USER_DEFAULT_SCREEN_DPI, ))
+.子程序 SetClientSize, , 公开
+.参数 hWnd, 整数型
+.参数 width, 整数型
+.参数 height, 整数型
+.局部变量 x, RECT
+.局部变量 style, 整数型
+.局部变量 hMenu, 整数型
+.局部变量 bMenu, 整数型
+.局部变量 exStyle, 整数型
+
+x.right = width
+x.bottom = height
+style = GetWindowLong (hWnd, #GWL_STYLE)
+hMenu = GetMenu (hWnd)
+.如果真 (hMenu != 0)
+    .如果真 (GetMenuItemCount (hMenu) != 0)
+        bMenu = 1
+    .如果真结束
+    
+.如果真结束
+
+exStyle = GetWindowLong (hWnd, #GWL_EXSTYLE)
+
+.如果真 (pAdjustWindowRectExForDpi == 0)
+    pAdjustWindowRectExForDpi = GetProcAddress (GetModuleHandle (“user32.dll”), “AdjustWindowRectExForDpi”)
+.如果真结束
+.如果 (pAdjustWindowRectExForDpi != 0)
+    Call_5 (pAdjustWindowRectExForDpi, 取变量地址 (x.left), style, bMenu, exStyle, GetDpiForWindow (hWnd))
+.否则
+    AdjustWindowRectEx (x, style, bMenu, exStyle)
+.如果结束
+
+SetWindowPos (hWnd, 0, 0, 0, x.right - x.left, x.bottom - x.top, 位或 (#SWP_NOZORDER, #SWP_NOOWNERZORDER, #SWP_NOMOVE, #SWP_NOACTIVATE))

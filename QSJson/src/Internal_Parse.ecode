@@ -1,0 +1,812 @@
+﻿.程序集 Internal_Parse
+
+.子程序 Internal_ParseNode_NewArrayElem, , , Internal_NextToken /   *跳过','或'['   */ --> Internal_ParseNode_NewArrayElem --> [Value]
+.参数 pNode, 整数型
+.参数 stack, 整数型
+.局部变量 pChild, 整数型
+
+pChild = JSON内存节点_创建 ()
+JSON数组_加 (JSON内存节点_数组_取地址 (pNode), pChild)
+ArrayList_Add (stack, pChild)
+.子程序 Internal_ParseNode_NewObjectElem, 逻辑型, , Internal_NextToken /   *跳过','或'{'   */ --> Internal_ParseNode_NewObjectElem --> [Value]
+.参数 JsonString, 字节集
+.参数 i, 整数型, 参考, 当前位置
+.参数 len, 整数型
+.参数 pNode, 整数型
+.参数 stack, 整数型
+.参数 Ex, Internal_QSJsonParseExtensionParameter, 参考, 用于存储几乎不用的数据
+.局部变量 pChild, 整数型
+.局部变量 string, 字节集
+
+.如果 (JsonString[i] != #AsciiCode_DoubleQuotation && JsonString[i] != #AsciiCode_SingleQuotation)
+    .如果真 (Internal_ParseUnquotedObjectKey (JsonString, i, len, string, Ex) == 假)  ' 无引号键支持(JSON5)
+        返回 (假)
+    .如果真结束
+    
+.否则
+    .如果真 (Internal_ParseString (JsonString, i, len, string, Ex) == 假)
+        返回 (假)
+    .如果真结束
+    
+.如果结束
+
+.如果真 (Internal_NextToken (JsonString, i, len) == 假)
+    Ex.ErrorMessaage.位置 = i
+    Ex.ErrorMessaage.信息 = “意外的数据结束”
+    返回 (假)
+.如果真结束
+.如果真 (JsonString[i] != #AsciiCode_Colon)
+    Ex.ErrorMessaage.位置 = i
+    Ex.ErrorMessaage.信息 = “键与值间缺少正确的的分割符号（:）”
+    返回 (假)
+.如果真结束
+.如果真 (Internal_NextToken (JsonString, i, len) == 假)
+    Ex.ErrorMessaage.位置 = i
+    Ex.ErrorMessaage.信息 = “意外的数据结束”
+    返回 (假)
+.如果真结束
+
+pChild = JSON内存节点_创建 ()
+JSON对象_置_字节集 (JSON内存节点_对象_取地址 (pNode), string, pChild)
+ArrayList_Add (stack, pChild)
+返回 (真)
+.子程序 Internal_ParseNode, 整数型
+.参数 JsonString, 字节集
+.参数 i, 整数型, 参考, 当前位置
+.参数 len, 整数型
+.参数 Ex, Internal_QSJsonParseExtensionParameter, 参考, 用于存储几乎不用的数据
+.局部变量 pNode, 整数型
+.局部变量 pRoot, 整数型
+.局部变量 string, 字节集
+.局部变量 stack, 整数型
+.局部变量 pChild, 整数型
+
+.如果真 (Internal_SkipWhitespaceAndComments (JsonString, i, len) == 假)
+    Ex.ErrorMessaage.位置 = i
+    Ex.ErrorMessaage.信息 = “意外的数据结束”
+    返回 (0)
+.如果真结束
+
+stack = ArrayList_New ()
+pRoot = JSON内存节点_创建 ()
+
+ArrayList_Add (stack, pRoot)
+.判断循环首 (真)
+    pNode = ArrayList_Peek (stack)
+    
+    .判断开始 (JsonString[i] == #AsciiCode_LeftCurlyBracket)
+        .如果真 (JSON内存节点_取类型 (pNode) != #QSJson_值类型_空)  ' 判断是否为有效的子节点。 错误示例：“{a:1{}}”
+            Ex.ErrorMessaage.位置 = i
+            .判断开始 (JSON内存节点_取类型 (pNode) == #QSJson_值类型_对象)
+                Ex.ErrorMessaage.信息 = “缺少正确的成员分割符号（,），或对象结束符号（}）”
+            .判断 (JSON内存节点_取类型 (pNode) == #QSJson_值类型_数组)
+                Ex.ErrorMessaage.信息 = “缺少正确的成员分割符号（,），或数组结束符号（]）”
+            .默认
+                
+            .判断结束
+            跳出循环 ()
+        .如果真结束
+        
+        JSON内存节点_置为空对象 (pNode)
+        .如果真 (Internal_NextToken (JsonString, i, len) == 假)
+            Ex.ErrorMessaage.位置 = i
+            Ex.ErrorMessaage.信息 = “意外的数据结束”
+            跳出循环 ()
+        .如果真结束
+        .如果 (JsonString[i] == #AsciiCode_Comma)  ' 尾随逗号的空对象(JSON5) 支持
+            .如果真 (Internal_NextToken (JsonString, i, len) == 假)
+                Ex.ErrorMessaage.位置 = i
+                Ex.ErrorMessaage.信息 = “意外的数据结束”
+                跳出循环 ()
+            .如果真结束
+            .如果 (JsonString[i] == #AsciiCode_RightCurlyBracket)
+                ArrayList_RemoveLast (stack)
+            .否则
+                Ex.ErrorMessaage.位置 = i
+                Ex.ErrorMessaage.信息 = “无效的标识符开头','('\x2C')”
+                跳出循环 ()
+            .如果结束
+            
+        .否则
+            .如果 (JsonString[i] == #AsciiCode_RightCurlyBracket)  ' 空对象 支持
+                ArrayList_RemoveLast (stack)
+            .否则
+                .如果 (Internal_ParseNode_NewObjectElem (JsonString, i, len, pNode, stack, Ex) == 假)
+                    跳出循环 ()
+                .否则
+                    到循环尾 ()
+                .如果结束
+                
+            .如果结束
+            
+        .如果结束
+        
+        
+        
+    .判断 (JsonString[i] == #AsciiCode_RightCurlyBracket)
+        .如果真 (JSON内存节点_取类型 (pNode) != #QSJson_值类型_对象)
+            Ex.ErrorMessaage.位置 = i
+            Ex.ErrorMessaage.信息 = “缺少正确的成员分割符号（,），或对象结束符号（}）”
+            跳出循环 ()
+        .如果真结束
+        ArrayList_RemoveLast (stack)
+    .判断 (JsonString[i] == #AsciiCode_LeftSquareBracket)
+        .如果真 (JSON内存节点_取类型 (pNode) != #QSJson_值类型_空)  ' 判断是否为有效的子节点。错误示例：“' 错误示例：“{a:1[]}””
+            Ex.ErrorMessaage.位置 = i
+            .判断开始 (JSON内存节点_取类型 (pNode) == #QSJson_值类型_对象)
+                Ex.ErrorMessaage.信息 = “缺少正确的成员分割符号（,），或对象结束符号（}）”
+            .判断 (JSON内存节点_取类型 (pNode) == #QSJson_值类型_数组)
+                Ex.ErrorMessaage.信息 = “缺少正确的成员分割符号（,），或数组结束符号（]）”
+            .默认
+                
+            .判断结束
+            跳出循环 ()
+        .如果真结束
+        
+        JSON内存节点_置为空数组 (pNode)
+        .如果真 (Internal_NextToken (JsonString, i, len) == 假)
+            Ex.ErrorMessaage.位置 = i
+            Ex.ErrorMessaage.信息 = “意外的数据结束”
+            跳出循环 ()
+        .如果真结束
+        .如果 (JsonString[i] == #AsciiCode_Comma)  ' 尾随逗号的空数组(JSON5) 支持
+            .如果真 (Internal_NextToken (JsonString, i, len) == 假)
+                Ex.ErrorMessaage.位置 = i
+                Ex.ErrorMessaage.信息 = “意外的数据结束”
+                跳出循环 ()
+            .如果真结束
+            .如果 (JsonString[i] == #AsciiCode_RightSquareBracket)
+                ArrayList_RemoveLast (stack)
+            .否则
+                Ex.ErrorMessaage.位置 = i
+                Ex.ErrorMessaage.信息 = “缺少正确的成员分割符号（,），或数组结束符号（]）”
+                跳出循环 ()
+            .如果结束
+            
+        .否则
+            .如果 (JsonString[i] == #AsciiCode_RightSquareBracket)  ' 空数组 支持
+                ArrayList_RemoveLast (stack)
+            .否则
+                Internal_ParseNode_NewArrayElem (pNode, stack)
+                到循环尾 ()
+            .如果结束
+            
+        .如果结束
+        
+    .判断 (JsonString[i] == #AsciiCode_RightSquareBracket)
+        .如果真 (JSON内存节点_取类型 (pNode) != #QSJson_值类型_数组)
+            Ex.ErrorMessaage.位置 = i
+            Ex.ErrorMessaage.信息 = “缺少正确的成员分割符号（,），或数组结束符号（]）”
+            跳出循环 ()
+        .如果真结束
+        ArrayList_RemoveLast (stack)
+    .判断 (JsonString[i] == #AsciiCode_Comma)
+        .判断开始 (JSON内存节点_取类型 (pNode) == #QSJson_值类型_对象)
+            .如果真 (Internal_NextToken (JsonString, i, len) == 假)
+                Ex.ErrorMessaage.位置 = i
+                Ex.ErrorMessaage.信息 = “意外的数据结束”
+                跳出循环 ()
+            .如果真结束
+            .如果真 (JsonString[i] == #AsciiCode_RightCurlyBracket)  ' 尾随逗号对象(JSON5) 支持
+                到循环尾 ()
+            .如果真结束
+            .如果真 (Internal_ParseNode_NewObjectElem (JsonString, i, len, pNode, stack, Ex) == 假)
+                跳出循环 ()
+            .如果真结束
+            到循环尾 ()
+        .判断 (JSON内存节点_取类型 (pNode) == #QSJson_值类型_数组)
+            .如果真 (Internal_NextToken (JsonString, i, len) == 假)
+                Ex.ErrorMessaage.位置 = i
+                Ex.ErrorMessaage.信息 = “意外的数据结束”
+                跳出循环 ()
+            .如果真结束
+            .如果真 (JsonString[i] == #AsciiCode_RightSquareBracket)  ' 尾随逗号数组(JSON5) 支持
+                到循环尾 ()
+            .如果真结束
+            Internal_ParseNode_NewArrayElem (pNode, stack)
+            到循环尾 ()
+        .默认
+            
+        .判断结束
+        
+    .默认
+        .如果真 (JSON内存节点_取类型 (pNode) != #QSJson_值类型_空)  ' 判断是否为有效的子节点。错误示例：“[1true]”
+            Ex.ErrorMessaage.位置 = i
+            .判断开始 (JSON内存节点_取类型 (pNode) == #QSJson_值类型_对象)
+                Ex.ErrorMessaage.信息 = “缺少正确的成员分割符号（,），或对象结束符号（}）”
+            .判断 (JSON内存节点_取类型 (pNode) == #QSJson_值类型_数组)
+                Ex.ErrorMessaage.信息 = “缺少正确的成员分割符号（,），或数组结束符号（]）”
+            .默认
+                
+            .判断结束
+            跳出循环 ()
+        .如果真结束
+        
+        ArrayList_RemoveLast (stack)
+        .判断开始 (JsonString[i] == #AsciiCode_DoubleQuotation || JsonString[i] == #AsciiCode_SingleQuotation)
+            .如果真 (Internal_ParseString (JsonString, i, len, string, Ex) == 假)
+                跳出循环 ()
+            .如果真结束
+            JSON内存节点_置文本_字节集 (pNode, string)
+        .默认
+            
+            .判断开始 (len - i >= 4)
+                .判断开始 (memcmp_refByte_text (JsonString[i], “false”, 5) == 0)  ' f(alse)
+                    i = i + 4
+                    JSON内存节点_置逻辑 (pNode, 假)
+                .判断 (memcmp_refByte_text (JsonString[i], “true”, 4) == 0)  ' true
+                    i = i + 3
+                    JSON内存节点_置逻辑 (pNode, 真)
+                .判断 (memcmp_refByte_text (JsonString[i], “null”, 4) == 0)  ' null
+                    i = i + 3
+                .默认
+                    ' 任何其他错误数据都可能传递给ParseNumberNode
+                    .如果真 (Internal_ParseNumberNode (JsonString, i, len, pNode, Ex) == 假)
+                        跳出循环 ()
+                    .如果真结束
+                    
+                .判断结束
+                
+            .判断 (len - i >= 3)
+                .判断开始 (memcmp_refByte_text (JsonString[i], “true”, 4) == 0)  ' true
+                    i = i + 3
+                    JSON内存节点_置逻辑 (pNode, 真)
+                .判断 (memcmp_refByte_text (JsonString[i], “null”, 4) == 0)  ' null
+                    i = i + 3
+                .默认
+                    ' 任何其他错误数据都可能传递给ParseNumberNode
+                    .如果真 (Internal_ParseNumberNode (JsonString, i, len, pNode, Ex) == 假)
+                        跳出循环 ()
+                    .如果真结束
+                    
+                .判断结束
+                
+            .默认
+                ' 任何其他错误数据都可能传递给ParseNumberNode
+                .如果真 (Internal_ParseNumberNode (JsonString, i, len, pNode, Ex) == 假)
+                    跳出循环 ()
+                .如果真结束
+                
+            .判断结束
+            
+        .判断结束
+        
+    .判断结束
+    .如果真 (ArrayList_GetLength (stack) == 0)
+        ArrayList_Delete (stack)
+        返回 (pRoot)
+    .如果真结束
+    .如果真 (Internal_NextToken (JsonString, i, len) == 假)
+        Ex.ErrorMessaage.位置 = i
+        Ex.ErrorMessaage.信息 = “意外的数据结束”
+        跳出循环 ()
+    .如果真结束
+    
+.判断循环尾 ()
+ArrayList_Delete (stack)
+
+JSON内存节点_引用减 (pRoot)
+返回 (0)
+.子程序 Internal_ParseNumberNode, 逻辑型
+.参数 JsonString, 字节集, , 空白请先跳过
+.参数 i, 整数型, 参考, 当前位置
+.参数 len, 整数型
+.参数 pNode, 整数型
+.参数 Ex, Internal_QSJsonParseExtensionParameter, 参考
+.局部变量 Neg, 逻辑型
+.局部变量
+.局部变量 StartPosition, 整数型
+.局部变量
+.局部变量 UseDouble, 逻辑型
+
+StartPosition = i
+
+.判断开始 (JsonString[i] == #AsciiCode_Minus)
+    Neg = 真
+    i = i + 1
+    .如果真 (i > len)
+        Ex.ErrorMessaage.位置 = i
+        Ex.ErrorMessaage.信息 = “意外的数据结束”
+        返回 (假)
+    .如果真结束
+    
+.判断 (JsonString[i] == #AsciiCode_Plus)  ' 显式正号支持(JSON5)
+    ' 保持默认（正）
+    i = i + 1
+    .如果真 (i > len)
+        Ex.ErrorMessaage.位置 = i
+        Ex.ErrorMessaage.信息 = “意外的数据结束”
+        返回 (假)
+    .如果真结束
+    
+.默认
+    
+.判断结束
+
+
+.判断开始 (len - i >= 7)
+    .判断开始 (memcmp_refByte_text (JsonString[i], “NaN”, 3) == 0)  ' 浮点特殊值NaN支持(JSON5)
+        i = i + 2
+        JSON内存节点_置双精度小数 (pNode, Double_NaN ())
+        返回 (真)
+    .判断 (memcmp_refByte_text (JsonString[i], “Infinity”, 8) == 0)  ' 浮点特殊值Infinity支持(JSON5)
+        i = i + 7
+        .如果 (Neg)
+            JSON内存节点_置双精度小数 (pNode, Double_NegInfinity ())
+        .否则
+            JSON内存节点_置双精度小数 (pNode, Double_Infinity ())
+        .如果结束
+        返回 (真)
+        
+    .默认
+        
+    .判断结束
+    
+    
+.判断 (len - i >= 2)
+    .如果真 (memcmp_refByte_text (JsonString[i], “NaN”, 3) == 0)  ' 浮点特殊值NaN支持(JSON5)
+        i = i + 2
+        JSON内存节点_置双精度小数 (pNode, Double_NaN ())
+        返回 (真)
+    .如果真结束
+    
+.默认
+    
+.判断结束
+
+.如果 (JsonString[i] == #AsciiCode_0)
+    i = i + 1  ' Skip '0'
+    .如果真 (i <= len && JsonString[i] == #AsciiCode_X_LowerCase || JsonString[i] == #AsciiCode_X_UpperCase)  ' 十六进制数字支持(JSON5)
+        i = i + 1  ' Skip 'x'
+        返回 (Internal_ParseHexNumber (JsonString, i, len, Neg, pNode, Ex))
+    .如果真结束
+    
+.否则
+    .如果 (JsonString[i] < #AsciiCode_0 || JsonString[i] > #AsciiCode_9)
+        .如果真 (JsonString[i] != #AsciiCode_Dot)  ' 小数点开头数字支持(JSON5)
+            Ex.ErrorMessaage.位置 = i
+            Ex.ErrorMessaage.信息 = “意外的未知字符”
+            返回 (假)
+        .如果真结束
+        
+    .否则
+        .循环判断首 ()
+            i = i + 1
+        .循环判断尾 (i <= len && JsonString[i] >= #AsciiCode_0 && JsonString[i] <= #AsciiCode_9)
+    .如果结束
+    
+.如果结束
+
+.如果真 (i <= len && JsonString[i] == #AsciiCode_Dot)
+    UseDouble = 真
+    i = i + 1
+    .判断循环首 (i <= len && JsonString[i] >= #AsciiCode_0 && JsonString[i] <= #AsciiCode_9)
+        i = i + 1
+    .判断循环尾 ()
+.如果真结束
+
+.如果真 (i <= len && (JsonString[i] == #AsciiCode_E_LowerCase || JsonString[i] == #AsciiCode_E_UpperCase))
+    UseDouble = 真
+    i = i + 1
+    .如果真 (i > len)
+        Ex.ErrorMessaage.位置 = i
+        Ex.ErrorMessaage.信息 = “不正确的科学记数法”
+        返回 (假)
+    .如果真结束
+    .判断开始 (JsonString[i] == #AsciiCode_Minus)
+        i = i + 1
+    .判断 (JsonString[i] == #AsciiCode_Plus)
+        i = i + 1
+    .默认
+        
+    .判断结束
+    
+    .如果真 (i > len || JsonString[i] < #AsciiCode_0 || JsonString[i] > #AsciiCode_9)
+        Ex.ErrorMessaage.位置 = i
+        Ex.ErrorMessaage.信息 = “不正确的科学记数法”
+        返回 (假)
+    .如果真结束
+    .循环判断首 ()
+        i = i + 1
+    .循环判断尾 (i <= len && JsonString[i] >= #AsciiCode_0 && JsonString[i] <= #AsciiCode_9)
+.如果真结束
+
+i = i - 1
+
+.如果 (UseDouble)
+    JSON内存节点_置双精度小数 (pNode, 到数值 (到文本 (取字节集中间 (JsonString, StartPosition, i - StartPosition + 1))))
+.否则
+    JSON内存节点_置长整数 (pNode, FastParseLong (JsonString[StartPosition], JsonString[i]))
+.如果结束
+返回 (真)
+.子程序 FastParseLong, 长整数型, , 请保证数据规范性
+.参数 start, 字节型, 参考
+.参数 end, 字节型, 参考
+
+置入代码 ({81, 139, 125, 8, 15, 190, 7, 141, 119, 1, 131, 232, 48, 137, 117, 8, 153, 139, 218, 139, 200, 139, 69, 12, 139, 208, 43, 214, 199, 69, 12, 0, 0, 0, 0, 66, 59, 240, 15, 71, 85, 12, 137, 85, 252, 131, 250, 1, 114, 58, 139, 198, 43, 199, 137, 69, 12, 15, 190, 6, 139, 251, 139, 241, 131, 232, 48, 15, 164, 247, 2, 153, 193, 230, 2, 3, 206, 139, 117, 8, 19, 223, 15, 164, 203, 1, 3, 201, 3, 200, 139, 69, 12, 19, 218, 64, 70, 137, 69, 12, 137, 117, 8, 59, 69, 252, 118, 205, 139, 211, 139, 193, 201, 194, 8, 0})
+返回 (0)
+.子程序 Internal_NextToken, 逻辑型
+.参数 JsonString, 字节集
+.参数 i, 整数型, 参考, 当前位置
+.参数 len, 整数型
+
+.如果真 (i == len)
+    返回 (假)
+.如果真结束
+i = i + 1
+返回 (Internal_SkipWhitespaceAndComments (JsonString, i, len))
+.子程序 Internal_ParseUnquotedObjectKey, 逻辑型
+.参数 JsonString, 字节集
+.参数 pos, 整数型, 参考, 当前位置
+.参数 len, 整数型
+.参数 key, 字节集, 参考
+.参数 Ex, Internal_QSJsonParseExtensionParameter, 参考
+.局部变量 i, 整数型
+.局部变量 未添加起始位置, 整数型
+.局部变量 未添加数量, 整数型
+
+i = pos
+key = 取空白字节集 (0)
+
+未添加起始位置 = i
+.判断开始 (JsonString[i] >= #AsciiCode_A_UpperCase && JsonString[i] <= #AsciiCode_Z_UpperCase || JsonString[i] >= #AsciiCode_A_LowerCase && JsonString[i] <= #AsciiCode_Z_LowerCase || JsonString[i] >= 128 || JsonString[i] == 取代码 (“_”, ) || JsonString[i] == 取代码 (“$”, ))
+    未添加数量 = 未添加数量 + 1
+    i = i + 1
+.判断 (JsonString[i] == #AsciiCode_ReverseSolidus)
+    .如果真 (Internal_ParseUnicodeEscapeSequences (JsonString, i, len, key, Ex) == 假)
+        返回 (假)
+    .如果真结束
+    i = i + 1
+    未添加起始位置 = i
+.默认
+    Ex.ErrorMessaage.位置 = i
+    .如果 (JsonString[i] < 16)
+        Ex.ErrorMessaage.信息 = “无效的标识符开头'” + 到文本 (字符 (JsonString[i])) + “'('\x0” + 取十六进制文本 (JsonString[i]) + “')”
+    .否则
+        Ex.ErrorMessaage.信息 = “无效的标识符开头'” + 到文本 (字符 (JsonString[i])) + “'('\x” + 取十六进制文本 (JsonString[i]) + “')”
+    .如果结束
+    返回 (假)
+.判断结束
+.判断循环首 (i <= len)
+    .判断开始 (JsonString[i] >= #AsciiCode_A_UpperCase && JsonString[i] <= #AsciiCode_Z_UpperCase || JsonString[i] >= #AsciiCode_A_LowerCase && JsonString[i] <= #AsciiCode_Z_LowerCase || JsonString[i] >= 128 || JsonString[i] == 取代码 (“_”, ) || JsonString[i] == 取代码 (“$”, ) || JsonString[i] >= #AsciiCode_0 && JsonString[i] <= #AsciiCode_9)
+        未添加数量 = 未添加数量 + 1
+        i = i + 1
+    .判断 (JsonString[i] == #AsciiCode_ReverseSolidus)
+        .如果真 (Internal_ParseUnicodeEscapeSequences (JsonString, i, len, key, Ex) == 假)
+            返回 (假)
+        .如果真结束
+        i = i + 1
+        key = key + 取字节集中间 (JsonString, 未添加起始位置, 未添加数量)
+        未添加数量 = 0
+        未添加起始位置 = i
+    .默认
+        跳出循环 ()
+    .判断结束
+    
+.判断循环尾 ()
+
+i = i - 1
+pos = i
+
+key = key + 取字节集中间 (JsonString, 未添加起始位置, 未添加数量)
+返回 (真)
+.子程序 Internal_SkipWhitespaceAndComments, 逻辑型
+.参数 JsonString, 字节集
+.参数 i, 整数型, 参考, 当前位置
+.参数 len, 整数型
+.局部变量 code, 字节型
+
+.判断循环首 (i <= len)
+    code = JsonString[i]
+    .如果真 (取反 (code == #AsciiCode_Space || code == #AsciiCode_HorizontalTab || code == #AsciiCode_CarriageReturn || code == #AsciiCode_LineFeed))
+        .判断开始 (code == #AsciiCode_Solidus)  ' 注释支持(JSON5)
+            .如果真 (i < len)
+                code = JsonString[i + 1]
+                .判断开始 (code == #AsciiCode_Solidus)  ' 行内注释(inline comments)
+                    i = i + 1
+                    i = i + 1
+                    .判断循环首 (i <= len)
+                        .如果真 (JsonString[i] == #AsciiCode_CarriageReturn || JsonString[i] == #AsciiCode_LineFeed)
+                            跳出循环 ()  ' 位置：换行标识
+                        .如果真结束
+                        i = i + 1
+                    .判断循环尾 ()
+                .判断 (code == 取代码 (“*”, ))  ' 块注释(block comments)
+                    i = i + 1
+                    i = i + 1
+                    .判断循环首 (i <= len)
+                        .如果真 (JsonString[i] == 取代码 (“*”, ))
+                            .如果真 (i < len && JsonString[i + 1] == 取代码 (“/”, ))
+                                i = i + 1  ' 位置：(/**)/
+                                跳出循环 ()
+                            .如果真结束
+                            
+                        .如果真结束
+                        i = i + 1
+                    .判断循环尾 ()
+                .默认
+                    返回 (真)
+                .判断结束
+                
+            .如果真结束
+            
+        .默认
+            返回 (真)
+        .判断结束
+        
+    .如果真结束
+    i = i + 1
+.判断循环尾 ()
+返回 (假)
+.子程序 Internal_ParseUnicodeEscapeSequences, 逻辑型
+.参数 JsonString, 字节集
+.参数 pos, 整数型, 参考, 当前位置
+.参数 len, 整数型
+.参数 r, 字节集, 参考, [!重要] 不自动清空
+.参数 Ex, Internal_QSJsonParseExtensionParameter, 参考
+.局部变量 UTF16结果, 字节集
+.局部变量 Unicode转义数量, 整数型
+.局部变量 Unicode转义起始位置, 整数型
+.局部变量 i, 整数型
+.局部变量 byte, 字节型
+.局部变量 UTF16字节集位置, 整数型
+
+i = pos
+.如果真 (取反 (i < len && JsonString[i] == #AsciiCode_ReverseSolidus && JsonString[i + 1] == #AsciiCode_U_LowerCase))
+    Ex.ErrorMessaage.位置 = i
+    Ex.ErrorMessaage.信息 = “无效Unicode转义”
+    返回 (假)
+.如果真结束
+Unicode转义起始位置 = i
+.循环判断首 ()
+    .如果 (len - i > 4)
+        Unicode转义数量 = Unicode转义数量 + 1
+        i = i + 6
+    .否则
+        Ex.ErrorMessaage.位置 = i
+        Ex.ErrorMessaage.信息 = “意外的数据结束”
+        返回 (假)
+    .如果结束
+    
+.循环判断尾 (i < len && JsonString[i] == #AsciiCode_ReverseSolidus && JsonString[i + 1] == #AsciiCode_U_LowerCase)
+i = i - 1
+pos = i
+
+i = Unicode转义起始位置
+UTF16结果 = 取空白字节集 (Unicode转义数量 * 2)
+UTF16字节集位置 = 1
+.判断循环首 (Unicode转义数量 > 0)
+    i = i + 1  ' Skip /
+    i = i + 1  ' Skip u
+    
+    .判断开始 (JsonString[i] >= #AsciiCode_0 && JsonString[i] <= #AsciiCode_9)
+        byte = JsonString[i] - #AsciiCode_0
+    .判断 (JsonString[i] >= #AsciiCode_A_UpperCase && JsonString[i] <= #AsciiCode_F_UpperCase)
+        byte = JsonString[i] - #AsciiCode_A_UpperCase + 10
+    .判断 (JsonString[i] >= #AsciiCode_A_LowerCase && JsonString[i] <= #AsciiCode_F_LowerCase)
+        byte = JsonString[i] - #AsciiCode_A_LowerCase + 10
+    .默认
+        Ex.ErrorMessaage.位置 = i
+        Ex.ErrorMessaage.信息 = “无效Unicode转义”
+        返回 (假)
+    .判断结束
+    i = i + 1
+    .判断开始 (JsonString[i] >= #AsciiCode_0 && JsonString[i] <= #AsciiCode_9)
+        byte = byte * 16 + JsonString[i] - #AsciiCode_0
+    .判断 (JsonString[i] >= #AsciiCode_A_UpperCase && JsonString[i] <= #AsciiCode_F_UpperCase)
+        byte = byte * 16 + JsonString[i] - #AsciiCode_A_UpperCase + 10
+    .判断 (JsonString[i] >= #AsciiCode_A_LowerCase && JsonString[i] <= #AsciiCode_F_LowerCase)
+        byte = byte * 16 + JsonString[i] - #AsciiCode_A_LowerCase + 10
+    .默认
+        Ex.ErrorMessaage.位置 = i
+        Ex.ErrorMessaage.信息 = “无效Unicode转义”
+        返回 (假)
+    .判断结束
+    i = i + 1
+    UTF16结果[UTF16字节集位置 + 1] = byte
+    
+    .判断开始 (JsonString[i] >= #AsciiCode_0 && JsonString[i] <= #AsciiCode_9)
+        byte = JsonString[i] - #AsciiCode_0
+    .判断 (JsonString[i] >= #AsciiCode_A_UpperCase && JsonString[i] <= #AsciiCode_F_UpperCase)
+        byte = JsonString[i] - #AsciiCode_A_UpperCase + 10
+    .判断 (JsonString[i] >= #AsciiCode_A_LowerCase && JsonString[i] <= #AsciiCode_F_LowerCase)
+        byte = JsonString[i] - #AsciiCode_A_LowerCase + 10
+    .默认
+        Ex.ErrorMessaage.位置 = i
+        Ex.ErrorMessaage.信息 = “无效Unicode转义”
+        返回 (假)
+    .判断结束
+    i = i + 1
+    .判断开始 (JsonString[i] >= #AsciiCode_0 && JsonString[i] <= #AsciiCode_9)
+        byte = byte * 16 + JsonString[i] - #AsciiCode_0
+    .判断 (JsonString[i] >= #AsciiCode_A_UpperCase && JsonString[i] <= #AsciiCode_F_UpperCase)
+        byte = byte * 16 + JsonString[i] - #AsciiCode_A_UpperCase + 10
+    .判断 (JsonString[i] >= #AsciiCode_A_LowerCase && JsonString[i] <= #AsciiCode_F_LowerCase)
+        byte = byte * 16 + JsonString[i] - #AsciiCode_A_LowerCase + 10
+    .默认
+        Ex.ErrorMessaage.位置 = i
+        Ex.ErrorMessaage.信息 = “无效Unicode转义”
+        返回 (假)
+    .判断结束
+    i = i + 1
+    UTF16结果[UTF16字节集位置] = byte
+    UTF16字节集位置 = UTF16字节集位置 + 2
+    
+    Unicode转义数量 = Unicode转义数量 - 1
+.判断循环尾 ()
+.判断开始 (Ex.Encode == #QSJson_编码_Ansi)
+    r = r + Internal_Utf16ToAnsi (UTF16结果)
+.判断 (Ex.Encode == #QSJson_编码_UTF8)
+    r = r + Internal_Utf16ToUtf8 (UTF16结果)
+.默认
+    Ex.ErrorMessaage.位置 = i
+    Ex.ErrorMessaage.信息 = “【非解析错误】无效的编码设定”
+    返回 (假)
+.判断结束
+
+返回 (真)
+.子程序 Internal_Utf16ToAnsi, 字节集
+.参数 Unicode, 字节集
+.局部变量 字符长度, 整数型
+.局部变量 转换后字节数, 整数型
+.局部变量 Ansi数据, 字节集
+
+字符长度 = 取字节集长度 (Unicode) / 2  ' UTF16中每个字符占两个字节
+转换后字节数 = WideCharToMultiByte (0, 0, Unicode, 字符长度, 取空白字节集 (0), 0, 0, 0)
+Ansi数据 = 取空白字节集 (转换后字节数)
+WideCharToMultiByte (0, 0, Unicode, 字符长度, Ansi数据, 转换后字节数, 0, 0)
+返回 (Ansi数据)
+.子程序 Internal_Utf16ToUtf8, 字节集
+.参数 Unicode, 字节集
+.局部变量 字符长度, 整数型
+.局部变量 转换后字节数, 整数型
+.局部变量 Ansi数据, 字节集
+
+字符长度 = 取字节集长度 (Unicode) / 2  ' UTF16中每个字符占两个字节
+转换后字节数 = WideCharToMultiByte (65001, 0, Unicode, 字符长度, 取空白字节集 (0), 0, 0, 0)
+Ansi数据 = 取空白字节集 (转换后字节数)
+WideCharToMultiByte (65001, 0, Unicode, 字符长度, Ansi数据, 转换后字节数, 0, 0)
+返回 (Ansi数据)
+.子程序 Internal_ParseString, 逻辑型
+.参数 JsonString, 字节集
+.参数 pos, 整数型, 参考, 当前位置
+.参数 len, 整数型
+.参数 r, 字节集, 参考
+.参数 Ex, Internal_QSJsonParseExtensionParameter
+.局部变量 i, 整数型
+.局部变量 有未处理转义斜杠, 逻辑型
+.局部变量 结束符, 字节型
+.局部变量
+.局部变量 未添加起始位置, 整数型
+.局部变量 未添加数量, 整数型
+
+r = 取空白字节集 (0)
+
+i = pos
+结束符 = JsonString[i]
+
+i = i + 1
+未添加起始位置 = i
+
+.判断循环首 (i <= len)
+    .如果 (JsonString[i] == #AsciiCode_ReverseSolidus)
+        .如果真 (i == len)
+            Ex.ErrorMessaage.位置 = i
+            Ex.ErrorMessaage.信息 = “意外的数据结束”
+            返回 (假)
+        .如果真结束
+        i = i + 1
+        .如果真 (未添加数量 != 0)
+            r = r + 取字节集中间 (JsonString, 未添加起始位置, 未添加数量)
+        .如果真结束
+        .判断开始 (JsonString[i] == #AsciiCode_N_LowerCase)
+            r = r + {#AsciiCode_LineFeed}
+        .判断 (JsonString[i] == #AsciiCode_R_LowerCase)
+            r = r + {#AsciiCode_CarriageReturn}
+        .判断 (JsonString[i] == #AsciiCode_U_LowerCase)
+            i = i - 1
+            Internal_ParseUnicodeEscapeSequences (JsonString, i, len, r, Ex)
+        .判断 (JsonString[i] == #AsciiCode_T_LowerCase)
+            r = r + {#AsciiCode_HorizontalTab}
+        .判断 (JsonString[i] == #AsciiCode_B_LowerCase)
+            r = r + {#AsciiCode_Backspace}
+        .判断 (JsonString[i] == #AsciiCode_F_LowerCase)
+            r = r + {#AsciiCode_FormFeed}
+        .判断 (JsonString[i] == #AsciiCode_CarriageReturn)  ' 字符串多行书写支持(JSON5)
+            .如果真 (i < len && JsonString[i + 1] == #AsciiCode_LineFeed)
+                i = i + 1
+            .如果真结束
+            
+        .判断 (JsonString[i] == #AsciiCode_LineFeed)  ' 字符串多行书写支持(JSON5)
+            ' Skip
+        .默认
+            r = r + 到字节集 (JsonString[i])
+        .判断结束
+        未添加数量 = 0
+        i = i + 1
+        未添加起始位置 = i
+    .否则
+        
+        .如果 (BitTest_Byte (JsonString[i], Ex.Mask_FirstByte))
+            .如果真 (i == len)
+                Ex.ErrorMessaage.位置 = i
+                Ex.ErrorMessaage.信息 = “无效双字节字符”
+                返回 (假)
+            .如果真结束
+            i = i + 1
+            未添加数量 = 未添加数量 + 1
+        .否则
+            .如果真 (JsonString[i] == 结束符)
+                跳出循环 ()
+            .如果真结束
+            .如果真 (JsonString[i] == #AsciiCode_CarriageReturn || JsonString[i] == #AsciiCode_LineFeed)
+                i = i - 1
+                Ex.ErrorMessaage.位置 = i
+                Ex.ErrorMessaage.信息 = “字符串未正确闭合”
+                返回 (假)
+            .如果真结束
+            
+        .如果结束
+        
+        未添加数量 = 未添加数量 + 1
+        i = i + 1
+    .如果结束
+    
+.判断循环尾 ()
+.如果真 (未添加数量 != 0)
+    r = r + 取字节集中间 (JsonString, 未添加起始位置, 未添加数量)
+.如果真结束
+
+pos = i
+返回 (真)
+.子程序 Internal_ParseHexNumber, 逻辑型
+.参数 JsonString, 字节集
+.参数 i, 整数型, 参考, 当前位置 应已跳过"0x"
+.参数 len, 整数型
+.参数 Neg, 逻辑型
+.参数 pNode, 整数型
+.参数 Ex, Internal_QSJsonParseExtensionParameter, 参考
+.局部变量 c, 整数型
+.局部变量 Result, 长整数型
+
+.判断循环首 (i <= len)
+    .判断开始 (JsonString[i] >= #AsciiCode_0 && JsonString[i] <= #AsciiCode_9)
+        Result = Result * 16 + JsonString[i] - #AsciiCode_0
+    .判断 (JsonString[i] >= #AsciiCode_A_UpperCase && JsonString[i] <= #AsciiCode_F_UpperCase)
+        Result = Result * 16 + JsonString[i] - #AsciiCode_A_UpperCase + 10
+    .判断 (JsonString[i] >= #AsciiCode_A_LowerCase && JsonString[i] <= #AsciiCode_F_LowerCase)
+        Result = Result * 16 + JsonString[i] - #AsciiCode_A_LowerCase + 10
+    .默认
+        跳出循环 ()
+    .判断结束
+    c = c + 1
+    
+    i = i + 1
+.判断循环尾 ()
+.如果真 (c == 0)
+    Ex.ErrorMessaage.位置 = i
+    Ex.ErrorMessaage.信息 = “无效的十六进制数字”
+    返回 (假)
+.如果真结束
+i = i - 1
+.如果真 (Neg)
+    Result = Result * -1
+.如果真结束
+JSON内存节点_置长整数 (pNode, Result)
+返回 (真)
+.子程序 BitTest_Byte, 逻辑型
+.参数 a, 字节型
+.参数 mask, 字节型
+
+' AsmToECode代码:@arg a:byte
+' AsmToECode代码:@arg _mask:byte
+' AsmToECode代码:mov cl,a
+' AsmToECode代码:xor eax,eax
+' AsmToECode代码:test cl,_mask
+' AsmToECode代码:setnz al
+' AsmToECode代码:@ret
+置入代码 ({138, 77, 8, 51, 192, 132, 77, 12, 15, 149, 192, 201, 194, 8, 0})
+
+
+' 返回 (位与 (a, mask) ≠ 0)
+返回 (假)

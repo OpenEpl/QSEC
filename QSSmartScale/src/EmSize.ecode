@@ -1,0 +1,54 @@
+﻿.程序集 EmSize
+.程序集变量 EmSize, 整数型
+.程序集变量 pSystemParametersInfoForDpi, 整数型
+.程序集变量 pSystemParametersInfoW, 整数型
+
+.子程序 GetEmSize, 整数型, 公开, in points
+
+.如果真 (EmSize == 0)
+    EmSize = _CalcEmSize ()
+.如果真结束
+返回 (EmSize)
+.子程序 _CalcEmSize, 整数型
+.局部变量 pNonClientMetricsW, 整数型
+.局部变量 result, 整数型
+.局部变量 processHeap, 整数型
+
+.如果真 (pSystemParametersInfoForDpi == 0)
+    pSystemParametersInfoForDpi = GetProcAddress (GetModuleHandle (“user32.dll”), “SystemParametersInfoForDpi”)
+.如果真结束
+.如果真 (pSystemParametersInfoForDpi != 0)  ' win10 or newer
+    processHeap = GetProcessHeap ()
+    pNonClientMetricsW = HeapAlloc (processHeap, 0, #SizeOfNonClientMetricsW)
+    .如果真 (pNonClientMetricsW != 0)
+        写到内存 (#SizeOfNonClientMetricsW, pNonClientMetricsW, )
+        .如果真 (Call_5 (pSystemParametersInfoForDpi, #SPI_GETNONCLIENTMETRICS, #SizeOfNonClientMetricsW, pNonClientMetricsW, 0, 72) != 0)
+            result = 取绝对值 (指针到整数 (pNonClientMetricsW + 408))  ' pNonClientMetricsW->lfMessageFont.lfHeight
+        .如果真结束
+        HeapFree (processHeap, 0, pNonClientMetricsW)
+    .如果真结束
+    
+.如果真结束
+.如果真 (result == 0)  ' fallback to older way
+    .如果真 (pSystemParametersInfoW == 0)
+        pSystemParametersInfoW = GetProcAddress (GetModuleHandle (“user32.dll”), “SystemParametersInfoW”)
+    .如果真结束
+    .如果真 (pSystemParametersInfoW != 0)
+        processHeap = GetProcessHeap ()
+        pNonClientMetricsW = HeapAlloc (processHeap, 0, #SizeOfNonClientMetricsW)
+        .如果真 (pNonClientMetricsW != 0)
+            写到内存 (#SizeOfNonClientMetricsW, pNonClientMetricsW, )
+            .如果真 (Call_4 (pSystemParametersInfoW, #SPI_GETNONCLIENTMETRICS, #SizeOfNonClientMetricsW, pNonClientMetricsW, 0) != 0)
+                result = 取绝对值 (指针到整数 (pNonClientMetricsW + 408))  ' pNonClientMetricsW->lfMessageFont.lfHeight
+                result = 四舍五入 (result * 72 / GetDpiForSystem (), )
+            .如果真结束
+            HeapFree (processHeap, 0, pNonClientMetricsW)
+        .如果真结束
+        
+    .如果真结束
+    .如果真 (result == 0)
+        result = 9  ' fallback to the common practice
+    .如果真结束
+    
+.如果真结束
+返回 (result)

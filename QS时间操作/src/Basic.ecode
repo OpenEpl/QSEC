@@ -1,0 +1,265 @@
+﻿.程序集 Basic
+
+.子程序 _启动子程序, 整数型, , 请在本子程序中放置易模块初始化代码
+.局部变量 Offest, 长整数型
+
+.计次循环首 (5, )
+    调试输出 (时间_取网络时间_FileTime (, , Offest), Offest)
+.计次循环尾 ()
+_临时子程序 ()  ' 在初始化代码执行完毕后调用测试代码
+返回 (0)  ' 可以根据您的需要返回任意数值
+.子程序 _临时子程序
+
+' 本名称子程序用作测试程序用，仅在开发及调试环境中有效，编译发布程序前将被系统自动清空，请将所有用作测试的临时代码放在本子程序中。 ***注意不要修改本子程序的名称、参数及返回值类型。
+.子程序 时间_UTC到本地, 日期时间型, 公开
+.参数 DataTime, 日期时间型
+.局部变量 UtcTime, SYSTEMTIME
+.局部变量 LocalTime, SYSTEMTIME
+.局部变量 Result, 日期时间型
+
+VariantTimeToSystemTime (DataTime, UtcTime)
+SystemTimeToTzSpecificLocalTime (0, UtcTime, LocalTime)
+SystemTimeToVariantTime (LocalTime, Result)
+返回 (Result)
+.子程序 时间_本地到UTC, 日期时间型, 公开
+.参数 DataTime, 日期时间型
+.局部变量 UtcTime, SYSTEMTIME
+.局部变量 LocalTime, SYSTEMTIME
+.局部变量 Result, 日期时间型
+
+VariantTimeToSystemTime (DataTime, LocalTime)
+TzSpecificLocalTimeToSystemTime (0, LocalTime, UtcTime)
+SystemTimeToVariantTime (UtcTime, Result)
+返回 (Result)
+.子程序 时间_取现行FileTime, 长整数型, 公开
+.局部变量 result, 长整数型
+
+GetSystemTimeAsFileTime_UsingUInt64 (result)
+返回 (result)
+.子程序 时间_取现行UTC时间, 日期时间型, 公开
+.局部变量 UtcTime, SYSTEMTIME
+.局部变量 Result, 日期时间型
+
+GetSystemTime (UtcTime)
+SystemTimeToVariantTime (UtcTime, Result)
+返回 (Result)
+.子程序 时间_取现行时间戳_13位, 长整数型, 公开, 请不要使用 整数型(int32) 保存，请使用 长整数型(int64)
+.参数 UTC, 逻辑型, 可空, 默认为：真
+.局部变量 SystemTime, SYSTEMTIME
+.局部变量 FileTime, 长整数型
+
+.如果 (是否为空 (UTC) || UTC)
+    GetSystemTimeAsFileTime_UsingUInt64 (FileTime)
+.否则
+    GetLocalTime (SystemTime)
+    SystemTimeToFileTime_UsingUInt64 (SystemTime, FileTime)
+.如果结束
+返回 (时间_FileTime到时间戳_13位 (FileTime))
+.子程序 时间_取现行时间戳_10位, 长整数型, 公开, 为避免2038问题，请不要使用 整数型(int32) 保存，请使用 长整数型(int64)
+.参数 UTC, 逻辑型, 可空, 默认为：真
+.局部变量 SystemTime, SYSTEMTIME
+.局部变量 FileTime, 长整数型
+
+.如果 (是否为空 (UTC) || UTC)
+    GetSystemTimeAsFileTime_UsingUInt64 (FileTime)
+.否则
+    GetLocalTime (SystemTime)
+    SystemTimeToFileTime_UsingUInt64 (SystemTime, FileTime)
+.如果结束
+返回 (时间_FileTime到时间戳_10位 (FileTime))
+.子程序 时间_到时间戳_13位, 长整数型, 公开
+.参数 Data, 日期时间型
+.参数 LocalTimeToUtcTimestamp, 逻辑型, 可空, 默认为：真
+.局部变量 SystemTime, SYSTEMTIME
+.局部变量 TempTime, SYSTEMTIME
+.局部变量 FileTime, 长整数型
+
+VariantTimeToSystemTime (Data, SystemTime)
+.如果真 (是否为空 (LocalTimeToUtcTimestamp) || LocalTimeToUtcTimestamp)
+    TempTime = SystemTime
+    TzSpecificLocalTimeToSystemTime (0, TempTime, SystemTime)
+.如果真结束
+SystemTimeToFileTime_UsingUInt64 (SystemTime, FileTime)
+返回 (时间_FileTime到时间戳_13位 (FileTime))
+.子程序 时间_到时间戳_10位, 长整数型, 公开
+.参数 DataTime, 日期时间型
+.参数 LocalTimeToUtcTimestamp, 逻辑型, 可空, 默认为：真
+.局部变量 SystemTime, SYSTEMTIME
+.局部变量 TempTime, SYSTEMTIME
+.局部变量 FileTime, 长整数型
+
+VariantTimeToSystemTime (DataTime, SystemTime)
+.如果真 (是否为空 (LocalTimeToUtcTimestamp) || LocalTimeToUtcTimestamp)
+    TempTime = SystemTime
+    TzSpecificLocalTimeToSystemTime (0, TempTime, SystemTime)
+.如果真结束
+SystemTimeToFileTime_UsingUInt64 (SystemTime, FileTime)
+返回 (时间_FileTime到时间戳_10位 (FileTime))
+.子程序 时间_时间戳到时间_10位, 日期时间型, 公开
+.参数 Timestamp_10, 长整数型
+.参数 UtcTimestampToLocalTime, 逻辑型, 可空, 默认为：真
+.局部变量 FileTime, 长整数型
+.局部变量 SystemTime, SYSTEMTIME
+.局部变量 TempTime, SYSTEMTIME
+.局部变量 Result, 日期时间型
+
+FileTime = 时间_时间戳到FileTime_10位 (Timestamp_10)
+FileTimeToSystemTime_UsingUInt64 (FileTime, SystemTime)
+.如果真 (是否为空 (UtcTimestampToLocalTime) || UtcTimestampToLocalTime)
+    TempTime = SystemTime
+    SystemTimeToTzSpecificLocalTime (0, TempTime, SystemTime)
+.如果真结束
+SystemTimeToVariantTime (SystemTime, Result)
+返回 (Result)
+.子程序 时间_时间戳到时间_13位, 日期时间型, 公开
+.参数 Timestamp_13, 长整数型
+.参数 UtcTimestampToLocalTime, 逻辑型, 可空, 默认为：真
+.局部变量 FileTime, 长整数型
+.局部变量 SystemTime, SYSTEMTIME
+.局部变量 TempTime, SYSTEMTIME
+.局部变量 Result, 日期时间型
+
+FileTime = 时间_时间戳到FileTime_13位 (Timestamp_13)
+FileTimeToSystemTime_UsingUInt64 (FileTime, SystemTime)
+.如果真 (是否为空 (UtcTimestampToLocalTime) || UtcTimestampToLocalTime)
+    TempTime = SystemTime
+    SystemTimeToTzSpecificLocalTime (0, TempTime, SystemTime)
+.如果真结束
+SystemTimeToVariantTime (SystemTime, Result)
+返回 (Result)
+.子程序 时间_FileTime到时间戳_13位, 长整数型, 公开
+.参数 FileTime, 长整数型
+
+' [SInt]Timestamp_13 = ([UInt]FileTime - 116444736000000000) / 10000
+
+' AsmToECode代码:@arg FileTime
+' AsmToECode代码:xor edx,edx
+' AsmToECode代码:mov ecx, dword ptr [FileTime]
+' AsmToECode代码:mov ebx,10000
+' AsmToECode代码:mov eax, dword ptr [FileTime+4]
+' AsmToECode代码:xor edi,edi
+' AsmToECode代码:sub ecx, 0D53E8000h
+' AsmToECode代码:sbb eax, 19DB1DEh
+' AsmToECode代码:
+' AsmToECode代码:jnc notSign
+' AsmToECode代码:inc edi
+' AsmToECode代码:neg eax
+' AsmToECode代码:neg ecx
+' AsmToECode代码:sbb eax, 0
+' AsmToECode代码:notSign:
+' AsmToECode代码:
+' AsmToECode代码:div ebx
+' AsmToECode代码:xchg eax,ecx
+' AsmToECode代码:div ebx
+' AsmToECode代码:mov edx,ecx
+' AsmToECode代码:
+' AsmToECode代码:or edi,edi
+' AsmToECode代码:jz notSetSign
+' AsmToECode代码:neg     edx
+' AsmToECode代码:neg     eax
+' AsmToECode代码:sbb     edx, 0
+' AsmToECode代码:notSetSign:
+' AsmToECode代码:@ret
+置入代码 ({51, 210, 139, 77, 8, 187, 16, 39, 0, 0, 139, 69, 12, 51, 255, 129, 233, 0, 128, 62, 213, 29, 222, 177, 157, 1, 115, 8, 71, 247, 216, 247, 217, 131, 216, 0, 247, 243, 145, 247, 243, 139, 209, 11, 255, 116, 7, 247, 218, 247, 216, 131, 218, 0, 201, 194, 4, 0})
+返回 (0)
+.子程序 时间_FileTime到时间戳_10位, 长整数型, 公开
+.参数 FileTime, 长整数型
+
+' [SInt]Timestamp_10 = ([UInt]FileTime - 116444736000000000) / 10000000
+
+' AsmToECode代码:@arg FileTime
+' AsmToECode代码:xor edx,edx
+' AsmToECode代码:mov ecx, dword ptr [FileTime]
+' AsmToECode代码:mov ebx,10000000
+' AsmToECode代码:mov eax, dword ptr [FileTime+4]
+' AsmToECode代码:xor edi,edi
+' AsmToECode代码:sub ecx, 0D53E8000h
+' AsmToECode代码:sbb eax, 19DB1DEh
+' AsmToECode代码:
+' AsmToECode代码:jnc notSign
+' AsmToECode代码:inc edi
+' AsmToECode代码:neg eax
+' AsmToECode代码:neg ecx
+' AsmToECode代码:sbb eax, 0
+' AsmToECode代码:notSign:
+' AsmToECode代码:
+' AsmToECode代码:div ebx
+' AsmToECode代码:xchg eax,ecx
+' AsmToECode代码:div ebx
+' AsmToECode代码:mov edx,ecx
+' AsmToECode代码:
+' AsmToECode代码:or edi,edi
+' AsmToECode代码:jz notSetSign
+' AsmToECode代码:neg     edx
+' AsmToECode代码:neg     eax
+' AsmToECode代码:sbb     edx, 0
+' AsmToECode代码:notSetSign:
+' AsmToECode代码:@ret
+置入代码 ({51, 210, 139, 77, 8, 187, 128, 150, 152, 0, 139, 69, 12, 51, 255, 129, 233, 0, 128, 62, 213, 29, 222, 177, 157, 1, 115, 8, 71, 247, 216, 247, 217, 131, 216, 0, 247, 243, 145, 247, 243, 139, 209, 11, 255, 116, 7, 247, 218, 247, 216, 131, 218, 0, 201, 194, 4, 0})
+返回 (0)
+.子程序 时间_时间戳到FileTime_13位, 长整数型, 公开
+.参数 Timestamp_13, 长整数型
+
+' AsmToECode代码:@arg Timestamp_13:qword
+' AsmToECode代码:mov ecx, dword ptr Timestamp_13+4
+' AsmToECode代码:xor eax, eax
+' AsmToECode代码:or eax, ecx
+' AsmToECode代码:jnz big
+' AsmToECode代码:mov eax, dword ptr Timestamp_13
+' AsmToECode代码:mov ecx, 10000
+' AsmToECode代码:mul ecx
+' AsmToECode代码:mov ecx, eax
+' AsmToECode代码:mov esi, edx
+' AsmToECode代码:jmp short finished
+' AsmToECode代码:big:
+' AsmToECode代码:mov eax, ecx
+' AsmToECode代码:mov edi, 10000
+' AsmToECode代码:mul edi
+' AsmToECode代码:xor ecx, ecx
+' AsmToECode代码:mov esi, eax
+' AsmToECode代码:mov eax, dword ptr Timestamp_13
+' AsmToECode代码:mul edi
+' AsmToECode代码:add ecx, eax
+' AsmToECode代码:adc esi, edx
+' AsmToECode代码:finished:
+' AsmToECode代码:add ecx, 0D53E8000h
+' AsmToECode代码:mov eax, ecx
+' AsmToECode代码:adc esi, 19DB1DEh
+' AsmToECode代码:mov edx, esi
+' AsmToECode代码:pop ebp
+' AsmToECode代码:retn 8
+置入代码 ({139, 77, 12, 51, 192, 11, 193, 117, 16, 139, 69, 8, 185, 16, 39, 0, 0, 247, 225, 139, 200, 139, 242, 235, 22, 139, 193, 191, 16, 39, 0, 0, 247, 231, 51, 201, 139, 240, 139, 69, 8, 247, 231, 3, 200, 19, 242, 129, 193, 0, 128, 62, 213, 139, 193, 129, 214, 222, 177, 157, 1, 139, 214, 93, 194, 8, 0})
+返回 (0)
+.子程序 时间_时间戳到FileTime_10位, 长整数型, 公开
+.参数 Timestamp_10, 长整数型
+
+' AsmToECode代码:@arg Timestamp_10:qword
+' AsmToECode代码:mov ecx, dword ptr Timestamp_10+4
+' AsmToECode代码:xor eax, eax
+' AsmToECode代码:or eax, ecx
+' AsmToECode代码:jnz big
+' AsmToECode代码:mov eax, dword ptr Timestamp_10
+' AsmToECode代码:mov ecx, 10000000
+' AsmToECode代码:mul ecx
+' AsmToECode代码:mov ecx, eax
+' AsmToECode代码:mov esi, edx
+' AsmToECode代码:jmp short finished
+' AsmToECode代码:big:
+' AsmToECode代码:mov eax, ecx
+' AsmToECode代码:mov edi, 10000000
+' AsmToECode代码:mul edi
+' AsmToECode代码:xor ecx, ecx
+' AsmToECode代码:mov esi, eax
+' AsmToECode代码:mov eax, dword ptr Timestamp_10
+' AsmToECode代码:mul edi
+' AsmToECode代码:add ecx, eax
+' AsmToECode代码:adc esi, edx
+' AsmToECode代码:finished:
+' AsmToECode代码:add ecx, 0D53E8000h
+' AsmToECode代码:mov eax, ecx
+' AsmToECode代码:adc esi, 19DB1DEh
+' AsmToECode代码:mov edx, esi
+' AsmToECode代码:pop ebp
+' AsmToECode代码:retn 8
+置入代码 ({139, 77, 12, 51, 192, 11, 193, 117, 16, 139, 69, 8, 185, 128, 150, 152, 0, 247, 225, 139, 200, 139, 242, 235, 22, 139, 193, 191, 128, 150, 152, 0, 247, 231, 51, 201, 139, 240, 139, 69, 8, 247, 231, 3, 200, 19, 242, 129, 193, 0, 128, 62, 213, 139, 193, 129, 214, 222, 177, 157, 1, 139, 214, 93, 194, 8, 0})
+返回 (0)

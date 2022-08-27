@@ -1,0 +1,46 @@
+﻿.数据类型 THREADENTRY32
+    .成员 dwSize, 整数型
+    .成员 cntUsage, 整数型
+    .成员 th32ThreadID, 整数型
+    .成员 th32OwnerProcessID, 整数型
+    .成员 tpBasePri, 整数型
+    .成员 tpDeltaPri, 整数型
+    .成员 dwFlags, 整数型
+
+.数据类型 CONTEXT
+    .成员 ContextFlags, 整数型
+    .成员 Dr0, 整数型
+    .成员 Dr1, 整数型
+    .成员 Dr2, 整数型
+    .成员 Dr3, 整数型
+    .成员 Dr6, 整数型
+    .成员 Dr7, 整数型
+    .成员 FloatSave, FLOATING_SAVE_AREA
+    .成员 SegGs, 整数型
+    .成员 SegFs, 整数型
+    .成员 SegEs, 整数型
+    .成员 SegDs, 整数型
+    .成员 Edi, 整数型
+    .成员 Esi, 整数型
+    .成员 Ebx, 整数型
+    .成员 Edx, 整数型
+    .成员 Ecx, 整数型
+    .成员 Eax, 整数型
+    .成员 Ebp, 整数型
+    .成员 Eip, 整数型
+    .成员 SegCs, 整数型
+    .成员 EFlags, 整数型
+    .成员 Esp, 整数型
+    .成员 SegSs, 整数型
+
+.数据类型 FLOATING_SAVE_AREA
+    .成员 ControlWord, 整数型
+    .成员 StatusWord, 整数型
+    .成员 TagWord, 整数型
+    .成员 ErrorOffset, 整数型
+    .成员 ErrorSelector, 整数型
+    .成员 DataOffset, 整数型
+    .成员 DataSelector, 整数型
+    .成员 RegisterArea, 字节型, , "80"
+    .成员 Cr0NpxState, 整数型
+

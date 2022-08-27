@@ -1,0 +1,723 @@
+﻿<%
+	/*
+	EJS File
+	https://github.com/mde/ejs
+	*/
+if(typeof(ValueType) == "undefined"){
+	ValueType = null;
+}
+var ValueIsValueType = false;
+switch(ValueType){
+	case "整数型":
+		ValueIsValueType = true;
+		break;
+}
+var Name;
+if(ValueType){
+Name = "哈希表_" + KeyType + "_" + ValueType;
+}else{
+Name = "哈希集合_" + KeyType;
+}
+var Prefix = Name + "_";
+
+var KeyIsValueType = false;
+var Code_GetLowLevelKeyHashCode = function(Key){
+	throw "没有实现" + KeyType + "的Code_GetLowLevelKeyHashCode";
+};
+var Code_SendLowLevelKeyInInt = function(Key){
+	throw "没有实现" + KeyType + "的Code_SendLowLevelKeyInInt";
+};
+var Code_LowLevelKeyParam = function(Name){
+	return ".参数 " + Name + ", " + KeyType;
+};
+var FullName_GetWithLowLevelKey = Prefix + "取";
+var FullName_PutWithLowLevelKey = Prefix + "置";
+var FullName_HasWithLowLevelKey = Prefix + "是否存在";
+var FullName_RemoveWithLowLevelKey = Prefix + "删";
+switch(KeyType){
+	case "文本型":
+		Code_GetLowLevelKeyHashCode = function(Key){
+			return "取哈希值_文本 (" + Key + ")";
+		};
+		Code_SendLowLevelKeyInInt = function(Key){
+			return "取变量数据地址_文本型 (" + Key + ")";
+		};
+		break;
+	case "字节集":
+		Code_GetLowLevelKeyHashCode = function(Key){
+			return "取哈希值_内存 (" + Key + "_内存地址, " + Key + "_长度)";
+		};
+		Code_SendLowLevelKeyInInt = function(Key){
+			return "取变量地址_整数型 (" + Key + "_内存地址)";
+		};
+		Code_LowLevelKeyParam = function(Name){
+			return ".参数 " + Name + "_内存地址, 整数型, , 只需保证在此子程序返回前为有效的" + "\r\n" + ".参数 " + Name + "_长度, 整数型"
+		};
+		FullName_GetWithLowLevelKey += "_键为内存地址";
+		FullName_PutWithLowLevelKey += "_键为内存地址";
+		FullName_HasWithLowLevelKey += "_键为内存地址";
+		FullName_RemoveWithLowLevelKey += "_键为内存地址";
+		break;
+	case "整数型":
+		Code_GetLowLevelKeyHashCode = function(Key){
+			return "(" + Key + ")";
+		};
+		Code_SendLowLevelKeyInInt = function(Key){
+			return "(" + Key + ")";
+		};
+		KeyIsValueType = true;
+		break;
+	case "长整数型":
+		Code_GetLowLevelKeyHashCode = function(Key){
+			return "取哈希值_长整数 (" + Key + ")";
+		};
+		Code_SendLowLevelKeyInInt = function(Key){
+			return "取变量地址_长整数型 (" + Key + ")";
+		};
+		KeyIsValueType = true;
+		break;
+	default:
+		throw "未知键类型：" + KeyType;
+		break;
+}
+%>
+<%if(KeyType=="长整数型"){%>
+	.常量 键大小, "8"
+<%}else{%>
+	.常量 键大小, "4"
+<%}%>
+<%if(ValueType){%>
+	<%if(ValueType=="长整数型"){%>
+		.常量 值大小, "8"
+	<%}else{%>
+		.常量 值大小, "4"
+	<%}%>
+<%}%>
+.程序集 <%=Name%>
+
+<%
+switch(ValueType){
+case "文本型":
+%>
+	.子程序 <%=Prefix%>元素_取值, <%=ValueType%>, 公开
+	.参数 ptr, 整数型
+
+	返回 (指针到文本 (asm_读整型内存_指定偏移 (ptr, #底层哈希表_元素_内存大小 ＋ #键大小)))
+
+	.子程序 <%=Prefix%>元素_置值, , 公开
+	.参数 ptr, 整数型
+	.参数 值, <%=ValueType%>
+	.局部变量 副本, 整数型
+	.局部变量 长度_带终止符, 整数型
+
+	HeapFree(asm_读整型内存_指定偏移 (ptr, #底层哈希表_元素_内存大小 ＋ #键大小), GetProcessHeap(), 0)
+	
+	长度_带终止符 ＝ 取文本长度 (值)
+	.如果 (长度_带终止符 ＝ 0)
+		' 副本 ＝ 0
+	.否则
+		长度_带终止符 ＝ 长度_带终止符 ＋ 1
+		副本 ＝ HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, 长度_带终止符)
+		CopyMemoryFromString (副本, 值, 长度_带终止符)
+	.如果结束
+	asm_写整型内存_指定偏移 (ptr, 副本, #底层哈希表_元素_内存大小 ＋ #键大小)
+<%
+	break;
+case "字节集":
+%>
+	.子程序 <%=Prefix%>元素_取值, <%=ValueType%>, 公开
+	.参数 ptr, 整数型
+	
+	ptr = asm_读整型内存_指定偏移 (ptr, #底层哈希表_元素_内存大小 ＋ #键大小)
+	.如果真 (ptr ＝ 0)
+		返回 ({ })
+	.如果真结束
+	返回 (指针到字节集 (asm_整数加法 (ptr, 4), asm_读整型内存 (ptr)))
+
+	.子程序 <%=Prefix%>元素_置值, , 公开
+	.参数 ptr, 整数型
+	.参数 值, <%=ValueType%>
+	.局部变量 副本, 整数型
+	.局部变量 长度, 整数型
+
+	HeapFree(asm_读整型内存_指定偏移 (ptr, #底层哈希表_元素_内存大小 ＋ #键大小), GetProcessHeap(), 0)
+	
+	长度 ＝ 取字节集长度 (值)
+	.如果 (长度 ＝ 0)
+		' 副本 ＝ 0
+	.否则
+		副本 ＝ HeapAlloc (GetProcessHeap (), 0, asm_整数加法 (长度, 4))
+		asm_写整型内存 (副本, 长度)
+		CopyMemoryFromBin (asm_整数加法 (副本, 4), 值, 长度)
+	.如果结束
+	asm_写整型内存_指定偏移 (ptr, 副本, #底层哈希表_元素_内存大小 ＋ #键大小)
+<%
+	break;
+case "整数型":
+%>
+	.子程序 <%=Prefix%>元素_取值, <%=ValueType%>, 公开
+	.参数 ptr, 整数型
+
+	返回 (asm_读整型内存_指定偏移 (ptr, #底层哈希表_元素_内存大小 ＋ #键大小))
+
+	.子程序 <%=Prefix%>元素_置值, , 公开
+	.参数 ptr, 整数型
+	.参数 值, <%=ValueType%>
+
+	asm_写整型内存_指定偏移 (ptr, 值, #底层哈希表_元素_内存大小 ＋ #键大小)
+<%
+	break;
+case "长整数型":
+%>
+	.子程序 <%=Prefix%>元素_取值, <%=ValueType%>, 公开
+	.参数 ptr, 整数型
+
+	返回 (asm_读长整数内存_指定偏移 (ptr, #底层哈希表_元素_内存大小 ＋ #键大小))
+
+	.子程序 <%=Prefix%>元素_置值, , 公开
+	.参数 ptr, 整数型
+	.参数 值, <%=ValueType%>
+
+	asm_写长整数内存_指定偏移 (ptr, 值, #底层哈希表_元素_内存大小 ＋ #键大小)
+<%
+	break;
+default:
+	if(ValueType){
+		throw "未知值类型：" + ValueType;
+	}
+	break;
+}
+%>
+
+.子程序 <%=Prefix%>创建, 整数型, 公开
+
+返回 (底层哈希表_创建 (到整数 (&<%=Prefix%>元素_创建), 到整数 (&<%=Prefix%>元素_是否为指定键), 到整数 (&<%=Prefix%>元素_销毁)))
+
+.子程序 <%=Prefix%>取所有键, , 公开
+.参数 哈希表地址, 整数型
+.参数 所有键, <%=KeyType%>, 参考 数组
+.局部变量 元素地址, 整数型
+.局部变量 索引, 整数型
+
+重定义数组 (所有键, 假, 底层哈希表_取数量 (哈希表地址))
+元素地址 ＝ 底层哈希表_元素_首个 (哈希表地址)
+索引 ＝ 1
+.判断循环首 (元素地址 ≠ 0)
+    所有键 [索引] ＝ <%=Prefix%>元素_取键 (元素地址)
+
+    索引 ＝ 索引 ＋ 1
+    元素地址 ＝ 底层哈希表_元素_取下一元素 (元素地址)
+.判断循环尾 ()
+
+.子程序 <%=Prefix%>取数量, 整数型, 公开
+.参数 哈希表地址, 整数型
+
+返回 (底层哈希表_取数量 (哈希表地址))
+
+<%if(ValueType){%>
+.子程序 取变量地址_值, 整数型
+.参数 变量, <%=ValueType%>, 参考
+
+' mov eax,[ebp+8]
+' leave
+' retn 4
+置入代码 ({ 139, 69, 8, 201, 194, 4, 0 })
+返回 (0)
+
+.子程序 <%=Prefix%>删除前处理_返回原值
+.参数 elem, 整数型
+.参数 target, 整数型, 参考
+.局部变量 value, <%=ValueType%>
+
+value = <%=Prefix%>元素_取值 (elem)
+强制交换变量 (value, target)
+<%}%>
+
+.子程序 <%=Prefix%>元素_销毁
+.参数 ptr, 整数型
+
+<%if(!KeyIsValueType){%>
+HeapFree (GetProcessHeap (), 0, asm_读整型内存_指定偏移 (ptr, #底层哈希表_元素_内存大小))
+<%}%>
+<%if(ValueType && !ValueIsValueType){%>
+HeapFree (GetProcessHeap (), 0, asm_读整型内存_指定偏移 (ptr, #底层哈希表_元素_内存大小 ＋ #键大小))
+<%}%>
+HeapFree (GetProcessHeap (), 0, ptr)
+
+<%if(ValueType){%>
+	.子程序 <%=FullName_GetWithLowLevelKey%>, <%=ValueType%>, 公开
+	.参数 哈希表地址, 整数型
+	<%=Code_LowLevelKeyParam("键")%>
+	.参数 输出_元素地址, 整数型, 参考 可空, [Out]当不存在时，返回 0 并设置该值为 0。当存在时，此值一定不为0
+	.局部变量 默认, <%=ValueType%>
+
+	输出_元素地址 ＝ 底层哈希表_取 (哈希表地址, <%=Code_SendLowLevelKeyInInt("键")%>, <%=Code_GetLowLevelKeyHashCode("键")%>)
+	.如果真 (输出_元素地址 ＝ 0)
+		返回 (默认)
+	.如果真结束
+	返回 (<%=Prefix%>元素_取值 (输出_元素地址))
+<%}%>
+
+.子程序 <%=FullName_PutWithLowLevelKey%>, 逻辑型, 公开, 当原来不存在时，返回 假，否则返回 真
+.参数 哈希表地址, 整数型
+<%=Code_LowLevelKeyParam("键")%>
+<%if(ValueType){%>
+	.参数 值, <%=ValueType%>
+	.参数 输出_原值, <%=ValueType%>, 参考 可空, [Out]原来的值，仅在返回值为 真 时有效
+<%}%>
+.参数 输出_元素地址, 整数型, 参考 可空, [Out]
+.局部变量 存在, 逻辑型
+.局部变量 元素地址, 整数型
+
+元素地址 ＝ 底层哈希表_置 (哈希表地址, <%=Code_SendLowLevelKeyInInt("键")%>, <%=Code_GetLowLevelKeyHashCode("键")%>, 存在)
+<%if(ValueType){%>
+	.如果真 (是否为空(输出_原值) = 假)
+		输出_原值 ＝ <%=Prefix%>元素_取值 (元素地址)
+	.如果真结束
+	<%=Prefix%>元素_置值 (元素地址, 值)
+<%}%>
+输出_元素地址 = 元素地址
+返回 (存在)
+
+.子程序 <%=FullName_HasWithLowLevelKey%>, 逻辑型, 公开
+.参数 哈希表地址, 整数型
+<%=Code_LowLevelKeyParam("键")%>
+返回 (底层哈希表_是否存在 (哈希表地址, <%=Code_SendLowLevelKeyInInt("键")%>, <%=Code_GetLowLevelKeyHashCode("键")%>))
+
+.子程序 <%=FullName_RemoveWithLowLevelKey%>, 逻辑型, 公开, 当不存在时，返回 假，否则返回 真
+.参数 哈希表地址, 整数型
+<%=Code_LowLevelKeyParam("键")%>
+<%if(ValueType){%>
+	.参数 输出_原值, <%=ValueType%>, 参考 可空, [Out]原来的值，仅在返回值为 真 时有效
+<%}%>
+.局部变量 局_SubPtr_NULL, 子程序指针
+<%if(ValueType){%>
+	.如果真(是否为空 (输出_原值) = 假)
+		返回 (底层哈希表_删 (哈希表地址, <%=Code_SendLowLevelKeyInInt("键")%>, <%=Code_GetLowLevelKeyHashCode("键")%>, &<%=Prefix%>删除前处理_返回原值, 取变量地址_值 (输出_原值)))
+	.如果真结束
+<%}%>
+返回 (底层哈希表_删 (哈希表地址, <%=Code_SendLowLevelKeyInInt("键")%>, <%=Code_GetLowLevelKeyHashCode("键")%>, 局_SubPtr_NULL, 0))
+
+<%
+switch(KeyType){
+case "文本型":
+%>
+	.子程序 <%=Prefix%>元素_取键, 文本型, 公开
+	.参数 元素地址, 整数型
+
+	返回 (指针到文本 (asm_读整型内存_指定偏移 (元素地址, #底层哈希表_元素_内存大小)))
+		
+	.子程序 <%=Prefix%>元素_是否为指定键, 逻辑型
+	.参数 a, 整数型
+	.参数 b, 整数型
+	a ＝ asm_读整型内存_指定偏移 (a, #底层哈希表_元素_内存大小)
+	' AsmToECode代码:@arg a
+	' AsmToECode代码:@arg b
+	' AsmToECode代码:;注：与易语言规则一致，NULL与""相等
+	' AsmToECode代码:
+	' AsmToECode代码:mov esi,a
+	' AsmToECode代码:mov edi,b
+	' AsmToECode代码:;ESI 、 EDI 为 文本数据指针
+	' AsmToECode代码:
+	' AsmToECode代码:.if esi==0
+	' AsmToECode代码: .if edi==0
+	' AsmToECode代码:  jmp ret_true
+	' AsmToECode代码: .endif
+	' AsmToECode代码: mov al,byte ptr [edi]
+	' AsmToECode代码: .if al==0
+	' AsmToECode代码:  jmp ret_true
+	' AsmToECode代码: .endif
+	' AsmToECode代码: jmp ret_false
+	' AsmToECode代码:.elseif edi==0
+	' AsmToECode代码: mov al,byte ptr [esi]
+	' AsmToECode代码: .if al==0
+	' AsmToECode代码:  jmp ret_true
+	' AsmToECode代码: .endif
+	' AsmToECode代码: jmp ret_false
+	' AsmToECode代码:.endif
+	' AsmToECode代码:
+	' AsmToECode代码:
+	' AsmToECode代码:cld
+	' AsmToECode代码:isequ_next:
+	' AsmToECode代码:mov al,byte ptr [edi]
+	' AsmToECode代码:cmp byte ptr [esi],al
+	' AsmToECode代码:.if !zero?
+	' AsmToECode代码:ret_false:
+	' AsmToECode代码:xor eax,eax
+	' AsmToECode代码:@ret
+	' AsmToECode代码:.elseif al==0
+	' AsmToECode代码:ret_true:
+	' AsmToECode代码:xor eax,eax
+	' AsmToECode代码:inc eax
+	' AsmToECode代码:@ret
+	' AsmToECode代码:.endif
+	' AsmToECode代码:inc esi
+	' AsmToECode代码:inc edi
+	' AsmToECode代码:jmp isequ_next
+	置入代码 ({ 139, 117, 8, 139, 125, 12, 11, 246, 117, 18, 11, 255, 117, 2, 235, 45, 138, 7, 10, 192, 117, 2, 235, 37, 235, 23, 235, 14, 11, 255, 117, 10, 138, 6, 10, 192, 117, 2, 235, 21, 235, 7, 252, 138, 7, 56, 6, 116, 8, 51, 192, 201, 194, 8, 0, 235, 11, 10, 192, 117, 7, 51, 192, 64, 201, 194, 8, 0, 70, 71, 235, 227 })
+	返回 (假)
+<%
+break;
+case "整数型":
+%>
+	.子程序 <%=Prefix%>元素_取键, 整数型, 公开
+	.参数 元素地址, 整数型
+
+	返回 (asm_读整型内存_指定偏移 (元素地址, #底层哈希表_元素_内存大小))
+
+	.子程序 <%=Prefix%>元素_是否为指定键, 逻辑型
+	.参数 a, 整数型
+	.参数 b, 整数型
+	返回 (asm_读整型内存_指定偏移 (a, #底层哈希表_元素_内存大小) = b)
+<%
+break;
+case "长整数型":
+%>
+	.子程序 <%=Prefix%>元素_取键, 长整数型, 公开
+	.参数 元素地址, 整数型
+
+	返回 (asm_读长整数内存_指定偏移 (元素地址, #底层哈希表_元素_内存大小))
+
+	.子程序 <%=Prefix%>元素_是否为指定键, 逻辑型
+	.参数 a, 整数型
+	.参数 b, 整数型
+	返回 (asm_读长整数内存_指定偏移 (a, #底层哈希表_元素_内存大小) = asm_读长整数内存 (b))
+	
+	.子程序 取哈希值_长整数, 整数型
+	.参数 value, 长整数型
+
+	' AsmToECode代码:@arg value:qword
+	' AsmToECode代码:mov eax,dword ptr value
+	' AsmToECode代码:xor eax,dword ptr value+4
+	' AsmToECode代码:@ret
+	置入代码 ({ 139, 69, 8, 51, 69, 12, 201, 194, 8, 0 })
+	返回 (0)
+<%
+break;
+case "字节集":
+%>
+	.子程序 <%=Prefix%>元素_取键, 字节集, 公开
+	.参数 元素地址, 整数型
+	.局部变量 pBin, 整数型
+
+	pBin ＝ asm_读整型内存_指定偏移 (元素地址, #底层哈希表_元素_内存大小)
+	.如果真 (pBin ＝ 0)
+		返回 ({  })
+	.如果真结束
+	返回 (指针到字节集 (asm_整数加法 (pBin, 4), asm_读整型内存 (pBin)))
+
+	<%if(ValueType){%>
+		.子程序 <%=Prefix%>取, <%=ValueType%>, 公开
+		.参数 哈希表地址, 整数型
+		.参数 键, 字节集
+		.参数 输出_元素地址, 整数型, 参考 可空, [Out]当不存在时，返回 0 并设置该值为 0。当存在时，此值一定不为0
+
+		返回 (<%=FullName_GetWithLowLevelKey%> (哈希表地址, 取变量数据地址_字节集 (键), 取字节集长度 (键), 输出_元素地址))
+	<%}%>
+	.子程序 <%=Prefix%>置, 逻辑型, 公开, 当原来不存在时，返回 假，否则返回 真
+	.参数 哈希表地址, 整数型
+	.参数 键, 字节集
+	<%if(ValueType){%>
+		.参数 值, <%=ValueType%>
+		.参数 输出_原值, <%=ValueType%>, 参考 可空, [Out]原来的值，仅在返回值为 真 时有效
+	<%}%>
+	.参数 输出_元素地址, 整数型, 参考 可空, [Out]
+	<%if(ValueType){%>
+		.如果真(是否为空 (输出_原值) = 假)
+			返回 (<%=Prefix%>置_键为内存地址 (哈希表地址, 取变量数据地址_字节集 (键), 取字节集长度 (键), 值, 输出_原值, 输出_元素地址))
+		.如果真结束
+	<%}%>
+	返回 (<%=FullName_PutWithLowLevelKey%> (哈希表地址, 取变量数据地址_字节集 (键), 取字节集长度 (键), <%if(ValueType){%>值, , <%}%>输出_元素地址))
+
+	.子程序 <%=Prefix%>是否存在, 逻辑型, 公开
+	.参数 哈希表地址, 整数型
+	.参数 键, 字节集
+
+	返回 (<%=FullName_HasWithLowLevelKey%> (哈希表地址, 取变量数据地址_字节集 (键), 取字节集长度 (键)))
+
+	.子程序 <%=Prefix%>删, 逻辑型, 公开, 当不存在时，返回 假，否则返回 真
+	.参数 哈希表地址, 整数型
+	.参数 键, 字节集
+	<%if(ValueType){%>
+		.参数 输出_原值, <%=ValueType%>, 参考 可空, [Out]原来的值，仅在返回值为 真 时有效
+		.如果真(是否为空 (输出_原值) = 假)
+			返回 (<%=Prefix%>删_键为内存地址 (哈希表地址, 取变量数据地址_字节集 (键), 取字节集长度 (键), 输出_原值))
+		.如果真结束
+	<%}%>
+	返回 (<%=FullName_RemoveWithLowLevelKey%> (哈希表地址, 取变量数据地址_字节集 (键), 取字节集长度 (键)))
+
+	.子程序 <%=Prefix%>元素_取键_内存地址, , 公开
+	.参数 元素地址, 整数型
+	.参数 键_内存地址, 整数型, 参考, [Out]
+	.参数 键_长度, 整数型, 参考, [Out]
+	.局部变量 pBin, 整数型
+
+	pBin ＝ asm_读整型内存_指定偏移 (元素地址, #底层哈希表_元素_内存大小)
+	.如果真 (pBin ＝ 0)
+		键_长度 ＝ 0
+		返回 ()
+	.如果真结束
+	键_长度 ＝ asm_读整型内存 (pBin)
+	键_内存地址 ＝ asm_整数加法 (pBin, 4)
+
+	.子程序 <%=Prefix%>元素_是否为指定键, 逻辑型
+	.参数 Elem, 整数型
+	.参数 EFormat, 整数型
+	.局部变量 len, 整数型
+
+	Elem ＝ asm_读整型内存_指定偏移 (Elem, #底层哈希表_元素_内存大小)
+	len ＝ asm_读整型内存_指定偏移 (EFormat, 4)
+	.如果真 (Elem ＝ 0)
+		返回 (len ＝ 0)
+	.如果真结束
+	.如果真 (len ≠ asm_读整型内存 (Elem))
+		返回 (假)
+	.如果真结束
+	返回 (memcmp (asm_整数加法 (Elem, 4), asm_读整型内存 (EFormat), len) ＝ 0)
+<%
+break;
+}
+%>
+
+.子程序 <%=Prefix%>元素_创建, 整数型
+.参数 原始键, 整数型
+.局部变量 元素地址, 整数型
+<% var alloc_elem = "元素地址 ＝ HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, #底层哈希表_元素_内存大小 ＋ #键大小" + (!!ValueType ? " ＋ #值大小" : "") + ")"; %>
+<%
+switch(KeyType){
+case "文本型":
+%>
+.局部变量 键副本, 整数型
+.局部变量 键长度_带终止符, 整数型
+	<%- alloc_elem %>
+	.如果 (原始键 ＝ 0)
+		' 键副本 ＝ 0
+	.否则
+		键长度_带终止符 ＝ strlen (原始键)
+		.如果 (键长度_带终止符 ＝ 0)
+			' 键副本 ＝ 0
+		.否则
+			键长度_带终止符 ＝ 键长度_带终止符 ＋ 1
+			键副本 ＝ HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, 键长度_带终止符)
+			memcpy (键副本, 原始键, 键长度_带终止符)
+		.如果结束
+	.如果结束
+	asm_写整型内存_指定偏移 (元素地址, 键副本, #底层哈希表_元素_内存大小)
+<%
+break;
+case "字节集":
+%>
+.局部变量 键副本, 整数型
+.局部变量 键长度, 整数型
+	<%- alloc_elem %>
+	键长度 ＝ asm_读整型内存_指定偏移 (原始键, 4)
+	.如果 (键长度 ＝ 0)
+		' 键副本 ＝ 0
+	.否则
+		键副本 ＝ HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, asm_整数加法 (键长度, 4))
+		asm_写整型内存 (键副本, 键长度)
+		memcpy (asm_整数加法 (键副本, 4), asm_读整型内存 (原始键), 键长度)
+	.如果结束
+	asm_写整型内存_指定偏移 (元素地址, 键副本, #底层哈希表_元素_内存大小)
+<%
+break;
+case "整数型":
+%>
+	<%- alloc_elem %>
+	asm_写整型内存_指定偏移 (元素地址, 原始键, #底层哈希表_元素_内存大小)
+<%
+break;
+case "长整数型":
+%>
+	<%- alloc_elem %>
+	asm_写长整数内存_指定偏移 (元素地址, asm_读长整数内存 (原始键), #底层哈希表_元素_内存大小)
+<%
+break;
+}
+%>
+<%if(ValueType && !ValueIsValueType){%>
+	asm_写整型内存_指定偏移 (元素地址, 0, #底层哈希表_元素_内存大小 + #键大小)
+<%}%>
+返回 (元素地址)
+
+.子程序 <%=Prefix%>销毁, , 公开
+.参数 哈希表地址, 整数型
+.参数 回调, 子程序指针, 可空, 整数型 元素地址，整数型 额外参数
+.参数 回调额外参数, 整数型, 可空
+
+底层哈希表_销毁 (哈希表地址, 回调, 回调额外参数)
+
+.子程序 <%=Prefix%>元素_首个, 整数型, 公开
+.参数 哈希表地址, 整数型
+
+返回 (底层哈希表_元素_首个 (哈希表地址))
+
+.子程序 <%=Prefix%>元素_最后, 整数型, 公开
+.参数 哈希表地址, 整数型
+
+返回 (底层哈希表_元素_最后 (哈希表地址))
+
+.子程序 <%=Prefix%>元素_取上一元素, 整数型, 公开
+.参数 ptr, 整数型
+
+返回 (底层哈希表_元素_取上一元素 (ptr))
+
+.子程序 <%=Prefix%>元素_取下一元素, 整数型, 公开
+.参数 ptr, 整数型
+
+返回 (底层哈希表_元素_取下一元素 (ptr))
+
+.子程序 取变量地址_整数型, 整数型
+.参数 变量, 整数型, 参考
+
+' mov eax,[ebp+8]
+' leave
+' retn 4
+置入代码 ({ 139, 69, 8, 201, 194, 4, 0 })
+返回 (0)
+
+.子程序 取变量地址_长整数型, 整数型
+.参数 变量, 长整数型, 参考
+
+' mov eax,[ebp+8]
+' leave
+' retn 4
+置入代码 ({ 139, 69, 8, 201, 194, 4, 0 })
+返回 (0)
+
+.子程序 取变量数据地址_字节集, 整数型
+.参数 变量, 字节集, 参考
+
+' mov eax , dword [ebp+08h]
+' mov eax , dword [eax]
+' add eax , 00000008h
+' leave
+' retn 0004h
+置入代码 ({ 139, 69, 8, 139, 0, 131, 192, 8, 201, 194, 4, 0 })
+' 返回 (取变量数据地址 (变量))
+返回 (0)
+
+.子程序 取变量数据地址_文本型, 整数型
+.参数 变量, 文本型, 参考
+
+' mov eax,[ebp+8]
+' mov eax,[eax]
+' leave
+' retn 4
+置入代码 ({ 139, 69, 8, 139, 0, 201, 194, 4, 0 })
+返回 (0)
+
+.子程序 asm_整数加法, 整数型
+.参数 一, 整数型
+.参数 二, 整数型
+
+置入代码 ({ 201, 139, 68, 36, 4, 3, 68, 36, 8, 194, 8, 0 })
+返回 (0)
+
+.子程序 asm_读整型内存, 整数型
+.参数 读取地址, 整数型
+
+置入代码 ({ 139, 69, 8, 139, 0, 201, 194, 4, 0 })
+返回 (0)
+
+.子程序 asm_写整型内存, 整数型, , 返回 参数 内存地址
+.参数 内存地址, 整数型
+.参数 内容, 整数型
+
+置入代码 ({ 139, 77, 12, 139, 69, 8, 137, 8, 201, 194, 8, 0 })
+返回 (0)
+
+.子程序 asm_读整型内存_指定偏移, 整数型
+.参数 读取地址, 整数型
+.参数 偏移, 整数型
+
+' 汇编代码（需要使用AsmToECode程序编译）:
+' @arg 读取地址
+' @arg 偏移
+' mov eax,读取地址
+' mov ecx,偏移
+' mov eax,[eax+ecx]
+' @ret
+置入代码 ({ 139, 69, 8, 139, 77, 12, 139, 4, 1, 201, 194, 8, 0 })
+' 返回 (指针到整数 (读取地址 ＋ 偏移))
+' 兼容5.11
+返回 (0)
+
+.子程序 asm_写整型内存_指定偏移, 整数型, , 返回 内存地址 + 偏移
+.参数 内存地址, 整数型
+.参数 内容, 整数型
+.参数 偏移, 整数型
+
+置入代码 ({ 139, 77, 12, 139, 69, 8, 3, 69, 16, 137, 8, 201, 194, 12, 0 })
+返回 (0)
+
+.子程序 asm_读长整数内存, 长整数型
+.参数 读取地址, 整数型
+
+' AsmToECode代码:@arg 读取地址
+' AsmToECode代码:mov eax,读取地址
+' AsmToECode代码:mov edx,[eax+4]
+' AsmToECode代码:mov eax,[eax]
+' AsmToECode代码:@ret
+置入代码 ({139,69,8,139,80,4,139,0,201,194,4,0})
+返回 (0)
+
+.子程序 asm_读长整数内存_指定偏移, 长整数型
+.参数 读取地址, 整数型
+.参数 偏移, 整数型
+
+' AsmToECode代码:@arg 读取地址
+' AsmToECode代码:@arg 偏移
+' AsmToECode代码:mov eax,读取地址
+' AsmToECode代码:add eax,偏移
+' AsmToECode代码:mov edx,[eax+4]
+' AsmToECode代码:mov eax,[eax]
+' AsmToECode代码:@ret
+置入代码 ({ 139, 69, 8, 3, 69, 12, 139, 80, 4, 139, 0, 201, 194, 8, 0 })
+返回 (0)
+
+.子程序 asm_写长整数内存_指定偏移, 整数型, , 返回 内存地址 + 偏移
+.参数 内存地址, 整数型
+.参数 内容, 长整数型
+.参数 偏移, 整数型
+
+置入代码 ({ 139, 77, 12, 139, 85, 16, 139, 69, 8, 3, 69, 20, 137, 8, 137, 80, 4, 201, 194, 16, 0 })
+返回 (0)
+
+.DLL命令 memcpy, , "ntdll.dll", "@memcpy"
+    .参数 pDest, 整数型
+    .参数 pSrc, 整数型
+    .参数 ByteLen, 整数型
+
+.DLL命令 HeapAlloc, 整数型, "kernel32.dll", "HeapAlloc", , 从堆中分配内存
+    .参数 hHeap, 整数型
+    .参数 dwFlags, 整数型
+    .参数 dwBytes, 整数型
+
+.DLL命令 HeapFree, 整数型, "kernel32.dll", "HeapFree", , 释放从堆中分配的内存
+    .参数 hHeap, 整数型
+    .参数 dwFlags, 整数型
+    .参数 lpMem, 整数型
+
+.DLL命令 GetProcessHeap, 整数型, "kernel32.dll", "GetProcessHeap", , 获取调用过程堆句柄
+
+.DLL命令 strlen, 整数型, "ntdll.dll", "@strlen"
+    .参数 str, 整数型
+
+.DLL命令 memcmp, 整数型, "ntdll.dll", "@memcmp"
+    .参数 buf1, 整数型
+    .参数 buf2, 整数型
+    .参数 count, 整数型
+
+.DLL命令 CopyMemoryFromString, , "ntdll.dll", "@memcpy"
+    .参数 pDest, 整数型
+    .参数 pSrc, 文本型
+    .参数 ByteLen, 整数型
+
+
+.DLL命令 CopyMemoryFromBin, , "ntdll.dll", "@memcpy"
+    .参数 pDest, 整数型
+    .参数 pSrc, 字节集
+    .参数 ByteLen, 整数型
+
+.常量 HEAP_GENERATE_EXCEPTIONS, "4"

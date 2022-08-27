@@ -1,0 +1,26 @@
+﻿.程序集 FontPool, <对象>, 公开
+.程序集变量 data, 整数型
+
+.子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
+
+data = 哈希表_字节集_整数型_创建 ()
+.子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
+
+哈希表_字节集_整数型_销毁 (data, &FontPool_DeleteElem, 0)
+.子程序 Get, 整数型, 公开
+.参数 font, LOGFONTW
+.局部变量 bFont, 字节集
+.局部变量 hNewFont, 整数型
+.局部变量 hFont, 整数型
+
+bFont = 取空白字节集 (#SizeOfLogFontW)
+MemoryCopyFromLogFontW (取变量数据地址 (bFont), font, #SizeOfLogFontW)
+hFont = 哈希表_字节集_整数型_取 (data, bFont)
+.如果真 (hFont == 0)
+    hFont = CreateFontIndirectW (font)
+    .如果真 (hFont != 0)
+        哈希表_字节集_整数型_置 (data, bFont, hFont)
+    .如果真结束
+    
+.如果真结束
+返回 (hFont)

@@ -1,0 +1,263 @@
+﻿.程序集 QSInlineHook, <对象>, 公开
+.程序集变量 m_pTarget, 整数型
+.程序集变量 m_size, 整数型
+.程序集变量 m_pTrampoline, 整数型
+.程序集变量 m_sizeOfTrampoline, 整数型
+.程序集变量 m_pDetour, 整数型
+.程序集变量 m_backup, 字节集
+.程序集变量 m_autoUninstall, 逻辑型
+.程序集变量 m_hModule, 整数型
+
+.子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
+
+m_autoUninstall = 真
+.子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
+
+.如果真 (m_autoUninstall)
+    卸载 ()
+.如果真结束
+
+.子程序 置自动卸载, , 公开
+.参数 bEnable, 逻辑型, , 默认开启
+
+m_autoUninstall = bEnable
+.子程序 安装_DLL, , 公开
+.参数 libraryName, 文本型
+.参数 procName, 文本型
+.参数 pDetour, 整数型
+.参数 bStart, 逻辑型, 可空
+
+.如果真 (是否为空 (bStart))
+    bStart = 真
+.如果真结束
+卸载 ()
+m_hModule = LoadLibrary (libraryName)
+.如果真 (m_hModule != 0)
+    安装 (GetProcAddress (m_hModule, procName), pDetour, bStart)
+.如果真结束
+
+.子程序 安装, , 公开
+.参数 pTarget, 整数型
+.参数 pDetour, 整数型
+.参数 bStart, 逻辑型, 可空
+.局部变量 instructionLength, 整数型, , "0"
+.局部变量 size, 整数型
+.局部变量 sizeOfTrampoline, 整数型
+.局部变量 currectInstructionLength, 整数型
+.局部变量 offest, 整数型
+.局部变量 i, 整数型
+.局部变量 firstByte, 整数型
+.局部变量 temp, 整数型
+.局部变量 secondByte, 整数型
+.局部变量 dest, 整数型
+.局部变量 fixedOffest, 整数型
+.局部变量 pShortJmpTrampoline, 整数型
+
+.如果真 (是否为空 (bStart))
+    bStart = 真
+.如果真结束
+
+卸载 ()
+.如果真 (pTarget == 0 || pDetour == 0)
+    返回 ()
+.如果真结束
+m_pTarget = pTarget
+m_pDetour = pDetour
+
+.循环判断首 ()
+    currectInstructionLength = 取汇编指令长度 (pTarget + size)
+    加入成员 (instructionLength, currectInstructionLength)
+    size = size + currectInstructionLength
+.循环判断尾 (size < 5)
+m_size = size
+
+sizeOfTrampoline = size + 5
+offest = 0
+.计次循环首 (取数组下标 (instructionLength, ), i)
+    firstByte = asm_读字节内存 (pTarget + offest)
+    .如果真 (firstByte == 235 || 位与 (firstByte, 240) == 112 || 位与 (firstByte, 252) == 224)  ' Jmp short / Jcc short / (LOOPNZ / LOOPZ / LOOP/ JECXZ)
+        temp = pTarget + offest + 1
+        dest = pTarget + offest + 2 + asm_读字节内存 (temp)
+        .如果真 (dest < pTarget || dest >= pTarget + size)
+            sizeOfTrampoline = sizeOfTrampoline + 5
+        .如果真结束
+        
+    .如果真结束
+    offest = offest + instructionLength[i]
+.计次循环尾 ()
+m_sizeOfTrampoline = sizeOfTrampoline
+
+m_pTrampoline = VirtualAlloc (0, sizeOfTrampoline, #MEM_COMMIT, #PAGE_EXECUTE_READWRITE)
+pShortJmpTrampoline = m_pTrampoline + size
+memcpy (m_pTrampoline, pTarget, size)
+asm_写字节内存 (m_pTrampoline + size, 233)
+asm_写整型内存 (m_pTrampoline + size + 1, computeOffest (m_pTrampoline + size + 5, pTarget + size))
+
+offest = 0
+.计次循环首 (取数组下标 (instructionLength, ), i)
+    firstByte = asm_读字节内存 (pTarget + offest)
+    .判断开始 (firstByte == 232 || firstByte == 233)  ' Call relative / Jmp relative
+        temp = pTarget + offest + 1
+        dest = pTarget + offest + 5 + asm_读整型内存 (temp)
+        .如果真 (dest < pTarget || dest >= pTarget + size)
+            fixedOffest = computeOffest (m_pTrampoline + offest + 5, dest)
+            asm_写整型内存 (m_pTrampoline + offest + 1, fixedOffest)
+        .如果真结束
+        
+    .判断 (firstByte == 15)
+        secondByte = asm_读字节内存 (pTarget + offest + 1)
+        .如果真 (位与 (secondByte, 240) == 128)  ' Jcc
+            temp = pTarget + offest + 2
+            dest = pTarget + offest + 6 + asm_读整型内存 (temp)
+            .如果真 (dest < pTarget || dest >= pTarget + size)
+                fixedOffest = computeOffest (m_pTrampoline + offest + 6, dest)
+                asm_写整型内存 (m_pTrampoline + offest + 2, fixedOffest)
+            .如果真结束
+            
+        .如果真结束
+        
+    .判断 (firstByte == 235 || 位与 (firstByte, 240) == 112 || 位与 (firstByte, 252) == 224)  ' Jmp short / Jcc short / (LOOPNZ / LOOPZ / LOOP/ JECXZ)
+        temp = pTarget + offest + 1
+        dest = pTarget + offest + 2 + asm_读字节内存 (temp)
+        .如果真 (dest < pTarget || dest >= pTarget + size)
+            asm_写字节内存 (pShortJmpTrampoline, 233)
+            asm_写整型内存 (pShortJmpTrampoline + 1, computeOffest (pShortJmpTrampoline + 5, dest))
+            asm_写字节内存 (m_pTrampoline + offest + 1, computeOffest (m_pTrampoline + offest + 2, pShortJmpTrampoline))
+            pShortJmpTrampoline = pShortJmpTrampoline + 5
+        .如果真结束
+        
+    .默认
+        
+    .判断结束
+    offest = offest + instructionLength[i]
+.计次循环尾 ()
+
+.如果真 (bStart)
+    启用 ()
+.如果真结束
+
+.子程序 取原函数跳板地址, 整数型, 公开
+
+返回 (m_pTrampoline)
+.子程序 是否启用, 逻辑型, 公开
+
+返回 (取字节集长度 (m_backup) != 0)
+.子程序 启用, , 公开
+.局部变量 listOfHandles, 整数型
+.局部变量 hThread, 整数型
+.局部变量 i, 整数型
+.局部变量 count, 整数型
+.局部变量 oldProtect, 整数型
+
+.如果真 (是否启用 ())
+    返回 ()
+.如果真结束
+listOfHandles = ArrayList_New ()
+打开其他线程 (listOfHandles, 位或 (#THREAD_SUSPEND_RESUME, #THREAD_GET_CONTEXT, #THREAD_QUERY_INFORMATION, #THREAD_SET_CONTEXT))
+count = ArrayList_GetLength (listOfHandles)
+
+i = 0
+.判断循环首 (i < count)
+    hThread = ArrayList_Get (listOfHandles, i)
+    SuspendThread (hThread)
+    处理线程指令地址_启用 (hThread)
+    i = i + 1
+.判断循环尾 ()
+
+VirtualProtect (m_pTarget, 5, #PAGE_EXECUTE_READWRITE, oldProtect)
+m_backup = 指针到字节集 (m_pTarget, 5)
+asm_写字节内存 (m_pTarget, 233)
+asm_写整型内存 (m_pTarget + 1, computeOffest (m_pTarget + 5, m_pDetour))
+VirtualProtect (m_pTarget, 5, oldProtect, oldProtect)
+
+i = 0
+.判断循环首 (i < count)
+    hThread = ArrayList_Get (listOfHandles, i)
+    ResumeThread (hThread)
+    CloseHandle (hThread)
+    i = i + 1
+.判断循环尾 ()
+
+ArrayList_Delete (listOfHandles)
+.子程序 禁用, , 公开
+.局部变量 listOfHandles, 整数型
+.局部变量 hThread, 整数型
+.局部变量 count, 整数型
+.局部变量 i, 整数型
+.局部变量 oldProtect, 整数型
+
+.如果真 (取反 (是否启用 ()))
+    返回 ()
+.如果真结束
+
+listOfHandles = ArrayList_New ()
+打开其他线程 (listOfHandles, 位或 (#THREAD_SUSPEND_RESUME, #THREAD_GET_CONTEXT, #THREAD_QUERY_INFORMATION, #THREAD_SET_CONTEXT))
+count = ArrayList_GetLength (listOfHandles)
+
+i = 0
+.判断循环首 (i < count)
+    hThread = ArrayList_Get (listOfHandles, i)
+    SuspendThread (hThread)
+    处理线程指令地址_禁用 (hThread)
+    i = i + 1
+.判断循环尾 ()
+
+VirtualProtect (m_pTarget, 5, #PAGE_EXECUTE_READWRITE, oldProtect)
+写到内存 (m_backup, m_pTarget, )
+VirtualProtect (m_pTarget, 5, oldProtect, oldProtect)
+m_backup = 取空白字节集 (0)
+
+i = 0
+.判断循环首 (i < count)
+    hThread = ArrayList_Get (listOfHandles, i)
+    ResumeThread (hThread)
+    CloseHandle (hThread)
+    i = i + 1
+.判断循环尾 ()
+
+ArrayList_Delete (listOfHandles)
+.子程序 卸载, , 公开
+
+禁用 ()
+.如果真 (m_pTarget == 0)
+    返回 ()
+.如果真结束
+m_pTarget = 0
+VirtualFree (m_pTrampoline, 0, #MEM_RELEASE)
+m_pTrampoline = 0
+.如果真 (m_hModule != 0)
+    FreeLibrary (m_hModule)
+    m_hModule = 0
+.如果真结束
+
+.子程序 处理线程指令地址_启用
+.参数 hThread, 整数型
+.局部变量 c, CONTEXT
+
+c.ContextFlags = #CONTEXT_CONTROL
+GetThreadContext (hThread, c)
+.如果真 (c.Eip > m_pTarget && c.Eip < m_pTarget + m_size)  ' c.Eip == m_pTarget时，没有必要修改，直接唤醒，会跳到m_pDetour
+    c.Eip = c.Eip - m_pTarget + m_pTrampoline
+    SetThreadContext (hThread, c)
+.如果真结束
+
+.子程序 处理线程指令地址_禁用
+.参数 hThread, 整数型
+.局部变量 c, CONTEXT
+.局部变量 dest, 整数型
+
+c.ContextFlags = #CONTEXT_CONTROL
+GetThreadContext (hThread, c)
+.如果真 (c.Eip >= m_pTrampoline && c.Eip < m_pTrampoline + m_sizeOfTrampoline)  ' c.Eip == m_pTrampoline时，有必要修改，因为m_pTrampoline即将被销毁
+    .如果 (c.Eip < m_pTrampoline + m_size)  ' 直接改
+        c.Eip = c.Eip - m_pTrampoline + m_pTarget
+    .否则
+        ' 此时必定为jmp指令（可能是跳回原函数继续执行的指令，也可能是jmp short的中转指令）
+        .如果真 (asm_读字节内存 (c.Eip) != 233)
+            MessageBox (0, “QSInlineHook Error: 处理线程指令地址_禁用 遇到无法处理的逻辑”, “QSInlineHook”, #MB_ICONERROR)
+        .如果真结束
+        dest = c.Eip + 5 + asm_读整型内存 (c.Eip + 1)
+        c.Eip = dest
+    .如果结束
+    SetThreadContext (hThread, c)
+.如果真结束

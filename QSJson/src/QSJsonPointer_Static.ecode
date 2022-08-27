@@ -1,0 +1,15 @@
+﻿.程序集 QSJsonPointer_Static
+
+.子程序 QSJsonPointer, QSJsonPointer, 公开
+.参数 Pointer, 文本型
+.局部变量 ReturnValue, QSJsonPointer
+
+ReturnValue.创建 (Pointer)
+置入代码 ({139, 69, 252, 201, 194, 4, 0})
+' mov eax,[ebp-4]
+' leave
+' retn 4
+
+' 由于易的返回会做无用的复制操作（返回值 = 复制(ReturnValue) | 销毁(ReturnValue) | 返回）
+' 所以直接汇编里返回
+返回 (ReturnValue)

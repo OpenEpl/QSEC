@@ -1,0 +1,23 @@
+﻿{
+  "Name": "QS随机数",
+  "Version": "1.0.0.0",
+  "ProjectType": "WindowsECom",
+  "SourceSet": "src",
+  "Description": "本模块提供的随机数算法均为非加密安全算法，可以较容易的通过生成结果推算出种子等内部状态。若为密钥生成等需求，请不要直接使用随机结果。",
+  "OutFile": "../_Build/QS随机数.ec",
+  "Dependencies": [
+    {
+      "Kind": "ELib",
+      "Name": "系统核心支持库",
+      "FileName": "krnln",
+      "Guid": "d09f2340818511d396f6aaf844c7e325",
+      "Version": "5.7"
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QS欢迎",
+      "Path": "../_IntermediateBuild/QS欢迎.ec",
+      "ReExport": false
+    }
+  ]
+}

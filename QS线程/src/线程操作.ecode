@@ -1,0 +1,59 @@
+﻿.程序集 线程操作
+
+.子程序 线程_取退出代码, 整数型, 公开, 若未结束，返回 #仍在运行
+.参数 handle, 整数型, , 句柄
+.局部变量 code, 整数型
+
+GetExitCodeThread (handle, code)
+返回 (code)
+.子程序 线程_是否结束, 逻辑型, 公开
+.参数 handle, 整数型, , 句柄
+
+返回 (取反 (WaitForSingleObject (handle, 0) == #WAIT_TIMEOUT))
+.子程序 线程_等待_响应UI, 整数型, 公开, 【0 表示成功，#等待_超时 表示 超时】请勿在非UI线程调用此子程序，以便避免未知错误
+.参数 handle, 整数型, , 句柄
+.参数 timeout, 整数型, , 单位：毫秒
+.局部变量 nCount, 整数型
+.局部变量 result, 整数型
+.局部变量 time, 整数型
+.局部变量 tmp, 整数型
+
+time = 选择 (timeout == #INFINITE, #INFINITE, 取启动时间 () + timeout)
+nCount = 1
+.判断循环首 (真)
+    .如果 (time == -1)
+        tmp = #INFINITE
+    .否则
+        tmp = time - 取启动时间 ()
+        .如果真 (tmp < 0)
+            返回 (#WAIT_TIMEOUT)
+        .如果真结束
+        
+    .如果结束
+    result = MsgWaitForMultipleObjectsEx (nCount, 取变量地址 (handle), tmp, #QS_ALLINPUT, #MWMO_INPUTAVAILABLE)
+    .如果 (result == #WAIT_OBJECT_0 + nCount)
+        处理事件 ()
+    .否则
+        返回 (result)
+    .如果结束
+    
+.判断循环尾 ()
+检查 (假)
+返回 (-1)
+.子程序 线程_创建, 逻辑型, 公开, 创建并启动一条线程，可重复使用以创建多条线程，成功返回真，失败返回假。
+.参数 StartAddress, 子程序指针, , 返回值 可用 线程_取退出代码 得到
+.参数 Parameter, 整数型, 可空, 如果需要传递复杂数据，参考 线程_传递***
+.参数 StackSize, 整数型, 可空
+.参数 Suspend, 逻辑型, 可空, 是否创建已暂停的线程
+.参数 Out_ThreadHandle, 整数型, 参考 可空, 请一定记住关闭该句柄。如果不提供本参数接收线程句柄，内部将自动关闭线程句柄。注：关闭线程句柄不会导致线程结束
+.参数 Out_ThreadId, 整数型, 参考 可空, 与线程句柄不同，ID不需要关闭。与句柄不同的是，在线程结束后，ID可能会被新创建的线程重新使用。而句柄在您手动关闭前不会被重用
+
+Out_ThreadHandle = CreateThread_SubPtr (0, StackSize, StartAddress, Parameter, 位或 (#STACK_SIZE_PARAM_IS_A_RESERVATION, 选择 (Suspend, #CREATE_SUSPENDED, 0)), Out_ThreadId)
+.如果真 (是否为空 (Out_ThreadHandle))
+    CloseHandle (Out_ThreadHandle)
+.如果真结束
+返回 (Out_ThreadHandle != 0)
+.子程序 线程_关闭句柄, 逻辑型, 公开, 返回真表示已成功关闭线程句柄。
+.参数 线程句柄, 整数型
+
+返回 (CloseHandle (线程句柄) != 0)

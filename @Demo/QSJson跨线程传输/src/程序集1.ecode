@@ -1,0 +1,31 @@
+﻿.程序集 程序集1
+
+.子程序 _启动子程序, 整数型, , 本子程序在程序启动后最先执行
+.局部变量 Json, QSJson_Ref
+.局部变量 hThread, 整数型
+
+' 警告：
+' 请不要在 多个 线程中 同时 操作 同一个 Json节点（如有必要，请加许可证）
+' 此特性为 不稳定 特性（并不是说可能导致崩溃，这里的不稳定 指的是 随时可能取消/修改此功能）
+
+Json.类型 (#QSJson_值类型_数组)
+Json.加入数组成员 (QSJson_文本 (“欢迎”))
+Json.加入数组成员 (QSJson_文本 (“使用”))
+Json.加入数组成员 (QSJson_文本 (“Quick”))
+Json.加入数组成员 (QSJson_文本 (“And”))
+Json.加入数组成员 (QSJson_文本 (“Simple”))
+Json.加入数组成员 (QSJson_文本 (“EC”))
+Json.加入数组成员 (QSJson_文本 (“官方”))
+Json.加入数组成员 (QSJson_文本 (“QQ群：”))
+Json.加入数组成员 (QSJson_文本 (“605310933”))
+
+启动线程 (&thread, Json.Internal_GetNakedNodePtrAndAddRef (), hThread)
+等待线程 (hThread, )
+关闭线程句柄 (hThread)
+返回 (0)  ' 可以根据您的需要返回任意数值
+.子程序 thread
+.参数 NakedNodePtr, 整数型
+.局部变量 Json, QSJson_Ref
+
+Json.Internal_SetNakedNodePtr (NakedNodePtr)
+信息框 (Json.到Json文本 (#QSJson_编码_Ansi), 0, , )

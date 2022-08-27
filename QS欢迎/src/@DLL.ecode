@@ -1,0 +1,80 @@
+﻿.DLL命令 CopyMemoryFromStringToByteArray, , ntdll.dll, @memcpy
+    .参数 pDest, 字节型, 数组
+    .参数 pSrc, 文本型
+    .参数 ByteLen, 整数型
+
+.DLL命令 CreateFontIndirect, 整数型, gdi32.dll, CreateFontIndirectA, , 用指定的属性创建一种逻辑字体  执行成功则返回逻辑字体句柄，零表示失败
+    .参数 lpLogFont, LOGFONT, , LOGFONT，这个结构定义了逻辑字体请求的属性;
+
+.DLL命令 SelectObject, 整数型, gdi32.dll, SelectObject, , 每个设备场景都可能有选入其中的图形对象。其中包括位图、刷子、字体、画笔以及区域等等。一次选入设备场景的只能有一个对象。选定的对象会在设备场景的绘图操作中使用。例如，当前选定的画笔决定了在设备场景中描绘的线段颜色及样式  与以前选入设备场景的相同hObject类型的一个对象的句柄，零表示出错。如选定的对象是一个区域（Region），结果就是下列常数之一：SIMPLEREGION， ;    COMPLEXREGION 或 NULLREGION 对区域进行描述， GDI_ERROR 表示出错
+    .参数 hdc, 整数型, , 一个设备场景的句柄
+    .参数 hObject, 整数型, , 一个画笔、位图、刷子、字体或区域的句柄;
+
+.DLL命令 SetBkColor, 整数型, gdi32.dll, SetBkColor, , 为指定的设备场景设置背景颜色。背景颜色用于填充阴影刷子、虚线画笔以及字符（如背景模式为OPAQUE）中的空隙。也在位图颜色转换期间使用。参考SetBkMode  前一个背景色，CLR_INVALID表示出错
+    .参数 hdc, 整数型
+    .参数 crColor, 整数型
+
+.DLL命令 CreateWindowEx, 整数型, user32.dll, CreateWindowExA, , 建立窗口
+    .参数 dwExStyle, 整数型
+    .参数 lpClassName, 文本型
+    .参数 lpWindowName, 文本型
+    .参数 dwStyle, 整数型
+    .参数 x, 整数型
+    .参数 y, 整数型
+    .参数 nWidth, 整数型
+    .参数 nHeight, 整数型
+    .参数 hWndParent, 整数型
+    .参数 hMenu, 整数型
+    .参数 hInstance, 整数型
+    .参数 lpParam, 整数型
+
+.DLL命令 SetLayeredWindowAttributes, 整数型, user32.dll, SetLayeredWindowAttributes
+    .参数 hwnd, 整数型
+    .参数 crKey, 整数型
+    .参数 bAlpha, 字节型
+    .参数 dwFlags, 整数型
+
+.DLL命令 WaitForSingleObject, 整数型, kernel32.dll, WaitForSingleObject, , 监测一个对象
+    .参数 hHandle, 整数型
+    .参数 dwMilliseconds, 整数型
+
+.DLL命令 SetEnvironmentVariable, 整数型, kernel32.dll, SetEnvironmentVariableA, , 将一个环境变量设为指定的值  TRUE（非零）表示成功，否则返回零。会设置GetLastError
+    .参数 lpName, 文本型
+    .参数 lpValue, 文本型
+
+.DLL命令 GetEnvironmentVariable, 整数型, kernel32.dll, GetEnvironmentVariableA, , 取得一个环境变量的值  载入的环境变量的长度。如指定的环境字串不存在，就返回零。如lpBuffer的长度不足以全部容下字串，则返回字串的全长。随后可用这个长度分配一个足够大的缓冲区
+    .参数 lpName, 文本型, , 欲读入的环境字串的名称
+    .参数 lpBuffer, 文本型, , 随同字串装载的一个缓冲区。注意预先将其初始化到合适的长度
+    .参数 nSize, 整数型, , lpBuffer的长度;
+
+.DLL命令 SetWindowLongA, 整数型, user32.dll, SetWindowLongA, , 在窗口结构中为指定的窗口设置信息  指定数据的前一个值
+    .参数 窗口句柄, 整数型, , hwnd，欲为其取得信息的窗口的句柄
+    .参数 窗口信息值, 整数型, , nIndex，请参考GetWindowLong函数的nIndex参数的说明
+    .参数 窗口信息新值, 整数型, , dwNewLong，由nIndex指定的窗口信息的新值
+
+.DLL命令 GetWindowLong, 整数型, user32.dll, GetWindowLongA, , 从指定窗口的结构中取得信息  由nIndex决定。零表示出错。会设置GetLastError
+    .参数 hwnd, 整数型, , 欲为其获取信息的窗口的句柄
+    .参数 nIndex, 整数型, , 欲取回的信息，可以是下述任何一个常数：;GWL_EXSTYLE：扩展窗口样式;GWL_STYLE：窗口样式;GWL_WNDPROC：该窗口的窗口函数的地址;GWL_HINSTANCE：拥有窗口的实例的句柄;GWL_HWNDPARENT：该窗口之父的句柄。不要用SetWindowWord来改变这个值;GWL_ID：对话框中一个子窗口的标识符;GWL_USERDATA：含义由应用程序规定;DWL_DLGPROC：这个窗口的对话框函数地址;DWL_MSGRESULT：在对话框函数中处理的一条消息返回的值;DWL_USER：含义由应用程序规定;
+
+.DLL命令 SendMessage, 整数型, user32.dll, SendMessageA, , 调用一个窗口的窗口函数，将一条消息发给那个窗口。除非消息处理完毕，否则该函数不会返回。SendMessageBynum， ;    SendMessageByString是该函数的“类型安全”声明形式  由具体的消息决定
+    .参数 hwnd, 整数型, , 要接收消息的那个窗口的句柄
+    .参数 wMsg, 整数型, , 消息的标识符
+    .参数 wParam, 整数型, , 具体取决于消息
+    .参数 lParam, 整数型, , 具体取决于消息;
+
+.DLL命令 CreateSolidBrush, 整数型, gdi32.dll, CreateSolidBrush, , 用纯色创建一个刷子  如执行成功，返回新刷子的一个句柄；否则返回零
+    .参数 crColor, 整数型, , 数字的RGB彩色;
+
+.DLL命令 RegisterClassEx, 整数型, user32, RegisterClassExA, , 注册一个窗口类，以便后续用于调用CreateWindow或CreateWindowEx函数
+    .参数 pcWndClassEx, WNDCLASSEX, , 窗口类结构
+
+.DLL命令 LoadCursor, 整数型, user32, LoadCursorA, , 从指定的模块或应用程序实例中载入一个鼠标指针。LoadCursorBynum是LoadCursor函数的类型安全声明  执行成功则返回已载入的指针的句柄；零表示失败。在Windows ;    95 和Win16环境中，这个函数只能载入标准尺寸的图标
+    .参数 hInstance, 整数型, , 一个DLL的模块句柄；或者一个实例句柄，指定包含了鼠标指针的可执行程序
+    .参数 lpCursorName, 整数型, , 作为一个字串，指定欲载入的指针资源。作为一个长整数值，指定欲载入的资源ID；或者设置一个常数，代表某幅固有系统指针。如装载的是一个固有系统指针，注意hInstance参数应设为零。在api32.txt文件中以前缀IDC_ 作为标志;
+
+.DLL命令 DefWindowProc, 整数型, user32, DefWindowProcA, , 窗口消息默认处理
+    .参数 hwnd, 整数型, , 处理接收到消息的窗口句柄
+    .参数 wMsg, 整数型, , 指定消息
+    .参数 wParam, 整数型, , 指定附加的消息信息。此参数的内容取决于Msg参数的值
+    .参数 lParam, 整数型, , 指定附加的消息信息。此参数的内容取决于Msg参数的值
+

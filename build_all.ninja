@@ -1,0 +1,4 @@
+rule gencode
+    command = node gencode/gencode.js "$indir" "$params" "$outdir"
+include build_normal.gen.ninja
+include build_hash_map.gen.ninja

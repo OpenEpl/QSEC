@@ -1,0 +1,13 @@
+﻿.数据类型 QSJson错误信息, 公开
+    .成员 位置, 整数型, , , 从1开始，即1指第1个字符，2指第2个字符。PS：可用 文本_取行号 获取行号
+    .成员 信息, 文本型
+
+.数据类型 Internal_QSJsonParseExtensionParameter
+    .成员 Encode, 整数型, , , [In]
+    .成员 Mask_FirstByte, 字节型
+    .成员 ErrorMessaage, QSJson错误信息, 传址, , [Out]
+
+.数据类型 Internal_QSJsonToStringExtensionParameter
+    .成员 Encode, 整数型, , , [In]
+    .成员 Mask_FirstByte, 字节型, , , [In]
+

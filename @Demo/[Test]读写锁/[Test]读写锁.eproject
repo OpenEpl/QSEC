@@ -1,0 +1,36 @@
+﻿{
+  "Name": "",
+  "Version": "1.0.0.0",
+  "ProjectType": "WindowsApp",
+  "SourceSet": "src",
+  "OutFile": "..\\..\\_DemoBuild\\[Test]读写锁.exe",
+  "Dependencies": [
+    {
+      "Kind": "ELib",
+      "Name": "系统核心支持库",
+      "FileName": "krnln",
+      "Guid": "d09f2340818511d396f6aaf844c7e325",
+      "Version": "5.7"
+    },
+    {
+      "Kind": "ELib",
+      "Name": "多线程支持库",
+      "FileName": "EThread",
+      "Guid": "5F99C1642A2F4e03850721B4F5D7C3F8",
+      "Version": "2.0"
+    },
+    {
+      "Kind": "ELib",
+      "Name": "特殊功能支持库",
+      "FileName": "spec",
+      "Guid": "A512548E76954B6E92C21055517615B0",
+      "Version": "3.1"
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QS线程",
+      "Path": "../../_Build/QS线程.ec",
+      "ReExport": false
+    }
+  ]
+}

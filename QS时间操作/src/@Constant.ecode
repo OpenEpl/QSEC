@@ -1,0 +1,8 @@
+﻿.常量 SOCK_STREAM, "1"
+.常量 SOCK_DGRAM, "2"
+.常量 AF_UNSPEC, "0"
+.常量 IPPROTO_UDP, "17"
+.常量 AI_NUMERICHOST, "4"
+.常量 SOL_SOCKET, "65535"
+.常量 SO_RCVTIMEO, "4102"
+.常量 AF_INET6, "23"

@@ -1,0 +1,64 @@
+﻿.程序集 QsThreadPool_Queue, <对象>, , [内部使用]
+.程序集变量 Elements, 整数型, , "0"
+.程序集变量 Capacity, 整数型
+.程序集变量 Head, 整数型, , , E Style Index
+.程序集变量 Length, 整数型
+
+.子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
+
+重定义数组 (Elements, 假, #QsThreadPool_Queue_InitCapacity)
+Capacity = #QsThreadPool_Queue_InitCapacity
+Head = 1
+Length = 0
+.子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
+
+
+.子程序 Push, , 公开
+.参数 Element, 整数型
+.局部变量 OldCapacity, 整数型
+.局部变量 NewElements, 整数型, , "0"
+.局部变量 NumOfElementsInRight, 整数型
+.局部变量 NumOElementsfInLeft, 整数型
+
+OldCapacity = Capacity
+.如果 (Head + Length <= OldCapacity)
+    Elements[Head + Length] = Element
+.否则
+    .如果 (Length == OldCapacity)  ' Full
+        Capacity = 乘1点5 (OldCapacity)
+        重定义数组 (NewElements, 假, Capacity)
+        NumOfElementsInRight = OldCapacity - Head + 1
+        CopyMemory (取变量数据地址_整数型 (NewElements[1]), 取变量数据地址_整数型 (Elements[Head]), 左移 (NumOfElementsInRight, 2))
+        NumOElementsfInLeft = Head + Length - OldCapacity - 1
+        CopyMemory (取变量数据地址_整数型 (NewElements[1 + NumOfElementsInRight]), 取变量数据地址_整数型 (Elements[1]), 左移 (NumOElementsfInLeft, 2))
+        asm_交换变量_数组 (NewElements, Elements)
+        Head = 1
+        Elements[Head + Length] = Element
+    .否则
+        Elements[Head + Length - Capacity] = Element
+    .如果结束
+    
+.如果结束
+Length = Length + 1
+
+.子程序 Poll, 逻辑型, 公开
+.参数 Element, 整数型, 参考
+
+.如果真 (Length == 0)
+    返回 (假)
+.如果真结束
+Element = Elements[Head]
+Head = Head + 1
+Length = Length - 1
+.如果真 (Head > Capacity)
+    Head = 1
+.如果真结束
+返回 (真)
+.子程序 Clear, , 公开
+
+Head = 1
+Length = 0
+
+.子程序 Length, 整数型, 公开
+
+返回 (Length)

@@ -1,0 +1,123 @@
+﻿.程序集 QS线程池, <对象>, 公开
+.程序集变量 Queue, QsThreadPool_Queue
+.程序集变量 ThisPtr, 整数型
+.程序集变量 pThreadEntry, 整数型
+.程序集变量 NewTaskSemaphore, 整数型
+.程序集变量 Lock, CRITICAL_SECTION
+.程序集变量 LockForThreadHandle, CRITICAL_SECTION
+.程序集变量 ThreadHandle, 整数型, , "0"
+.程序集变量 InitCom, 逻辑型
+
+.子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
+
+ThisPtr = 取This指针 ()
+pThreadEntry = 取类函数地址 (ThisPtr, 2)
+NewTaskSemaphore = CreateSemaphore (0, 0, 十六进制 (“7FFFFFFF”), 0)
+InitializeCriticalSectionAndSpinCount (Lock, 4000)
+InitializeCriticalSection (LockForThreadHandle)
+.子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
+
+销毁 ()
+CloseHandle (NewTaskSemaphore)
+DeleteCriticalSection (Lock)
+DeleteCriticalSection (LockForThreadHandle)
+.子程序 ThreadEntry, 整数型
+.局部变量 Main, 整数型
+.局部变量 UserData, 整数型
+
+.如果真 (InitCom)
+    CoInitializeEx (0, 位或 (#COINIT_MULTITHREADED, #COINIT_SPEED_OVER_MEMORY))
+.如果真结束
+.判断循环首 (真)
+    WaitForSingleObject (NewTaskSemaphore, #INFINITE)
+    EnterCriticalSection (Lock)
+    Queue.Poll (Main)
+    Queue.Poll (UserData)
+    LeaveCriticalSection (Lock)
+    .如果 (Main != #PtrIdForDestroyThread)
+        ASM_调用子程序_1参数 (Main, UserData)
+    .否则
+        .如果真 (InitCom)
+            CoUninitialize ()
+        .如果真结束
+        ' 调用SetEvent时，尽管线程还没结束，但EIP已不在此模块内且再也不会返回此模块
+        ' 这意味此DLL模块可以被安全卸载
+        ' 从而使得等待过程可以丢到DllMain中
+        ' 尽管如此，仍然不推荐在DllMain中销毁线程池
+        GetProcAddress (GetModuleHandle (“kernel32.dll”), “SetEvent”)
+        ' AsmToECode代码:@arg pThis
+        ' AsmToECode代码:@local Main
+        ' AsmToECode代码:@local UserData
+        ' AsmToECode代码:mov ecx,UserData
+        ' AsmToECode代码:leave
+        ' AsmToECode代码:mov [esp+4],ecx
+        ' AsmToECode代码:jmp eax
+        置入代码 ({139, 77, 248, 201, 137, 76, 36, 4, 255, 224})
+        返回 (0)
+    .如果结束
+    
+.判断循环尾 ()
+返回 (0)
+.子程序 创建, , 公开
+.参数 _NumOfThreads, 整数型
+.参数 _InitCom, 逻辑型, 可空, 默认为真。注：如果要用到COM，应将初始化工作交给线程池，而不是放在每个任务中，以便加快效率
+.参数 _StackSize, 整数型, 可空
+.局部变量 i, 整数型
+
+EnterCriticalSection (LockForThreadHandle)
+销毁 ()
+.如果 (是否为空 (_InitCom))
+    InitCom = 真
+.否则
+    InitCom = _InitCom
+.如果结束
+重定义数组 (ThreadHandle, 假, _NumOfThreads)
+.计次循环首 (_NumOfThreads, i)
+    ThreadHandle[i] = CreateThread (0, _StackSize, pThreadEntry, 取变量数据地址_整数型 (ThisPtr), #STACK_SIZE_PARAM_IS_A_RESERVATION, 0)
+.计次循环尾 ()
+LeaveCriticalSection (LockForThreadHandle)
+.子程序 销毁, , 公开, 等待当前任务全部完成
+.局部变量 i, 整数型
+.局部变量 ExitedEvent, 整数型
+.局部变量 WaitObjects, 整数型, , "2"
+.局部变量 NumOfThreads, 整数型
+
+EnterCriticalSection (LockForThreadHandle)
+.如果真 (取数组下标 (ThreadHandle, ) == 0)
+    LeaveCriticalSection (LockForThreadHandle)
+    返回 ()
+.如果真结束
+ExitedEvent = CreateEvent (0, 0, 0, 0)
+.计次循环首 (取数组下标 (ThreadHandle, ), i)  ' 防止某些线程意外退出（只保证在无意外退出的情况下正确安全）
+    .如果真 (WaitForSingleObject (ThreadHandle[i], 0) == #WAIT_TIMEOUT)
+        NumOfThreads = NumOfThreads + 1
+    .如果真结束
+    CloseHandle (ThreadHandle[i])
+.计次循环尾 ()
+.计次循环首 (NumOfThreads, )
+    EnterCriticalSection (Lock)
+    Queue.Push (#PtrIdForDestroyThread)
+    Queue.Push (ExitedEvent)
+    LeaveCriticalSection (Lock)
+    ReleaseSemaphore (NewTaskSemaphore, 1, 0)
+    WaitForSingleObject (ExitedEvent, #INFINITE)
+.计次循环尾 ()
+CloseHandle (ExitedEvent)
+清除数组 (ThreadHandle)
+LeaveCriticalSection (LockForThreadHandle)
+.子程序 添加任务, , 公开
+.参数 FunctionAddress, 整数型
+.参数 UserData, 整数型, 可空
+
+EnterCriticalSection (Lock)
+Queue.Push (FunctionAddress)
+Queue.Push (UserData)
+LeaveCriticalSection (Lock)
+ReleaseSemaphore (NewTaskSemaphore, 1, 0)
+.子程序 待执行任务数, 整数型, 公开
+.局部变量 result, 整数型
+
+EnterCriticalSection (Lock)
+result = Queue.Length ()
+LeaveCriticalSection (Lock)
+返回 (右移 (result, 1))

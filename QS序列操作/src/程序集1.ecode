@@ -1,0 +1,519 @@
+﻿.程序集 程序集1
+
+.子程序 _启动子程序, 整数型, , 请在本子程序中放置易模块初始化代码
+
+
+_临时子程序 ()  ' 在初始化代码执行完毕后调用测试代码
+返回 (0)  ' 可以根据您的需要返回任意数值
+.子程序 _临时子程序
+.局部变量 IntArrayObject, 整数序列
+.局部变量 RawIntArray, 整数型, , "0"
+.局部变量 StringArrayObject, 文本序列
+.局部变量 RawStringArray, 文本型, , "0"
+.局部变量 ResultIntArray, 整数型, , "0"
+
+' 本名称子程序用作测试程序用，仅在开发及调试环境中有效，编译发布程序前将被系统自动清空，请将所有用作测试的临时代码放在本子程序中。 ***注意不要修改本子程序的名称、参数及返回值类型。
+RawIntArray = {2, 3, 1, 4, 5, 7, 9, 10, 8, 6, 11, 3}
+IntArrayObject.数据交换 (RawIntArray)
+检查 (序列_寻找元素 (IntArrayObject, 3) == 2)
+序列_快速排序 (IntArrayObject)
+检查 (序列_二分查找 (IntArrayObject, 3) == 3)
+检查 (序列_寻找元素 (IntArrayObject, 3) == 3)
+检查 (序列_倒找元素 (IntArrayObject, 3) == 4)
+序列_寻找所有元素 (IntArrayObject, 3, ResultIntArray)
+检查 (取数组下标 (ResultIntArray, ) == 2 && ResultIntArray[1] == 3 && ResultIntArray[2] == 4)
+
+RawStringArray = {“02”, “03”, “01”, “04”, “05”, “07”, “09”, “10”, “08”, “06”, “11”, “03”}
+StringArrayObject.数据交换 (RawStringArray)
+检查 (序列_寻找元素 (StringArrayObject, “03”) == 2)
+序列_快速排序 (StringArrayObject)
+检查 (序列_二分查找 (StringArrayObject, “03”) == 3)
+检查 (序列_寻找元素 (StringArrayObject, “03”) == 3)
+检查 (序列_倒找元素 (StringArrayObject, “03”) == 4)
+序列_寻找所有元素 (StringArrayObject, “03”, ResultIntArray)
+检查 (取数组下标 (ResultIntArray, ) == 2 && ResultIntArray[1] == 3 && ResultIntArray[2] == 4)
+.子程序 序列_寻找所有元素, 整数型, 公开, 返回数量
+.参数 array, 序列基类
+.参数 value, 通用型, 参考, 自行保证数据类型符合
+.参数 result, 整数型, 参考 数组
+.参数 left, 整数型, 可空, 包括
+.参数 right, 整数型, 可空, 包括
+.局部变量 count, 整数型
+.局部变量 capacity, 整数型
+
+.如果真 (是否为空 (left))
+    left = 1
+.如果真结束
+.如果真 (是否为空 (right))
+    right = array.取长度 ()
+.如果真结束
+重定义数组 (result, 假, 8)
+capacity = 8
+.判断循环首 (left <= right)
+    .如果真 (array.比较成员_与外部对象 (left, value) == 0)
+        count = count + 1
+        .如果 (count <= capacity)
+            result[count] = left
+        .否则
+            capacity = asm_乘1点5 (capacity)
+            重定义数组 (result, 真, capacity)
+            result[count] = left
+        .如果结束
+        
+    .如果真结束
+    left = left + 1
+.判断循环尾 ()
+重定义数组 (result, 真, count)
+返回 (count)
+.子程序 序列_寻找元素, 整数型, 公开
+.参数 array, 序列基类
+.参数 value, 通用型, 参考, 自行保证数据类型符合
+.参数 left, 整数型, 可空, 包括
+.参数 right, 整数型, 可空, 包括
+
+.如果真 (是否为空 (left))
+    left = 1
+.如果真结束
+.如果真 (是否为空 (right))
+    right = array.取长度 ()
+.如果真结束
+.判断循环首 (left <= right)
+    .如果真 (array.比较成员_与外部对象 (left, value) == 0)
+        返回 (left)
+    .如果真结束
+    left = left + 1
+.判断循环尾 ()
+返回 (-1)
+.子程序 序列_倒找元素, 整数型, 公开
+.参数 array, 序列基类
+.参数 value, 通用型, 参考, 自行保证数据类型符合
+.参数 left, 整数型, 可空, 包括
+.参数 right, 整数型, 可空, 包括
+
+.如果真 (是否为空 (left))
+    left = 1
+.如果真结束
+.如果真 (是否为空 (right))
+    right = array.取长度 ()
+.如果真结束
+.判断循环首 (left <= right)
+    .如果真 (array.比较成员_与外部对象 (right, value) == 0)
+        返回 (right)
+    .如果真结束
+    right = right - 1
+.判断循环尾 ()
+返回 (-1)
+.子程序 序列_求最长公共子序列, 整数型, 公开, 【区别于 求最长公共子串，子序列可以是原来的序列中不连续的数据，但顺序不变。“AxxBC”个“AyyBC”的最长公共子串为“BC”，但最长公共子序列为“ABC”】返回序列长度
+.参数 A, 序列基类
+.参数 B, 序列基类
+.参数 位置inA, 整数型, 可空 数组, 仅为1种可能的解
+.参数 位置inB, 整数型, 可空 数组, 仅为1种可能的解
+.局部变量 M, 整数型, , "0", M[k][i]表示满足LCS_LENGTH(A[1:i]，B[1:j])==k的最小整数j，0表示不存在
+.局部变量 Length_A, 整数型
+.局部变量 k, 整数型
+.局部变量 i, 整数型
+.局部变量 j, 整数型
+.局部变量 Length_B, 整数型
+.局部变量 p, 整数型
+.局部变量 max_j, 整数型
+
+.如果真 (A.取长度 () > B.取长度 ())
+    返回 (序列_求最长公共子序列 (B, A, 位置inB, 位置inA))
+.如果真结束
+' 算法：http://www.paper.edu.cn/releasepaper/content/201011-538
+清除数组 (位置inA)
+清除数组 (位置inB)
+Length_A = A.取长度 ()
+Length_B = B.取长度 ()
+
+k = 1
+.如果真 (Length_A != 0)
+    重定义数组 (M, 假, Length_A, Length_A)
+    
+    ' k=1，i=1的情况
+    j = 1
+    max_j = Length_B
+    .判断循环首 (j <= max_j)
+        .如果真 (A.比较成员_与另一序列 (1, B, j) == 0)
+            M[1][1] = j
+            跳出循环 ()
+        .如果真结束
+        j = j + 1
+    .判断循环尾 ()
+    
+    .如果 (M[1][1] == 1)
+        j = 2
+        .判断循环首 (j <= Length_A)
+            M[1][j] = M[1][1]
+            j = j + 1
+        .判断循环尾 ()
+    .否则
+        ' k=1，i>1的情况
+        i = 2
+        .判断循环首 (i <= Length_A)
+            j = 1
+            
+            max_j = M[1][i - 1]
+            M[1][i] = max_j
+            .如果 (max_j != 0)
+                max_j = max_j - 1
+            .否则
+                max_j = Length_B
+            .如果结束
+            .判断循环首 (j <= max_j)
+                .如果真 (A.比较成员_与另一序列 (i, B, j) == 0)
+                    M[1][i] = j
+                    跳出循环 ()
+                .如果真结束
+                j = j + 1
+            .判断循环尾 ()
+            
+            .如果真 (M[1][i] == 1)
+                j = i + 1
+                .判断循环首 (j <= Length_A)
+                    M[1][j] = M[1][i]
+                    j = j + 1
+                .判断循环尾 ()
+                跳出循环 ()
+            .如果真结束
+            
+            i = i + 1
+        .判断循环尾 ()
+        
+    .如果结束
+    
+    ' k>1的情况
+    .如果真 (M[1][Length_A] != 0)
+        k = 2
+        .判断循环首 (k <= Length_A)
+            i = k
+            .判断循环首 (i <= Length_A)
+                .如果 (M[k - 1][i] != 0)
+                    j = M[k - 1][i] + 1
+                .否则
+                    
+                    i = i + 1
+                    到循环尾 ()
+                .如果结束
+                
+                max_j = M[k][i - 1]
+                M[k][i] = max_j
+                .如果 (max_j != 0)
+                    max_j = max_j - 1
+                .否则
+                    max_j = Length_B
+                .如果结束
+                .判断循环首 (j <= max_j)
+                    .如果真 (A.比较成员_与另一序列 (i, B, j) == 0)
+                        M[k][i] = j
+                        跳出循环 ()
+                    .如果真结束
+                    j = j + 1
+                .判断循环尾 ()
+                
+                .如果真 (M[k][i] == k)
+                    j = i + 1
+                    .判断循环首 (j <= Length_A)
+                        M[k][j] = M[k][i]
+                        j = j + 1
+                    .判断循环尾 ()
+                    跳出循环 ()
+                .如果真结束
+                
+                i = i + 1
+            .判断循环尾 ()
+            
+            
+            .如果真 (M[k][Length_A] == 0)
+                跳出循环 ()
+            .如果真结束
+            k = k + 1
+        .判断循环尾 ()
+    .如果真结束
+    
+.如果真结束
+p = k - 1
+
+重定义数组 (位置inA, 假, p)
+重定义数组 (位置inB, 假, p)
+k = p
+i = Length_A
+.判断循环首 (k > 0)
+    位置inB[k] = M[k][i]
+    .判断循环首 (i > 1 && M[k][i - 1] == M[k][i])
+        i = i - 1
+    .判断循环尾 ()
+    位置inA[k] = i
+    k = k - 1
+.判断循环尾 ()
+返回 (p)
+.子程序 序列_反转, , 公开, 【当前算法时间复杂度O(n)，空间复杂度O(1)】
+.参数 array, 序列基类
+.参数 left, 整数型, 可空, 包括
+.参数 right, 整数型, 可空, 包括
+
+.如果真 (是否为空 (left))
+    left = 1
+.如果真结束
+.如果真 (是否为空 (right))
+    right = array.取长度 ()
+.如果真结束
+
+.判断循环首 (left < right)
+    array.交换成员 (left, right)
+    left = left + 1
+    right = right - 1
+.判断循环尾 ()
+.子程序 序列_快速排序, , 公开
+.参数 array, 序列基类
+.参数 正序或倒序, 逻辑型, 可空
+.参数 start, 整数型, 可空, 包括
+.参数 end, 整数型, 可空, 包括
+.局部变量 j, 整数型
+.局部变量 mid, 整数型
+.局部变量 x_index, 整数型
+.局部变量 newend, 整数型
+.局部变量 left, 整数型
+.局部变量 right, 整数型
+.局部变量
+.局部变量 stack, 整数型
+
+.如果真 (是否为空 (正序或倒序))
+    正序或倒序 = 真
+.如果真结束
+.如果真 (是否为空 (start))
+    start = 1
+.如果真结束
+.如果真 (是否为空 (end))
+    end = array.取长度 ()
+.如果真结束
+
+.如果 (正序或倒序)
+    stack = ArrayList_New ()
+    .判断循环首 (真)
+        .判断循环首 (start >= end)
+            .如果真 (ArrayList_GetLength (stack) == 0)
+                ArrayList_Delete (stack)
+                返回 ()
+            .如果真结束
+            start = ArrayList_Pop (stack)
+            end = ArrayList_Pop (stack)
+        .判断循环尾 ()
+        mid = start + 右移 (end - start, 1)  ' mid = start + (end - start) / 2
+        
+        .如果真 (array.比较成员 (mid, end) > 0)
+            array.交换成员 (mid, end)
+        .如果真结束
+        .如果真 (array.比较成员 (start, end) > 0)
+            array.交换成员 (start, end)
+        .如果真结束
+        .如果 (array.比较成员 (mid, start) > 0)
+            x_index = mid
+        .否则
+            x_index = start
+        .如果结束
+        
+        
+        left = start
+        right = end
+        .判断循环首 (真)
+            .判断循环首 (array.比较成员 (right, x_index) >= 0 && left < right)  ' 在右边找一个比x小的
+                right = right - 1
+            .判断循环尾 ()
+            .判断循环首 (array.比较成员 (left, x_index) < 0 && left < right)  ' 在左边找一个比x大或等于的
+                left = left + 1
+            .判断循环尾 ()
+            .如果 (left < right)
+                array.交换成员 (right, left)
+                .如果真 (left == x_index)
+                    x_index = right
+                .如果真结束
+                
+            .否则
+                跳出循环 ()
+            .如果结束
+            
+        .判断循环尾 ()
+        newend = left
+        
+        left = left + 1
+        right = end
+        .判断循环首 (真)
+            .判断循环首 (array.比较成员 (right, x_index) != 0 && left < right)  ' 在右边找一个和x相等的
+                right = right - 1
+            .判断循环尾 ()
+            .判断循环首 (array.比较成员 (left, x_index) == 0 && left < right)  ' 在左边找一个和x不等的
+                left = left + 1
+            .判断循环尾 ()
+            .如果 (left < right)
+                array.交换成员 (right, left)
+                .如果真 (right == x_index)
+                    x_index = left
+                .如果真结束
+                
+            .否则
+                跳出循环 ()
+            .如果结束
+            
+        .判断循环尾 ()
+        left = left + 1
+        
+        .如果 (end - left < newend - start)
+            ArrayList_Add (stack, end)
+            ArrayList_Add (stack, left)
+            end = newend
+        .否则
+            ArrayList_Add (stack, newend)
+            ArrayList_Add (stack, start)
+            start = left
+        .如果结束
+        
+    .判断循环尾 ()
+    
+.否则
+    stack = ArrayList_New ()
+    .判断循环首 (真)
+        .判断循环首 (start >= end)
+            .如果真 (ArrayList_GetLength (stack) == 0)
+                ArrayList_Delete (stack)
+                返回 ()
+            .如果真结束
+            start = ArrayList_Pop (stack)
+            end = ArrayList_Pop (stack)
+        .判断循环尾 ()
+        mid = start + 右移 (end - start, 1)  ' mid = start + (end - start) / 2
+        
+        .如果真 (array.比较成员 (mid, end) > 0)
+            array.交换成员 (mid, end)
+        .如果真结束
+        .如果真 (array.比较成员 (start, end) > 0)
+            array.交换成员 (start, end)
+        .如果真结束
+        .如果 (array.比较成员 (mid, start) > 0)
+            x_index = mid
+        .否则
+            x_index = start
+        .如果结束
+        
+        
+        left = start
+        right = end
+        .判断循环首 (真)
+            .判断循环首 (array.比较成员 (right, x_index) <= 0 && left < right)  ' 在右边找一个比x大的
+                right = right - 1
+            .判断循环尾 ()
+            .判断循环首 (array.比较成员 (left, x_index) > 0 && left < right)  ' 在左边找一个比x小或等于的
+                left = left + 1
+            .判断循环尾 ()
+            .如果 (left < right)
+                array.交换成员 (right, left)
+                .如果真 (left == x_index)
+                    x_index = right
+                .如果真结束
+                
+            .否则
+                跳出循环 ()
+            .如果结束
+            
+        .判断循环尾 ()
+        newend = left
+        
+        left = left + 1
+        right = end
+        .判断循环首 (真)
+            .判断循环首 (array.比较成员 (right, x_index) != 0 && left < right)  ' 在右边找一个和x相等的
+                right = right - 1
+            .判断循环尾 ()
+            .判断循环首 (array.比较成员 (left, x_index) == 0 && left < right)  ' 在左边找一个和x不等的
+                left = left + 1
+            .判断循环尾 ()
+            .如果 (left < right)
+                array.交换成员 (right, left)
+                .如果真 (right == x_index)
+                    x_index = left
+                .如果真结束
+                
+            .否则
+                跳出循环 ()
+            .如果结束
+            
+        .判断循环尾 ()
+        left = left + 1
+        
+        .如果 (end - left < newend - start)
+            ArrayList_Add (stack, end)
+            ArrayList_Add (stack, left)
+            end = newend
+        .否则
+            ArrayList_Add (stack, newend)
+            ArrayList_Add (stack, start)
+            start = left
+        .如果结束
+        
+    .判断循环尾 ()
+    
+.如果结束
+
+.子程序 序列_循环左移, , 公开, 有时也被称作 左旋转【当前算法时间复杂度O(n)，空间复杂度O(1)】
+.参数 array, 序列基类
+.参数 n, 整数型
+.局部变量 length, 整数型
+
+.如果真 (n > 0)
+    length = array.取长度 ()
+    .如果 (n < length)
+        序列_反转 (array, 1, n)
+        n = n + 1
+        序列_反转 (array, n, length)
+        序列_反转 (array, 1, length)
+    .否则
+        序列_循环左移 (array, n % length)
+    .如果结束
+    
+.如果真结束
+
+.子程序 序列_循环右移, , 公开, 有时也被称作 右旋转【当前算法时间复杂度O(n)，空间复杂度O(1)】
+.参数 array, 序列基类
+.参数 n, 整数型
+.局部变量 length, 整数型
+
+.如果真 (n > 0)
+    length = array.取长度 ()
+    .如果 (n < length)
+        序列_反转 (array, 1, length)
+        序列_反转 (array, 1, n)
+        n = n + 1
+        序列_反转 (array, n, length)
+    .否则
+        序列_循环右移 (array, n % length)
+    .如果结束
+    
+.如果真结束
+
+.子程序 序列_二分查找, 整数型, 公开, 【序列必须已被 按正序排序 过】找不到：返回-1；找到：返回下标
+.参数 array, 序列基类
+.参数 value, 通用型, 参考, 自行保证数据类型符合
+.参数 left, 整数型, 可空, 包括
+.参数 right, 整数型, 可空, 包括
+.局部变量 i, 整数型
+.局部变量 c, 整数型
+
+.如果真 (是否为空 (left))
+    left = 1
+.如果真结束
+.如果真 (是否为空 (right))
+    right = array.取长度 ()
+.如果真结束
+.判断循环首 (left <= right)
+    i = left + 右移 (right - left, 1)
+    c = array.比较成员_与外部对象 (i, value)
+    .判断开始 (c == 0)
+        返回 (i)
+    .判断 (c < 0)
+        left = i + 1
+    .默认
+        right = i - 1
+    .判断结束
+    
+.判断循环尾 ()
+返回 (-1)

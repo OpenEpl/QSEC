@@ -1,0 +1,43 @@
+﻿.程序集 ArrayListOfControlInfos, <对象>, 公开
+.程序集变量 Count, 整数型
+.程序集变量 Data, ControlRecord, , "16"
+
+.子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
+
+
+.子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
+
+
+.子程序 Add, 整数型, 公开
+.参数 one, ControlRecord, 可空
+.局部变量 Index, 整数型
+
+Index = Count + 1
+.如果真 (Index > 取数组下标 (Data, ))
+    重定义数组 (Data, 真, 取数组下标 (Data, ) * 2)
+.如果真结束
+.如果真 (是否为空 (one) == 假)
+    Data[Index] = one
+.如果真结束
+Count = Count + 1
+返回 (Index)
+.子程序 SwapElem, , 公开, 快！
+.参数 index, 整数型
+.参数 one, ControlRecord, 参考, 传入目标，传出原信息
+
+强制交换变量 (Data[index], one)
+.子程序 Count, 整数型, 公开
+
+返回 (Count)
+.子程序 Get, ControlRecord, 公开
+.参数 i, 整数型
+.局部变量 result, ControlRecord
+
+.如果真 (i >= 1 && i <= Count)
+    result = Data[i]
+.如果真结束
+返回 (result)
+.子程序 Clear, , 公开
+
+重定义数组 (Data, 假, 16)
+Count = 0

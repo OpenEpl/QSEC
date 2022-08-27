@@ -1,0 +1,21 @@
+﻿.DLL命令 GetACP, 整数型, kernel32, GetACP, , 判断目前正在生效的ANSI代码页  目前活动ANSI代码页的标识符。针对一种特定的语言，可能存在多个这样的代码页。可能的代码页包括下面这些：
+
+
+.DLL命令 HeapAlloc, 整数型, kernel32.dll, HeapAlloc, , 从堆中分配内存
+    .参数 hHeap, 整数型
+    .参数 dwFlags, 整数型
+    .参数 dwBytes, 整数型
+
+.DLL命令 GetProcessHeap, 整数型, kernel32, GetProcessHeap, , 获取调用过程堆句柄
+
+
+.DLL命令 HeapFree, 整数型, kernel32.dll, HeapFree, , 释放从堆中分配的内存
+    .参数 hHeap, 整数型
+    .参数 dwFlags, 整数型
+    .参数 lpMem, 整数型
+
+.DLL命令 CopyMemory, , ntdll.dll, @memcpy
+    .参数 pDest, 整数型
+    .参数 pSrc, 整数型
+    .参数 ByteLen, 整数型
+

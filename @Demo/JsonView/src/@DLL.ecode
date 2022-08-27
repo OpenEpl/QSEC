@@ -1,0 +1,22 @@
+﻿.DLL命令 WideCharToMultiByte, 整数型, kernel32.dll, WideCharToMultiByte
+    .参数 目标代码页, 整数型
+    .参数 标志, 整数型
+    .参数 宽字符文本, 字节集
+    .参数 宽字符文本长度, 整数型
+    .参数 双字节文本, 字节集
+    .参数 双字节文本长度, 整数型
+    .参数 默认文本, 整数型
+    .参数 使用默认文本, 整数型
+
+.DLL命令 _SM_TV_INSERTSTRUCT, 整数型, user32.dll, SendMessageA, , 来自EVA 发消息TV_INSERTSTRUCT
+    .参数 hwnd, 整数型, , 窗口句柄
+    .参数 wMsg, 整数型, , 消息值
+    .参数 wParam, 整数型
+    .参数 lParam, TV_INSERTSTRUCT, , 结构类型
+
+.DLL命令 SendMessage, 整数型, user32.dll, SendMessageA, , 调用一个窗口的窗口函数，将一条消息发给那个窗口。除非消息处理完毕，否则该函数不会返回。SendMessageBynum， ;    SendMessageByString是该函数的“类型安全”声明形式  由具体的消息决定
+    .参数 hwnd, 整数型, , 要接收消息的那个窗口的句柄
+    .参数 wMsg, 整数型, , 消息的标识符
+    .参数 wParam, 整数型, , 具体取决于消息
+    .参数 lParam, 整数型, , 具体取决于消息;
+

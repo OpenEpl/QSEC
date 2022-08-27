@@ -1,0 +1,547 @@
+﻿.程序集 QSJson_Ref, <对象>, 公开, 【智能引用】JSON对象，用于存储具体数据，支持所有有效JSON类型（整数、小数、对象、数组、逻辑、空值都可以使用本对象表达）
+.程序集变量 JSON内存节点, 整数型
+.程序集变量 ArcHelper, 对象, , , 假COM对象，因此不需要用户调用CoInitialize等函数初始化
+
+.子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
+
+JSON内存节点 = JSON内存节点_创建 ()
+ArcHelper = ThisToCom_NotAddRef (JSON内存节点)
+.子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
+
+
+.子程序 Internal_SetNakedNodePtr, , 公开, 【内部使用】原节点自动引用-1，新节点不会自动+1
+.参数 新节点, 整数型
+
+JSON内存节点 = 新节点
+ArcHelper = ThisToCom_NotAddRef (JSON内存节点)
+.子程序 Internal_SetNakedNodePtrAndAddRef, , 公开, 【内部使用】原节点自动引用-1，新节点自动+1
+.参数 新节点, 整数型
+
+JSON内存节点_引用加 (新节点)
+JSON内存节点 = 新节点
+ArcHelper = ThisToCom_NotAddRef (JSON内存节点)
+.子程序 Internal_GetNakedNodePtr, 整数型, 公开, 【内部使用】不修改引用计数
+
+返回 (JSON内存节点)
+.子程序 Internal_GetNakedNodePtrAndAddRef, 整数型, 公开, 【内部使用】自动引用+1
+
+JSON内存节点_引用加 (JSON内存节点)
+返回 (JSON内存节点)
+.子程序 清空, , 公开, 清空
+
+JSON内存节点_置为空 (JSON内存节点)
+.子程序 类型, 整数型, 公开, 当前对象类型。参考 QSJson_值类型_*
+.参数 value, 整数型, 可空, 对象类型。参考 QSJson_值类型_*。如果与当前类型不相同，将清除当前数据！不会尝试自动转换！
+.局部变量 返回值, 整数型
+
+返回值 = JSON内存节点_取类型 (JSON内存节点)
+.如果真 (是否为空 (value) == 假)
+    .如果真 (value != 返回值)
+        .判断开始 (value == #QSJson_值类型_长整数)
+            JSON内存节点_置长整数 (JSON内存节点, 0)
+        .判断 (value == #QSJson_值类型_逻辑)
+            JSON内存节点_置逻辑 (JSON内存节点, 假)
+        .判断 (value == #QSJson_值类型_空)
+            JSON内存节点_置为空 (JSON内存节点)
+        .判断 (value == #QSJson_值类型_数组)
+            JSON内存节点_置为空数组 (JSON内存节点)
+        .判断 (value == #QSJson_值类型_文本)
+            JSON内存节点_置文本 (JSON内存节点, “”)
+        .判断 (value == #QSJson_值类型_双精度小数)
+            JSON内存节点_置双精度小数 (JSON内存节点, 0)
+        .判断 (value == #QSJson_值类型_对象)
+            JSON内存节点_置为空对象 (JSON内存节点)
+        .默认
+            调试输出 (“错误，未知JSON类型：” + 到文本 (value))
+        .判断结束
+        
+    .如果真结束
+    
+.如果真结束
+
+返回 (返回值)
+.子程序 数量, 整数型, 公开, 类型为 #QSJson_值类型_数组 或 QSJson_值类型_对象 时才有效
+.局部变量 Type, 整数型
+
+Type = JSON内存节点_取类型 (JSON内存节点)
+.如果真 (Type == #QSJson_值类型_数组)
+    返回 (JSON数组_取数量 (JSON内存节点_数组_取地址 (JSON内存节点)))
+.如果真结束
+.如果真 (Type == #QSJson_值类型_对象)
+    返回 (JSON对象_取数量 (JSON内存节点_对象_取地址 (JSON内存节点)))
+.如果真结束
+返回 (0)
+.子程序 取_带默认值, QSJson_Ref, 公开, 存在时等同于Get，不存在时Put一个null并返回
+.参数 key, 文本型
+.局部变量 val, QSJson_Ref
+.局部变量 pNode, 整数型
+
+.如果真 (类型 () != #QSJson_值类型_对象)
+    JSON内存节点_置为空对象 (JSON内存节点)
+.如果真结束
+pNode = JSON对象_取 (JSON内存节点_对象_取地址 (JSON内存节点), key)
+.如果 (pNode == 0)
+    pNode = val.Internal_GetNakedNodePtr ()
+    JSON内存节点_引用加 (pNode)
+    JSON对象_置 (JSON内存节点_对象_取地址 (JSON内存节点), key, pNode)
+.否则
+    JSON内存节点_引用加 (pNode)
+    val.Internal_SetNakedNodePtr (pNode)
+.如果结束
+
+返回 (val)
+.子程序 取_带默认值_字节集, QSJson_Ref, 公开, 存在时等同于Get，不存在时Put一个null并返回
+.参数 key, 字节集
+.局部变量 val, QSJson_Ref
+.局部变量 pNode, 整数型
+
+.如果真 (类型 () != #QSJson_值类型_对象)
+    JSON内存节点_置为空对象 (JSON内存节点)
+.如果真结束
+pNode = JSON对象_取_字节集 (JSON内存节点_对象_取地址 (JSON内存节点), key)
+.如果 (pNode == 0)
+    pNode = val.Internal_GetNakedNodePtr ()
+    JSON内存节点_引用加 (pNode)
+    JSON对象_置_字节集 (JSON内存节点_对象_取地址 (JSON内存节点), key, pNode)
+.否则
+    JSON内存节点_引用加 (pNode)
+    val.Internal_SetNakedNodePtr (pNode)
+.如果结束
+
+返回 (val)
+.子程序 取, QSJson_Ref, 公开, 类型为 #QSJson_值类型_数组 时才有效    通过名称获取对象
+.参数 key, 文本型
+.参数 存在, 逻辑型, 参考 可空
+.局部变量 val, QSJson_Ref
+.局部变量 pNode, 整数型
+
+.如果真 (类型 () == #QSJson_值类型_对象)
+    pNode = JSON对象_取 (JSON内存节点_对象_取地址 (JSON内存节点), key)
+    .如果 (pNode == 0)
+        存在 = 假
+    .否则
+        JSON内存节点_引用加 (pNode)
+        val.Internal_SetNakedNodePtr (pNode)
+        存在 = 真
+    .如果结束
+    
+.如果真结束
+
+返回 (val)
+.子程序 取_字节集, QSJson_Ref, 公开, 类型为 #QSJson_值类型_数组 时才有效    通过名称获取对象
+.参数 key, 字节集
+.参数 存在, 逻辑型, 参考 可空
+.局部变量 val, QSJson_Ref
+.局部变量 pNode, 整数型
+
+.如果真 (类型 () == #QSJson_值类型_对象)
+    pNode = JSON对象_取_字节集 (JSON内存节点_对象_取地址 (JSON内存节点), key)
+    .如果 (pNode == 0)
+        存在 = 假
+    .否则
+        JSON内存节点_引用加 (pNode)
+        val.Internal_SetNakedNodePtr (pNode)
+        存在 = 真
+    .如果结束
+    
+.如果真结束
+
+返回 (val)
+.子程序 取数组成员, QSJson_Ref, 公开, 类型为 #QSJson_值类型_数组 时才有效    通过位置获取对象
+.参数 pos, 整数型, , 位置。从1开始
+
+pos = pos - 1
+返回 (取数组成员_C风格 (pos))
+.子程序 取数组成员_C风格, QSJson_Ref, 公开, 类型为 #QSJson_值类型_数组 时才有效    通过位置获取对象
+.参数 pos, 整数型, , 位置。从0开始
+.局部变量 val, QSJson_Ref
+.局部变量 pNode, 整数型
+
+.如果真 (类型 () != #QSJson_值类型_数组)
+    返回 (val)
+.如果真结束
+.如果真 (pos >= 数量 () || pos < 0)
+    返回 (val)
+.如果真结束
+pNode = JSON数组_取 (JSON内存节点_数组_取地址 (JSON内存节点), pos)
+JSON内存节点_引用加 (pNode)
+val.Internal_SetNakedNodePtr (pNode)
+返回 (val)
+.子程序 置数组成员, , 公开, 类型为 #QSJson_值类型_数组 时才有效
+.参数 pos, 整数型, , 位置。从1开始。必须保证该项目已存在，否则失败！
+.参数 obj, QSJson_Ref
+
+pos = pos - 1
+置数组成员_C风格 (pos, obj)
+.子程序 置数组成员_C风格, , 公开, 类型为 #QSJson_值类型_数组 时才有效
+.参数 pos, 整数型, , 位置。从0开始。必须保证该项目已存在，否则失败！
+.参数 obj, QSJson_Ref
+.局部变量 p, 整数型
+
+.如果真 (类型 () != #QSJson_值类型_数组)
+    返回 ()
+.如果真结束
+.如果真 (pos >= 数量 () || pos < 0)
+    返回 ()
+.如果真结束
+p = obj.Internal_GetNakedNodePtr ()
+JSON内存节点_引用加 (p)
+JSON数组_置 (JSON内存节点_数组_取地址 (JSON内存节点), pos, p)
+.子程序 置, 逻辑型, 公开, 加入对象。
+.参数 key, 文本型
+.参数 obj, QSJson_Ref
+
+.如果真 (类型 () != #QSJson_值类型_对象)
+    JSON内存节点_置为空对象 (JSON内存节点)
+.如果真结束
+JSON对象_置 (JSON内存节点_对象_取地址 (JSON内存节点), key, obj.Internal_GetNakedNodePtrAndAddRef ())
+返回 (真)
+.子程序 置_字节集, 逻辑型, 公开, 加入对象。
+.参数 key, 字节集
+.参数 obj, QSJson_Ref
+
+.如果真 (类型 () != #QSJson_值类型_对象)
+    JSON内存节点_置为空对象 (JSON内存节点)
+.如果真结束
+JSON对象_置_字节集 (JSON内存节点_对象_取地址 (JSON内存节点), key, obj.Internal_GetNakedNodePtrAndAddRef ())
+返回 (真)
+.子程序 加入数组成员, 逻辑型, 公开, 加入对象到数组。
+.参数 obj, QSJson_Ref, , 对象
+
+.如果真 (类型 () != #QSJson_值类型_数组)
+    JSON内存节点_置为空数组 (JSON内存节点)
+.如果真结束
+JSON数组_加 (JSON内存节点_数组_取地址 (JSON内存节点), obj.Internal_GetNakedNodePtrAndAddRef ())
+返回 (真)
+.子程序 删, 逻辑型, 公开, 删除下级对象。只针对 #QSJson_值类型_对象 类型的对象
+.参数 key, 文本型
+
+.如果真 (是否存在 (key) == 假)
+    返回 (假)
+.如果真结束
+JSON对象_删 (JSON内存节点_对象_取地址 (JSON内存节点), key)
+返回 (真)
+.子程序 删除数组成员, 逻辑型, 公开, 删除指定位置的对象。只针对 #QSJson_值类型_数组 类型的对象
+.参数 pos, 整数型, , 位置索引。从1开始
+
+pos = pos - 1
+返回 (删除数组成员_C风格 (pos))
+.子程序 删除数组成员_C风格, 逻辑型, 公开, 删除指定位置的对象。只针对 #QSJson_值类型_数组 类型的对象
+.参数 pos, 整数型, , 位置索引。从0开始
+
+.如果真 (类型 () != #QSJson_值类型_数组)
+    返回 (假)
+.如果真结束
+.如果真 (pos >= 数量 () || pos < 0)
+    返回 (假)
+.如果真结束
+JSON数组_删 (JSON内存节点_数组_取地址 (JSON内存节点), pos)
+返回 (真)
+.子程序 是否存在, 逻辑型, 公开, 只针对 #QSJson_值类型_对象 类型的对象
+.参数 name, 文本型, , 对象名
+
+.如果真 (类型 () != #QSJson_值类型_对象)
+    返回 (假)
+.如果真结束
+返回 (JSON对象_是否存在 (JSON内存节点_对象_取地址 (JSON内存节点), name))
+.子程序 取所有键, , 公开, 获取对象的所有键
+.参数 keySet, 文本型, 参考 数组, [Out] 存储所有键的数组
+
+.如果真 (类型 () != #QSJson_值类型_对象)
+    清除数组 (keySet)
+    返回 ()
+.如果真结束
+JSON对象_取所有键 (JSON内存节点_对象_取地址 (JSON内存节点), keySet)
+.子程序 是否为Json空值, 逻辑型, 公开
+
+返回 (类型 () == #QSJson_值类型_空)
+.子程序 长整数, 长整数型, 公开, 尝试将数据转为长整数型，如果当前类型无法转换为长整数型，返回0
+.局部变量 Type, 整数型
+
+Type = JSON内存节点_取类型 (JSON内存节点)
+.判断开始 (Type == #QSJson_值类型_长整数)
+    返回 (JSON内存节点_取长整数 (JSON内存节点))
+.判断 (Type == #QSJson_值类型_逻辑)
+    返回 (到整数 (JSON内存节点_取逻辑 (JSON内存节点)))
+.判断 (Type == #QSJson_值类型_文本)
+    返回 (到长整数 (JSON内存节点_取文本 (JSON内存节点)))
+.判断 (Type == #QSJson_值类型_双精度小数)
+    返回 (到长整数 (JSON内存节点_取双精度小数 (JSON内存节点)))
+.默认
+    
+.判断结束
+返回 (0)
+.子程序 文本, 文本型, 公开, 尝试将数据转为文本型，如果当前类型无法转换为文本型，返回“”
+.局部变量 Type, 整数型
+
+Type = JSON内存节点_取类型 (JSON内存节点)
+.判断开始 (Type == #QSJson_值类型_文本)
+    返回 (JSON内存节点_取文本 (JSON内存节点))
+.判断 (Type == #QSJson_值类型_长整数)
+    返回 (到文本 (JSON内存节点_取长整数 (JSON内存节点)))
+.判断 (Type == #QSJson_值类型_逻辑)
+    返回 (选择 (JSON内存节点_取逻辑 (JSON内存节点), “true”, “false”))
+.判断 (Type == #QSJson_值类型_双精度小数)
+    返回 (fast_dtoa_e (JSON内存节点_取双精度小数 (JSON内存节点)))
+.默认
+    
+.判断结束
+
+返回 (“”)
+.子程序 文本_字节集, 字节集, 公开, 尝试将数据转为文本型，如果当前类型无法转换为文本型，返回{}。不带有终止符{0}
+.局部变量 Type, 整数型
+
+Type = JSON内存节点_取类型 (JSON内存节点)
+.判断开始 (Type == #QSJson_值类型_文本)
+    返回 (JSON内存节点_取文本_字节集 (JSON内存节点))
+.判断 (Type == #QSJson_值类型_长整数)
+    返回 (到字节集 (到文本 (JSON内存节点_取长整数 (JSON内存节点))))
+.判断 (Type == #QSJson_值类型_逻辑)
+    返回 (选择 (JSON内存节点_取逻辑 (JSON内存节点), 到字节集 (“true”), 到字节集 (“false”)))
+.判断 (Type == #QSJson_值类型_双精度小数)
+    返回 (到字节集 (fast_dtoa_e (JSON内存节点_取双精度小数 (JSON内存节点))))
+.默认
+    
+.判断结束
+
+返回 ({})
+.子程序 双精度小数, 双精度小数型, 公开, 尝试将数据转为双精度小数型，如果当前类型无法转换为双精度小数型，返回0
+.局部变量 Type, 整数型
+
+Type = JSON内存节点_取类型 (JSON内存节点)
+.判断开始 (Type == #QSJson_值类型_双精度小数)
+    返回 (JSON内存节点_取双精度小数 (JSON内存节点))
+.判断 (Type == #QSJson_值类型_长整数)
+    返回 (到数值 (JSON内存节点_取长整数 (JSON内存节点)))
+.判断 (Type == #QSJson_值类型_逻辑)
+    返回 (到数值 (JSON内存节点_取逻辑 (JSON内存节点)))
+.判断 (Type == #QSJson_值类型_文本)
+    返回 (到数值 (JSON内存节点_取文本 (JSON内存节点)))
+.默认
+    
+.判断结束
+
+返回 (0)
+.子程序 逻辑, 逻辑型, 公开, 尝试将数据转为逻辑型，如果当前类型无法转换为逻辑型，返回 假
+.局部变量 Type, 整数型
+
+Type = JSON内存节点_取类型 (JSON内存节点)
+.判断开始 (Type == #QSJson_值类型_逻辑)
+    返回 (JSON内存节点_取逻辑 (JSON内存节点))
+.判断 (Type == #QSJson_值类型_长整数)
+    返回 (JSON内存节点_取长整数 (JSON内存节点) != 0)
+.判断 (Type == #QSJson_值类型_文本)
+    返回 (JSON内存节点_取文本 (JSON内存节点) == “true”)
+.判断 (Type == #QSJson_值类型_双精度小数)
+    返回 (JSON内存节点_取双精度小数 (JSON内存节点) != 0)
+.默认
+    
+.判断结束
+
+返回 (假)
+.子程序 置长整数, , 公开, 设置为长整数值
+.参数 value, 长整数型
+
+JSON内存节点_置长整数 (JSON内存节点, value)
+.子程序 置双精度小数, , 公开, 设置为双精度小数型
+.参数 value, 双精度小数型
+
+JSON内存节点_置双精度小数 (JSON内存节点, value)
+.子程序 置文本, , 公开, 设置为文本型
+.参数 value, 文本型
+
+JSON内存节点_置文本 (JSON内存节点, value)
+.子程序 置文本_字节集, , 公开, 设置为文本型
+.参数 value, 字节集, , 不要带有终止符{0}
+
+JSON内存节点_置文本_字节集 (JSON内存节点, value)
+.子程序 置逻辑, , 公开, 设置为逻辑型
+.参数 value, 逻辑型
+
+JSON内存节点_置逻辑 (JSON内存节点, value)
+.子程序 置为Json空值, , 公开, 设置为空
+
+JSON内存节点_置为空 (JSON内存节点)
+.子程序 迭代, 整数型, 公开, 1.仅用于数组和对象 2.禁止在送达时对数据进行修改，否则将造成不可预料的后果 3.用那个对象获得的迭代器，就用那个对象去进行 迭代_下一个 等操作！
+
+返回 (-1)  ' -1 == 开始
+.子程序 迭代_下一个, 逻辑型, 公开
+.参数 pIterator, 整数型, 参考, [InOut]
+.参数 Result, QSJson_Ref, 参考, [Out]
+.局部变量 pNode, 整数型
+.局部变量 Type, 整数型
+
+Type = JSON内存节点_取类型 (JSON内存节点)
+.判断开始 (Type == #QSJson_值类型_对象)
+    .如果 (pIterator == -1)
+        pIterator = JSON对象_元素_首个 (JSON内存节点_对象_取地址 (JSON内存节点))
+    .否则
+        pIterator = JSON对象_元素_取下一元素 (pIterator)
+    .如果结束
+    .如果真 (pIterator == 0)
+        返回 (假)
+    .如果真结束
+    pNode = JSON对象_元素_取值 (pIterator)
+    JSON内存节点_引用加 (pNode)
+    Result.Internal_SetNakedNodePtr (pNode)
+    返回 (真)
+.判断 (Type == #QSJson_值类型_数组)
+    pIterator = pIterator + 1
+    .如果真 (pIterator >= 数量 () || pIterator < 0)
+        返回 (假)
+    .如果真结束
+    pNode = JSON数组_取 (JSON内存节点_数组_取地址 (JSON内存节点), pIterator)
+    JSON内存节点_引用加 (pNode)
+    Result.Internal_SetNakedNodePtr (pNode)
+    返回 (真)
+.默认
+    返回 (假)
+.判断结束
+
+.子程序 迭代_取索引, 整数型, 公开
+.参数 pIterator, 整数型
+
+' AsmToECode代码:@arg pIterator
+' AsmToECode代码:mov eax,pIterator
+' AsmToECode代码:inc eax
+' AsmToECode代码:@ret
+置入代码 ({139, 69, 8, 64, 201, 194, 4, 0})
+返回 (0)
+.子程序 迭代_取索引_C风格, 整数型, 公开
+.参数 pIterator, 整数型
+
+返回 (pIterator)
+.子程序 迭代_取键, 文本型, 公开
+.参数 pIterator, 整数型
+
+返回 (JSON对象_元素_取键 (pIterator))
+.子程序 迭代_取键_字节集, 字节集, 公开
+.参数 pIterator, 整数型
+
+返回 (JSON对象_元素_取键_字节集 (pIterator))
+.子程序 解析_从字节集, 逻辑型, 公开, 【构造类方法，不会影响原有节点，会创建并使用新节点】
+.参数 数据, 字节集, , [In]
+.参数 编码, 整数型, , [In] 必须对应JsonString的编码（否则将导致不可预料的的后果，是超出设计及实现所考虑的错误情况），同时影响 QSJson 中存储的文本的编码。可用取值：#QSJson_编码_*
+.参数 错误信息, QSJson错误信息, 参考 可空, [Out] 错误信息
+.参数 允许尾随其他数据, 逻辑型, 可空, [In] 默认为 假
+.参数 JSONP兼容, 逻辑型, 可空, [In] 默认为 假
+.局部变量 i, 整数型
+.局部变量 len, 整数型
+.局部变量 ptr, 整数型
+.局部变量 ex, Internal_QSJsonParseExtensionParameter
+.局部变量 temp, 整数型
+.局部变量 文档为JSONP, 逻辑型
+.局部变量 JSONP回调名, 字节集
+
+ArcHelper.清除 ()
+JSON内存节点 = 0
+
+i = 1
+len = 取字节集长度 (数据)
+ex.Encode = 编码
+.如果真 (ex.Encode == #QSJson_编码_Ansi)
+    ex.Mask_FirstByte = 128  ' 0x80
+.如果真结束
+
+.如果真 (JSONP兼容)
+    .如果真 (Internal_SkipWhitespaceAndComments (数据, i, len))
+        .如果真 (数据[i] >= #AsciiCode_A_UpperCase && 数据[i] <= #AsciiCode_Z_UpperCase || 数据[i] >= #AsciiCode_A_LowerCase && 数据[i] <= #AsciiCode_Z_LowerCase || 数据[i] >= 128 || 数据[i] == 取代码 (“_”, ) || 数据[i] == 取代码 (“$”, ) || 数据[i] == #AsciiCode_ReverseSolidus)
+            .如果真 (Internal_ParseUnquotedObjectKey (数据, i, len, JSONP回调名, ex) == 假)
+                Internal_SetNakedNodePtr (JSON内存节点_创建 ())
+                错误信息.位置 = ex.ErrorMessaage.位置
+                错误信息.信息 = “解析JSONP失败”
+                返回 (假)
+            .如果真结束
+            .如果真 (Internal_NextToken (数据, i, len) == 假)
+                Internal_SetNakedNodePtr (JSON内存节点_创建 ())
+                错误信息.位置 = i
+                错误信息.信息 = “解析JSONP失败”
+                返回 (假)
+            .如果真结束
+            .如果真 (数据[i] != 取代码 (“(”, ))
+                Internal_SetNakedNodePtr (JSON内存节点_创建 ())
+                错误信息.位置 = i
+                错误信息.信息 = “解析JSONP失败”
+                返回 (假)
+            .如果真结束
+            .如果真 (Internal_NextToken (数据, i, len) == 假)
+                Internal_SetNakedNodePtr (JSON内存节点_创建 ())
+                错误信息.位置 = i
+                错误信息.信息 = “解析JSONP失败”
+                返回 (假)
+            .如果真结束
+            文档为JSONP = 真
+        .如果真结束
+        
+    .如果真结束
+    
+.如果真结束
+
+ptr = Internal_ParseNode (数据, i, len, ex)
+.如果真 (ptr == 0)
+    Internal_SetNakedNodePtr (JSON内存节点_创建 ())
+    错误信息 = ex.ErrorMessaage
+    返回 (假)
+.如果真结束
+.如果真 (文档为JSONP)
+    .如果真 (Internal_NextToken (数据, i, len) == 假)
+        JSON内存节点_引用减 (ptr)
+        Internal_SetNakedNodePtr (JSON内存节点_创建 ())
+        错误信息.位置 = i
+        错误信息.信息 = “解析JSONP失败”
+        返回 (假)
+    .如果真结束
+    .如果真 (数据[i] != 取代码 (“)”, ))
+        JSON内存节点_引用减 (ptr)
+        Internal_SetNakedNodePtr (JSON内存节点_创建 ())
+        错误信息.位置 = i
+        错误信息.信息 = “解析JSONP失败”
+        返回 (假)
+    .如果真结束
+    
+    
+    temp = i
+    .如果真 (Internal_NextToken (数据, i, len))
+        .如果真 (数据[i] != 取代码 (“;”, ))
+            i = temp
+        .如果真结束
+        
+    .如果真结束
+    
+.如果真结束
+
+.如果真 (允许尾随其他数据 == 假)
+    .如果真 (Internal_NextToken (数据, i, len) == 真)
+        JSON内存节点_引用减 (ptr)
+        Internal_SetNakedNodePtr (JSON内存节点_创建 ())
+        错误信息.位置 = i
+        错误信息.信息 = “应为文档结束但发现数据”
+        返回 (假)
+    .如果真结束
+    
+.如果真结束
+Internal_SetNakedNodePtr (ptr)
+返回 (真)
+.子程序 到Json文本, 文本型, 公开, ToJsonString
+.参数 编码, 整数型, , [In] 必须对应 QSJson 中存储的文本的编码（否则将导致不可预料的的后果，是超出设计及实现所考虑的错误情况），同时影响输出的文本的编码。可用取值：#QSJson_编码_*
+.参数 人类易读, 逻辑型, 可空, [In] 是否启用人类易读输出。默认：假。如果为 真 则生成易于阅读的文本。如果您的文件要在互联网上传输，建议使用 假 来减少体积！
+.参数 缩进级别, 整数型, 可空, [In] 仅在 人类易读 启用时有效
+.参数 缩进填充字符, 文本型, 可空, [In] 仅在 人类易读 启用时有效
+.局部变量 输出, 快速文本连接
+.局部变量 Ex, Internal_QSJsonToStringExtensionParameter
+
+.如果真 (是否为空 (人类易读))
+    人类易读 = 假
+.如果真结束
+.如果真 (人类易读)
+    .如果真 (是否为空 (缩进填充字符))
+        缩进填充字符 = 取空白文本 (4)
+    .如果真结束
+    输出.添加 (取重复文本 (缩进级别, 缩进填充字符))
+.如果真结束
+Ex.Encode = 编码
+.如果真 (Ex.Encode == #QSJson_编码_Ansi)
+    Ex.Mask_FirstByte = 128  ' 0x80
+.如果真结束
+Internal_ToJsonString (JSON内存节点, 人类易读, 缩进级别, 缩进填充字符, 输出, Ex)
+返回 (输出.取文本 ())

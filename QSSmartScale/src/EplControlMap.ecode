@@ -1,0 +1,105 @@
+﻿.程序集 EplControlMap, <对象>
+.程序集变量 map, 整数型
+
+.子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
+
+map = 哈希表_整数型_字节集_创建 ()
+.子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
+
+哈希表_整数型_字节集_销毁 (map)
+.子程序 __DESCRIPTION__
+
+' 易的所有组件依靠两个ID引用，一个是WinId（或称FormId），一个是UnitId
+' WinId标识所处窗口（设计时的从属关系，SetParent等API的调用不会改变窗口组件的所属WinId），UnitId标识具体窗口组件
+' 注意到：窗口 本身也是一个窗口组件，其用自身的UnitId（与WinId不同）
+.子程序 LoadAll, , 公开
+.局部变量 winIdManager, 整数型
+.局部变量 winIdBasePtr, 整数型
+.局部变量 winIdBytes, 整数型
+.局部变量 winIdCount, 整数型
+.局部变量 i, 整数型
+.局部变量 winId, 整数型
+.局部变量 winInfo, 整数型
+
+winIdCount = 调用易系统功能 (2032, 0, 0)  ' NRS_GET_WINFORM_COUNT
+.如果真 (winIdCount == 0)
+    返回 ()
+.如果真结束
+' 1001 为易语言内部未公开功能号，且会导致黑月报运行时错误，故先用 2032 获取窗口数量（该功能号黑月识别且返回0）
+winIdManager = 调用易系统功能 (1001, 0, 0)
+.如果真 (winIdManager == 0)
+    返回 ()
+.如果真结束
+winIdBasePtr = 指针到整数 (winIdManager + 16)
+winIdBytes = 指针到整数 (winIdManager + 24)
+winIdCount = 右移 (winIdBytes, 3)
+i = 0
+.判断循环首 (i < winIdCount)
+    winId = 指针到整数 (winIdBasePtr + i * 4)
+    winInfo = 指针到整数 (winIdBasePtr + (winIdCount + i) * 4)
+    LoadWindow (winId, winInfo)
+    i = i + 1
+.判断循环尾 ()
+
+.子程序 LoadWindow
+.参数 winId, 整数型
+.参数 winInfo, 整数型
+.局部变量 count, 整数型
+.局部变量 unitIdManager, 整数型
+.局部变量 unitIdBasePtr, 整数型
+.局部变量 unitInfoOffestTablePtr, 整数型
+.局部变量 unitInfoBasePtr, 整数型
+.局部变量 i, 整数型
+.局部变量 unitId, 整数型
+.局部变量 unitInfoOffest, 整数型
+.局部变量 unitInfo, 整数型
+.局部变量 unitCWnd, 整数型
+.局部变量 hWnd, 整数型
+.局部变量 cur, 整数型
+.局部变量 unitDataType, 整数型
+
+unitIdManager = winInfo + 20
+count = 指针到整数 (unitIdManager + 4)
+unitIdBasePtr = 指针到整数 (unitIdManager + 16)
+unitInfoOffestTablePtr = unitIdBasePtr + count * 4
+unitInfoBasePtr = unitIdBasePtr + count * 8
+
+i = 0
+.判断循环首 (i < count)
+    unitId = 指针到整数 (unitIdBasePtr + i * 4)
+    unitInfoOffest = 指针到整数 (unitInfoOffestTablePtr + i * 4)
+    unitInfo = unitInfoBasePtr + unitInfoOffest
+    
+    cur = unitInfo + 4
+    unitDataType = 指针到整数 (cur)
+    
+    cur = cur + 24
+    
+    ' Skip Name
+    cur = cur + strlen (cur) + 1
+    
+    ' Skip Unknown
+    cur = cur + strlen (cur) + 1
+    
+    unitCWnd = 指针到整数 (cur)
+    .如果真 (unitCWnd != 0)
+        hWnd = 指针到整数 (unitCWnd + 28)
+        哈希表_整数型_字节集_置 (map, hWnd, 到字节集 (unitDataType) + 到字节集 (unitCWnd))
+    .如果真结束
+    
+    i = i + 1
+.判断循环尾 ()
+
+.子程序 Get, 逻辑型, 公开
+.参数 hWnd, 整数型
+.参数 dataType, 整数型, 参考
+.参数 cWnd, 整数型, 参考
+.局部变量 result, 字节集
+
+result = 哈希表_整数型_字节集_取 (map, hWnd, )
+.如果真 (取字节集长度 (result) == 0)
+    返回 (假)
+.如果真结束
+dataType = 取字节集数据 (result, #整数型, )
+cWnd = 取字节集数据 (result, #整数型, 5)
+返回 (真)

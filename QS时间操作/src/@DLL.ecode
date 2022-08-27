@@ -1,0 +1,89 @@
+﻿.DLL命令 GetSystemTime, , kernel32.dll, GetSystemTime, , 在一个SYSTEMTIME中载入当前系统时间，这个时间采用的是“协同世界时间”（即UTC，也叫做GMT）格式
+    .参数 lpSystemTime, SYSTEMTIME, , SYSTEMTIME，随同当前时间载入的结构;
+
+.DLL命令 SystemTimeToVariantTime, 整数型, oleaut32.dll, SystemTimeToVariantTime
+    .参数 lpSystemTime, SYSTEMTIME
+    .参数 pvtime, 日期时间型, 传址
+
+.DLL命令 VariantTimeToSystemTime, 整数型, oleaut32.dll, VariantTimeToSystemTime
+    .参数 vtime, 日期时间型
+    .参数 lpSystemTime, SYSTEMTIME
+
+.DLL命令 TzSpecificLocalTimeToSystemTime, 整数型, kernel32.dll, TzSpecificLocalTimeToSystemTime, , 将本地时间转换为UTC时间
+    .参数 lpTimeZoneInformation, 整数型, , 传0即可（表示当前系统时区）
+    .参数 lpLocalTime, SYSTEMTIME, , 本地时间
+    .参数 lpUniversalTime, SYSTEMTIME, , UTC时间
+
+.DLL命令 GetLocalTime, , kernel32.dll, GetLocalTime, , 在lpSystemTime结构中装载本地日期和时间
+    .参数 lpSystemTime, SYSTEMTIME, , SYSTEMTIME，用于装载本地时间的结构;
+
+.DLL命令 SystemTimeToTzSpecificLocalTime, 整数型, kernel32.dll, SystemTimeToTzSpecificLocalTime, , 将系统时间转换成地方时间  TRUE（非零）表示成功，否则返回零。会设置GetLastError
+    .参数 lpTimeZoneInformation, 整数型
+    .参数 lpUniversalTime, SYSTEMTIME, , SYSTEMTIME，包含系统时间的结构
+    .参数 lpLocalTime, SYSTEMTIME, , SYSTEMTIME，用于装载地方时间的结构;
+
+.DLL命令 SystemTimeToFileTime_UsingUInt64, 整数型, kernel32.dll, SystemTimeToFileTime, , 根据一个FILETIME结构的内容，载入一个SYSTEMTIME结构  非零表示成功，零表示失败。会设置GetLastError
+    .参数 lpSystemTime, SYSTEMTIME, , SYSTEMTIME，包含了系统时间信息的一个结构
+    .参数 lpFileTime, 长整数型, 传址, FILETIME，用于装载文件时间的一个结构;
+
+.DLL命令 WSAStartup, 整数型, ws2_32.dll, WSAStartup
+    .参数 wVersionRequired, 短整数型
+    .参数 lpWSAData, WSADATA
+
+.DLL命令 WSACleanup, 整数型, ws2_32.dll, WSACleanup
+
+
+.DLL命令 socket, 整数型, ws2_32.dll, socket
+    .参数 af, 整数型
+    .参数 lType, 整数型
+    .参数 protocol, 整数型
+
+.DLL命令 closesocket, 整数型, ws2_32.dll, closesocket
+    .参数 s, 整数型
+
+.DLL命令 sendNtpBasicInfo, 整数型, ws2_32.dll, send
+    .参数 s, 整数型
+    .参数 buf, NtpBasicInfo
+    .参数 lLen, 整数型, , sizeof(NtpBasicInfo) == 48
+    .参数 flags, 整数型
+
+.DLL命令 GetSystemTimeAsFileTime_UsingUInt64, , kernel32.dll, GetSystemTimeAsFileTime
+    .参数 lpSystemTimeAsFileTime, 长整数型, 传址
+
+.DLL命令 recvNtpBasicInfo, 整数型, ws2_32.dll, recv
+    .参数 s, 整数型
+    .参数 buf, NtpBasicInfo
+    .参数 lLen, 整数型
+    .参数 flags, 整数型
+
+.DLL命令 connect, 整数型, ws2_32.dll, connect
+    .参数 s, 整数型
+    .参数 name, 整数型
+    .参数 namelen, 整数型
+
+.DLL命令 getaddrinfo, 整数型, ws2_32.dll, getaddrinfo
+    .参数 pNodeName, 文本型
+    .参数 pServiceName, 文本型
+    .参数 pHints, addrinfo
+    .参数 ppResult, 整数型, 传址
+
+.DLL命令 freeaddrinfo, 整数型, ws2_32.dll, freeaddrinfo, , 来自EVA辅助库
+    .参数 arg_01
+
+.DLL命令 setsockopt_int, 整数型, ws2_32.dll, setsockopt
+    .参数 s, 整数型
+    .参数 level, 整数型
+    .参数 optname, 整数型
+    .参数 optval, 整数型, 传址
+    .参数 optlen, 整数型, , 4
+
+.DLL命令 QueryPerformanceFrequency, 整数型, kernel32.dll, QueryPerformanceFrequency, , 返回计数频率
+    .参数 lpFrequency, 长整数型, 传址
+
+.DLL命令 QueryPerformanceCounter, 整数型, kernel32.dll, QueryPerformanceCounter, , 获取计数值
+    .参数 lpPerformanceCount, 长整数型, 传址
+
+.DLL命令 FileTimeToSystemTime_UsingUInt64, 整数型, kernel32.dll, FileTimeToSystemTime, , 根据一个FILETIME结构的内容，装载一个SYSTEMTIME结构  非零表示成功，零表示失败。会设置GetLastError
+    .参数 lpFileTime, 长整数型, 传址, FILETIME，包含了文件时间的一个结构
+    .参数 lpSystemTime, SYSTEMTIME, , SYSTEMTIME，用于装载系统时间信息的一个结构;
+

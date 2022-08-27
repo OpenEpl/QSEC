@@ -1,0 +1,18 @@
+﻿.程序集 窗口程序集_启动窗口, 窗口: _启动窗口
+
+.子程序 _按钮1_被单击
+.局部变量 Data, 文本型
+.局部变量 Object, Class1
+
+.如果真 (取反 (输入框 (“请输入要传送的数据”, , “Hello World”, Data, , _启动窗口)))
+    信息框 (“您已取消”, 0, , _启动窗口)
+    返回 ()
+.如果真结束
+Object.Set (Data)
+启动线程 (&ThreadMain, 线程_传递类变量 (Object), )
+.子程序 ThreadMain
+.参数 pObject, 整数型
+.局部变量 Object, Class1
+
+线程_接收类变量 (pObject, Object)
+信息框 (“收到：” + Object.Get (), 0, , _启动窗口)

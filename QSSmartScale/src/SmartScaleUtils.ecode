@@ -1,0 +1,30 @@
+﻿.程序集 SmartScaleUtils
+
+.子程序 SmartScale_SubclassProcHelper, 整数型, , 跳板程序
+.参数 hWnd, 整数型, , ebp+8
+.参数 uMsg, 整数型, , ebp+12
+.参数 wParam, 整数型, , ebp+16
+.参数 lParam, 整数型, , ebp+20
+.参数 uIdSubclass, 整数型, , ebp+24
+.参数 dwRefData, 整数型, , ebp+28
+
+置入代码 ({139, 69, 28, 139, 77, 20, 139, 85, 16, 139, 117, 12, 139, 125, 8, 80, 81, 82, 86, 87, 139, 77, 24, 141, 69, 24, 139, 9, 139, 73, 8, 80, 255, 209, 201, 194, 24, 0})
+' mov eax,[ebp+28]
+' mov ecx,[ebp+20]
+' mov edx,[ebp+16]
+' mov esi,[ebp+12]
+' mov edi,[ebp+8]
+' push eax
+' push ecx
+' push edx
+' push esi
+' push edi
+' mov ecx,[ebp+24]
+' lea eax,[ebp+24]
+' mov ecx,[ecx]
+' mov ecx,[ecx+8] ;虚表偏移
+' push eax
+' call ecx
+' leave
+' retn 24
+返回 (0)

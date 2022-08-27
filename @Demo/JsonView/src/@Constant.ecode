@@ -1,0 +1,7 @@
+﻿.常量 TVM_INSERTITEM, "4352"
+.常量 TVIF_TEXT, "1"
+.常量 TVIF_PARAM, "4"
+.常量 TVI_LAST, "-65534"
+.常量 TVI_ROOT, "-65536"
+.常量 TVM_EXPAND, "4354"
+.常量 TVE_EXPAND, "2"

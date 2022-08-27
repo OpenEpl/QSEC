@@ -1,0 +1,36 @@
+﻿.程序集 QS速度测试, <对象>, 公开
+.程序集变量 开始, 长整数型
+.程序集变量 结束, 长整数型
+.程序集变量 频率, 长整数型
+
+.子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
+
+QueryPerformanceFrequency (频率)
+.子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
+
+
+.子程序 开始, , 公开, 开始
+
+QueryPerformanceCounter (开始)
+.子程序 记录, , 公开, 记录
+
+QueryPerformanceCounter (结束)
+.子程序 输出, , 公开, 输出（支持外部调试器）
+.参数 标签, 文本型, 可空
+.局部变量 OutputString, 文本型
+
+.如果真 (标签 != “”)
+    OutputString = OutputString + “[” + 标签 + “]”
+.如果真结束
+OutputString = OutputString + “耗时: ” + 到文本 (取耗时 ()) + “ms”
+
+输出调试文本 (OutputString)
+OutputDebugString (OutputString)
+.子程序 记录并输出, , 公开, 记录并输出（支持外部调试器）
+.参数 标签, 文本型, 可空
+
+记录 ()
+输出 (标签)
+.子程序 取耗时, 双精度小数型, 公开, 取耗时，单位：毫秒
+
+返回 ((结束 - 开始) * 1000 / 频率)

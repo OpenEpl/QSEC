@@ -1,0 +1,159 @@
+﻿.DLL命令 GetDesktopWindow, 整数型, User32.dll, GetDesktopWindow
+
+
+.DLL命令 GetDC, 整数型, User32.dll, GetDC
+    .参数 hwnd, 整数型
+
+.DLL命令 GetDeviceCaps, 整数型, Gdi32.dll, GetDeviceCaps
+    .参数 hdc, 整数型
+    .参数 nIndex, 整数型
+
+.DLL命令 ReleaseDC, 整数型, User32.dll, ReleaseDC
+    .参数 hwnd, 整数型
+    .参数 hdc, 整数型
+
+.DLL命令 EnumChildWindows, 逻辑型, User32.dll, EnumChildWindows
+    .参数 hWndParent, 整数型
+    .参数 lpEnumFunc, 整数型
+    .参数 lParam, 整数型
+
+.DLL命令 GetWindowRect, 逻辑型, User32.dll, GetWindowRect
+    .参数 hWnd, 整数型
+    .参数 lpRect, RECT
+
+.DLL命令 ScreenToClient, 逻辑型, User32.dll, ScreenToClient
+    .参数 hWnd, 整数型
+    .参数 lpPoint, POINT
+
+.DLL命令 GetProcAddress, 整数型, kernel32, GetProcAddress, , 从指定的动态链接库中检索一个导出的函数或变量的地址
+    .参数 模块句柄, 整数型, , 用LoadLibrary或getmodulehandle函数返回的句柄
+    .参数 函数名称, 文本型, , 函数名称
+
+.DLL命令 GetWindow, 整数型, user32.dll, GetWindow
+    .参数 hwnd, 整数型, , 源窗口
+    .参数 wCmd, 整数型, , 指定结果窗口与源窗口的关系，它们建立在下述常数基础上：;GW_CHILD：寻找源窗口的第一个子窗口;GW_HWNDFIRST：为一个源子窗口寻找第一个兄弟（同级）窗口，或寻找第一个顶级窗口;GW_HWNDLAST：为一个源子窗口寻找最后一个兄弟（同级）窗口，或寻找最后一个顶级窗口;GW_HWNDNEXT：为源窗口寻找下一个兄弟窗口;GW_HWNDPREV：为源窗口寻找前一个兄弟窗口;GW_OWNER：寻找窗口的所有者;
+
+.DLL命令 GetClientRect, 整数型, user32.dll, GetClientRect
+    .参数 hwnd, 整数型, , 欲计算大小的目标窗口
+    .参数 lpRect, RECT, , RECT，指定一个矩形，用客户区域的大小载入（以像素为单位）;
+
+.DLL命令 SetWindowPos, 整数型, user32.dll, SetWindowPos
+    .参数 hwnd, 整数型
+    .参数 hWndInsertAfter, 整数型
+    .参数 x, 整数型
+    .参数 y, 整数型
+    .参数 cx, 整数型
+    .参数 cy, 整数型
+    .参数 wFlags, 整数型
+
+.DLL命令 GetModuleHandle, 整数型, kernel32.dll, GetModuleHandleA
+    .参数 lpModuleName, 文本型, , 指定模块名，这通常是与模块的文件名相同的一个名字。例如，NOTEPAD.EXE程序的模块文件名就叫作NOTEPAD;
+
+.DLL命令 DeferWindowPos, 整数型, user32.dll, DeferWindowPos
+    .参数 hWinPosInfo, 整数型, , 由BeginDeferWindowPos为后续对DeferWindowPos的调用返回的句柄
+    .参数 hwnd, 整数型, , 欲定位的窗口
+    .参数 hWndInsertAfter, 整数型, , 窗口句柄。在窗口列表中，窗口hwnd会排列于这个窗口后面。也可用下述值之一：;HWND_BOTTOM：将窗口置于窗口列表底部;HWND_TOP：将窗口置于Z序列顶部；Z序列是窗口针对分级结构中一个给定级别显示的顺序;HWND_TOPMOST：将窗口置于列表顶部，位于任何最顶级窗口的前面（请参考WS_EX_TOPMOST样式位）;HWND_NOTOPMOST：将窗口置于列表顶部，位于任何最顶级窗口的后面
+    .参数 x, 整数型, , 窗口新的x坐标。如hwnd是个子窗口，那么x用父窗口的客户区坐标表示
+    .参数 y, 整数型, , 窗口新的y坐标。如hwnd是个子窗口，那么y用父窗口的客户区坐标表示
+    .参数 cx, 整数型, , 指定新窗口宽度
+    .参数 cy, 整数型, , 指定新窗口高度
+    .参数 wFlags, 整数型, , 包含了旗标的一个整数，如下所示：;SWP_DRAWFRAME：围绕窗口画一个框;SWP_HIDEWINDOW：隐藏窗口;SWP_NOACTIVATE：不激活窗口;SWP_NOMOVE：保持当前位置（x和y设定将被忽略）;SWP_NOREDRAW：窗口不自动重画;SWP_NOSIZE：保持当前大小（cx和cy会被忽略）;SWP_NOZORDER：保持在窗口列表的当前位置（hWndInsertAfter会被忽略）;SWP_SHOWWINDOW：显示窗口;SWP_NOOWNERZORDER：不改变Z序列的所有者;SWP_NOSENDCHANGING：窗口不发出WM_WINDOWPOSCHANGING消息;
+
+.DLL命令 BeginDeferWindowPos, 整数型, user32.dll, BeginDeferWindowPos
+    .参数 nNumWindows, 整数型, , 在结构中欲为其分配空间的初始窗口数量。在每次DeferWindowPos调用期间结构的大小会根据情况自动调节;
+
+.DLL命令 EndDeferWindowPos, 整数型, user32.dll, EndDeferWindowPos
+    .参数 hWinPosInfo, 整数型, , 由对DeferWindowPos最近一次调用返回的结构句柄;
+
+.DLL命令 GetObject_LOGFONTW, 整数型, gdi32.dll, GetObjectW
+    .参数 hObject, 整数型, , 画笔、刷子、字体、位图或调色板等对象的句柄
+    .参数 nCount, 整数型, , 欲取回的字节数。通常是由lpObject定义的那个结构的长度
+    .参数 lpObject, LOGFONTW, 传址, 任何类型，用于容纳对象数据的结构。针对画笔，通常是一个LOGPEN结构；针对扩展画笔，通常是EXTLOGPEN；针对字体是LOGBRUSH；针对位图是BITMAP；针对DIBSection位图是DIBSECTION；针对调色板，应指向一个整型变量，代表调色板中的条目数量
+
+.DLL命令 SendMessage, 整数型, user32.dll, SendMessageA
+    .参数 hwnd, 整数型, , 要接收消息的那个窗口的句柄
+    .参数 wMsg, 整数型, , 消息的标识符
+    .参数 wParam, 整数型, , 具体取决于消息
+    .参数 lParam, 整数型, , 具体取决于消息;
+
+.DLL命令 GetStockObject, 整数型, gdi32.dll, GetStockObject
+    .参数 nIndex, 整数型, , 下述表格中定义的任何常数之一BLACK_BRUSH黑色刷子DKGRAY_BRUSH黑灰色刷子GRAY_BRUSH灰色刷子HOLLOW_BRUSH凹刷子LTGRAY_BRUSH浅灰色刷子NULL_BRUSH空刷子WHITE_BRUSH白色刷子BLACK_PEN黑色画笔NULL_PEN空画笔WHITE_PEN白色画笔ANSI_FIXED_FONT采用windows（ANSI）字符集的等宽字体ANSI_VAR_FONT采用windows（ANSI）字符集的不等宽字体DEVICE_DEFAULT_FONT设备使用的默认字体（NT）DEFAULT_GUI_FONT用户界面的默认字体，包括菜单和对话框字体（Windows 95）OEM_FIXED_FONTOEM字符集的固有字体SYSTEM_FONT屏幕系统字体。这是用于菜单、对话框等等的默认不等宽字体SYSTEM_FIXED_FONT屏幕系统字体。这是用于菜单、对话框等等的默认等宽字体（在windows 3.0之前使用）DEFAULT_PALETTE默认调色板;
+
+.DLL命令 CreateFontIndirectW, 整数型, gdi32.dll, CreateFontIndirectW
+    .参数 lpLogFont, LOGFONTW, , LOGFONT，这个结构定义了逻辑字体请求的属性;
+
+.DLL命令 MemoryCopyFromLogFontW, , ntdll.dll, @memcpy
+    .参数 pDest, 整数型
+    .参数 pSrc, LOGFONTW
+    .参数 ByteLen, 整数型
+
+.DLL命令 DeleteObject, 整数型, gdi32.dll, DeleteObject
+    .参数 hObject, 整数型, , 一个GDI对象的句柄;
+
+.DLL命令 HeapAlloc, 整数型, kernel32.dll, HeapAlloc
+    .参数 hHeap, 整数型
+    .参数 dwFlags, 整数型
+    .参数 dwBytes, 整数型
+
+.DLL命令 GetProcessHeap, 整数型, kernel32.dll, GetProcessHeap
+
+
+.DLL命令 HeapFree, 整数型, kernel32.dll, HeapFree
+    .参数 hHeap, 整数型
+    .参数 dwFlags, 整数型
+    .参数 lpMem, 整数型
+
+.DLL命令 SetWindowSubclass, 逻辑型, Comctl32.dll, SetWindowSubclass, , 安装或者更新窗口子类回调
+    .参数 hWnd, 整数型, , __in HWND hWnd,
+    .参数 pfnSubclass, 整数型, , __in SUBCLASSPROC pfnSubclass,callback(SUBCLASSPROC)
+    .参数 uIdSubclass, 整数型, , __in UINT_PTR uIdSubclass,
+    .参数 dwRefData, 整数型, , __in DWORD_PTR dwRefData,
+
+.DLL命令 RemoveWindowSubclass, 逻辑型, Comctl32.dll, RemoveWindowSubclass, , 还原子类化
+    .参数 hWnd, 整数型, , __in HWND hWnd,
+    .参数 pfnSubclass, 整数型, , __in SUBCLASSPROC pfnSubclass,
+    .参数 uIdSubclass, 整数型, , __in UINT_PTR uIdSubclass,
+
+.DLL命令 DefSubclassProc, 整数型, Comctl32.dll, DefSubclassProc
+    .参数 hWnd, 整数型
+    .参数 uMsg, 整数型
+    .参数 wParam, 整数型
+    .参数 lParam, 整数型
+
+.DLL命令 memcpy, , ntdll.dll, @memcpy
+    .参数 pDest, 整数型
+    .参数 pSrc, 整数型
+    .参数 ByteLen, 整数型
+
+.DLL命令 GetObject, 整数型, gdi32.dll, GetObjectA
+    .参数 hObject, 整数型, , 画笔、刷子、字体、位图或调色板等对象的句柄
+    .参数 nCount, 整数型, , 欲取回的字节数。通常是由lpObject定义的那个结构的长度
+    .参数 lpObject, 整数型, , 任何类型，用于容纳对象数据的结构。针对画笔，通常是一个LOGPEN结构；针对扩展画笔，通常是EXTLOGPEN；针对字体是LOGBRUSH；针对位图是BITMAP；针对DIBSection位图是DIBSECTION；针对调色板，应指向一个整型变量，代表调色板中的条目数量
+
+.DLL命令 strlen, 整数型, ntdll.dll, @strlen
+    .参数 lpString, 整数型
+
+.DLL命令 MoveWindow, 整数型, user32.dll, MoveWindow
+    .参数 hwnd, 整数型, , 欲移动窗口的句柄
+    .参数 x, 整数型, , 窗口新的左侧位置
+    .参数 y, 整数型, , 窗口新的顶部位置
+    .参数 nWidth, 整数型, , 窗口的新宽度
+    .参数 nHeight, 整数型, , 窗口的高宽度
+    .参数 bRepaint, 整数型, , 如窗口此时应重画，则设为TRUE（非零）。FALSE（零）则表明应用程序会自己决定是否重画窗口;
+
+.DLL命令 AdjustWindowRectEx, 整数型, user32.dll, AdjustWindowRectEx
+    .参数 lpRect, RECT
+    .参数 dsStyle, 整数型
+    .参数 bMenu, 整数型
+    .参数 dwEsStyle, 整数型
+
+.DLL命令 GetWindowLong, 整数型, user32.dll, GetWindowLongA
+    .参数 hwnd, 整数型, , 欲为其获取信息的窗口的句柄
+    .参数 nIndex, 整数型, , 欲取回的信息，可以是下述任何一个常数：;GWL_EXSTYLE：扩展窗口样式;GWL_STYLE：窗口样式;GWL_WNDPROC：该窗口的窗口函数的地址;GWL_HINSTANCE：拥有窗口的实例的句柄;GWL_HWNDPARENT：该窗口之父的句柄。不要用SetWindowWord来改变这个值;GWL_ID：对话框中一个子窗口的标识符;GWL_USERDATA：含义由应用程序规定;DWL_DLGPROC：这个窗口的对话框函数地址;DWL_MSGRESULT：在对话框函数中处理的一条消息返回的值;DWL_USER：含义由应用程序规定;
+
+.DLL命令 GetMenu, 整数型, user32.dll, GetMenu
+    .参数 hwnd, 整数型, , 窗口句柄。对于vb，这应该是一个窗体句柄。注意可能不是子窗口的句柄;
+
+.DLL命令 GetMenuItemCount, 整数型, user32.dll, GetMenuItemCount
+    .参数 hMenu, 整数型, , 目标菜单的句柄;
+

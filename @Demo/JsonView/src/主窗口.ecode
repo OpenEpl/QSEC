@@ -1,0 +1,164 @@
+﻿.程序集 主窗口, 窗口: 主窗口
+
+.子程序 _生成按钮_被单击
+.局部变量 root, QSJson_Ref
+.局部变量 object, QSJson_Ref
+.局部变量 array, QSJson_Ref
+.局部变量 SpeedTest, QS速度测试
+.局部变量 JsonString, 文本型
+
+SpeedTest.开始 ()
+
+
+array.加入数组成员 (QSJson_文本 (“Welcome”))
+array.加入数组成员 (QSJson_文本 (“to”))
+array.加入数组成员 (QSJson_文本 (“use”))
+
+object.置 (“Quick”, QSJson_文本 (“快速”))
+object.置 (“Simple”, QSJson_文本 (“简单”))
+
+root.置 (“string”, QSJson_文本 (“Hello World”))
+root.置 (“bool”, QSJson_逻辑 (真))
+root.置 (“long”, QSJson_长整数 (到长整数 (“9223372036854775807”)))
+root.置 (“double”, QSJson_双精度小数 (0.123456))
+
+' 测试删除
+root.置 (“测试删除”, QSJson_Json空值 ())
+root.删 (“测试删除”)
+array.加入数组成员 (QSJson_文本 (“测试删除数组成员”))
+array.删除数组成员 (array.数量 ())
+
+root.置 (“null”, QSJson_Json空值 ())
+root.置 (“array”, array)
+root.置 (“object”, object)
+
+JsonString = root.到Json文本 (#QSJson_编码_Ansi, 人类易读选择框.选中, 到整数 (级别编辑框.内容))
+
+SpeedTest.记录 ()
+耗时标签.标题 = “耗时：” + 到文本 (SpeedTest.取耗时 ()) + “毫秒”
+JSON编辑框.内容 = JsonString
+
+.子程序 _执行按钮_被单击
+.局部变量 ErrorInfo, QSJson错误信息
+.局部变量 v, QSJson_Ref
+.局部变量 i, 整数型
+.局部变量 text, 文本型
+.局部变量 bin, 字节集
+.局部变量
+.局部变量 速度测试, QS速度测试
+.局部变量
+.局部变量 解析耗时, 双精度小数型
+.局部变量 总耗时, 双精度小数型
+
+速度测试.开始 ()
+text = JSON编辑框.内容
+bin = 到字节集 (text)
+.如果真 (v.解析_从字节集 (bin, #QSJson_编码_Ansi, ErrorInfo, 假, 真) == 假)
+    信息框 (“解析失败：” + ErrorInfo.信息 + “（位置：” + 到文本 (ErrorInfo.位置) + “，行号：” + 到文本 (文本_取行号 (text, ErrorInfo.位置)) + “）”, 0, , )
+.如果真结束
+速度测试.记录 ()
+解析耗时 = 速度测试.取耗时 ()
+
+.判断开始 (单选框2.选中)
+    JSON编辑框.内容 = v.到Json文本 (#QSJson_编码_Ansi, 人类易读选择框.选中, 到整数 (级别编辑框.内容))
+.判断 (单选框3.选中)
+    JSON树型框.禁止重画 ()
+    JSON树型框.清空 ()
+    ShowJsonToTreeView (JSON树型框.取窗口句柄 (), v, #TVI_ROOT)
+    JSON树型框.允许重画 ()
+.默认
+    总耗时 = 解析耗时
+.判断结束
+
+
+.如果 (取反 (单选框1.选中))
+    速度测试.记录 ()
+    总耗时 = 速度测试.取耗时 ()
+    耗时标签.标题 = “解析耗时：” + 到文本 (解析耗时) + “毫秒，总耗时：” + 到文本 (总耗时) + “毫秒”
+.否则
+    耗时标签.标题 = “耗时：” + 到文本 (解析耗时) + “毫秒”
+.如果结束
+
+
+.子程序 ShowJsonToTreeView
+.参数 hWnd, 整数型
+.参数 value, QSJson_Ref
+.参数 parentHandle, 整数型
+.参数 title, 文本型, 可空
+.局部变量 handle, 整数型
+.局部变量 text, 文本型
+
+.如果真 (title != “”)
+    text = title + “ : ”
+.如果真结束
+.判断开始 (value.类型 () == #QSJson_值类型_长整数)
+    text = text + 到文本 (value.长整数 ())
+.判断 (value.类型 () == #QSJson_值类型_双精度小数)
+    text = text + value.文本 ()
+.判断 (value.类型 () == #QSJson_值类型_逻辑)
+    text = text + 选择 (value.逻辑 (), “true”, “false”)
+.判断 (value.类型 () == #QSJson_值类型_空)
+    text = text + “null”
+.判断 (value.类型 () == #QSJson_值类型_文本)
+    text = text + #左引号 + value.文本 () + #右引号
+.判断 (value.类型 () == #QSJson_值类型_数组)
+    text = text + “[Array]”
+.判断 (value.类型 () == #QSJson_值类型_对象)
+    text = text + “[Object]”
+.默认
+    
+.判断结束
+handle = WinApi_TreeView_AddItem (hWnd, parentHandle, text)
+.判断开始 (value.类型 () == #QSJson_值类型_数组)
+    ShowJsonArrayToTreeView (hWnd, value, handle)
+.判断 (value.类型 () == #QSJson_值类型_对象)
+    ShowJsonObjectToTreeView (hWnd, value, handle)
+.默认
+    
+.判断结束
+WinApi_TreeView_Expand (hWnd, handle)
+.子程序 ShowJsonArrayToTreeView
+.参数 hWnd, 整数型
+.参数 value, QSJson_Ref, , 未做类型判断！
+.参数 parentIndex, 整数型
+.局部变量 pIterator, 整数型
+.局部变量 child, QSJson_Ref
+
+pIterator = value.迭代 ()
+.判断循环首 (value.迭代_下一个 (pIterator, child))
+    ShowJsonToTreeView (hWnd, child, parentIndex, “[” + 到文本 (value.迭代_取索引_C风格 (pIterator)) + “]”)
+.判断循环尾 ()
+.子程序 ShowJsonObjectToTreeView
+.参数 hWnd, 整数型
+.参数 value, QSJson_Ref, , 未做类型判断！
+.参数 parentIndex, 整数型
+.局部变量 pIterator, 整数型
+.局部变量 child, QSJson_Ref
+
+pIterator = value.迭代 ()
+.判断循环首 (value.迭代_下一个 (pIterator, child))
+    ShowJsonToTreeView (hWnd, child, parentIndex, value.迭代_取键 (pIterator))
+.判断循环尾 ()
+.子程序 _清空按钮_被单击
+
+JSON编辑框.内容 = “”
+.子程序 WinApi_TreeView_Expand, , , 【快速，比易的快很多】
+.参数 树型框句柄, 整数型, , 当前进程，不支持外部进程
+.参数 项目句柄, 整数型, , 项目句柄（非易语言的项目索引）
+
+SendMessage (树型框句柄, #TVM_EXPAND, #TVE_EXPAND, 项目句柄)
+.子程序 WinApi_TreeView_AddItem, 整数型, , 【快速，比易的快很多】返回 项目句柄（非易语言的项目索引）
+.参数 树型框句柄, 整数型, , 当前进程，不支持外部进程
+.参数 父项目句柄, 整数型, , 项目句柄（非易语言的项目索引），#TVI_ROOT 表示根项目
+.参数 名称, 文本型
+.局部变量 i, TV_INSERTSTRUCT
+.局部变量 h, 整数型
+
+i.hParent = 父项目句柄
+i.hInsertAfter = #TVI_LAST
+i.item.mask = 位或 (#TVIF_TEXT, #TVIF_PARAM)
+i.item.lParam = 0
+i.item.pszText = 名称
+i.item.cchTextMax = 取文本长度 (i.item.pszText)
+h = _SM_TV_INSERTSTRUCT (树型框句柄, #TVM_INSERTITEM, 0, i)
+返回 (h)

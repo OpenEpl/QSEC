@@ -1,0 +1,52 @@
+﻿.程序集 JSON数组
+
+.子程序 JSON数组_取数量, 整数型
+.参数 地址, 整数型
+
+返回 (ArrayList_GetLength (地址))
+.子程序 JSON数组_取缓冲区地址, 整数型
+.参数 地址, 整数型
+
+返回 (ArrayList_GetBufferPtr (地址))
+.子程序 JSON数组_取缓冲区可容纳成员数, 整数型
+.参数 地址, 整数型
+
+返回 (ArrayList_GetBufferCapacity (地址))
+.子程序 JSON数组_删, , , 比较耗时！
+.参数 地址, 整数型
+.参数 索引, 整数型, , 从0开始
+
+JSON内存节点_引用减 (ArrayList_Get (地址, 索引))
+ArrayList_Remove (地址, 索引)
+.子程序 JSON数组_加
+.参数 地址, 整数型
+.参数 数据, 整数型, , 不修改引用计数
+
+ArrayList_Add (地址, 数据)
+.子程序 JSON数组_取, 整数型, , 不修改引用计数
+.参数 地址, 整数型
+.参数 索引, 整数型, , 从0开始
+
+返回 (ArrayList_Get (地址, 索引))
+.子程序 JSON数组_置
+.参数 地址, 整数型
+.参数 索引, 整数型, , 从0开始
+.参数 新值, 整数型
+
+JSON内存节点_引用减 (ArrayList_Set (地址, 索引, 新值))
+.子程序 JSON数组_销毁, , , 自动引用减
+.参数 地址, 整数型
+.局部变量 i, 整数型
+.局部变量 length, 整数型
+.局部变量 t, 整数型
+
+length = JSON数组_取数量 (地址)
+
+i = 0
+.判断循环首 (i < length)
+    JSON内存节点_引用减 (JSON数组_取 (地址, i))
+    
+    i = i + 1
+.判断循环尾 ()
+
+ArrayList_Delete (地址)

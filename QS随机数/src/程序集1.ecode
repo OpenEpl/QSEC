@@ -1,0 +1,180 @@
+﻿.程序集 程序集1
+
+.子程序 _启动子程序, 整数型, , 请在本子程序中放置易模块初始化代码
+
+_临时子程序 ()  ' 在初始化代码执行完毕后调用测试代码
+返回 (0)  ' 可以根据您的需要返回任意数值
+.子程序 _临时子程序
+.局部变量 obj, 整数型
+
+' 本名称子程序用作测试程序用，仅在开发及调试环境中有效，编译发布程序前将被系统自动清空，请将所有用作测试的临时代码放在本子程序中。 ***注意不要修改本子程序的名称、参数及返回值类型。
+obj = 随机数_MT19337_创建 (取启动时间 ())
+输出调试文本 (随机数_原始随机整数 (obj))
+.计次循环首 (10, )
+    输出调试文本 (随机数_均匀分布整数 (obj, 0, 10))
+.计次循环尾 ()
+随机数_MT19337_销毁 (obj)
+.子程序 随机数_MT19337_创建, 整数型, 公开
+.参数 seed, 整数型
+.局部变量 obj, 整数型
+
+obj = HeapAlloc (GetProcessHeap (), #HEAP_GENERATE_EXCEPTIONS, 2504)
+asm_写子程序指针型内存 (obj, &内部_随机数_MT19337_生成)
+随机数_MT19337_置种子 (obj, seed)
+返回 (obj)
+.子程序 asm_写子程序指针型内存, 整数型, , 返回 参数 内存地址
+.参数 内存地址, 整数型
+.参数 内容, 子程序指针
+
+置入代码 ({139, 77, 12, 139, 69, 8, 137, 8, 201, 194, 8, 0})
+返回 (0)
+.子程序 随机数_MT19337_销毁, , 公开
+.参数 obj, 整数型
+
+HeapFree (GetProcessHeap (), 0, obj)
+.子程序 随机数_MT19337_置种子, , 公开
+.参数 obj, 整数型
+.参数 seed, 整数型
+
+' AsmToECode代码:obj             = dword ptr  8
+' AsmToECode代码:seed            = dword ptr  12
+' AsmToECode代码:mov     eax, [ebp+seed]
+' AsmToECode代码:mov     edi, [ebp+obj]
+' AsmToECode代码:add     edi,4
+' AsmToECode代码:mov     esi, 1
+' AsmToECode代码:mov     [edi], eax
+' AsmToECode代码:mov     eax, edi
+' AsmToECode代码:loop_init:
+' AsmToECode代码: mov     edx, [eax]
+' AsmToECode代码: lea     eax, [eax+4]
+' AsmToECode代码: shr     edx, 1Eh
+' AsmToECode代码: xor     edx, [eax-4]
+' AsmToECode代码: imul    ecx, edx, 6C078965h
+' AsmToECode代码: add     ecx, esi
+' AsmToECode代码: inc     esi
+' AsmToECode代码: mov     [eax], ecx
+' AsmToECode代码: cmp     esi, 270h
+' AsmToECode代码: jb      short loop_init
+' AsmToECode代码:mov     dword ptr [edi+9C0h], 270h
+' AsmToECode代码:pop     ebp
+' AsmToECode代码:retn    8
+置入代码 ({139, 69, 12, 139, 125, 8, 131, 199, 4, 190, 1, 0, 0, 0, 137, 7, 139, 199, 139, 16, 141, 64, 4, 193, 234, 30, 51, 80, 252, 105, 202, 101, 137, 7, 108, 3, 206, 70, 137, 8, 129, 254, 112, 2, 0, 0, 114, 226, 199, 135, 192, 9, 0, 0, 112, 2, 0, 0, 93, 194, 8, 0})
+.子程序 内部_随机数_MT19337_生成, 整数型
+.参数 obj, 整数型
+
+' AsmToECode代码:var_i           = dword ptr -4
+' AsmToECode代码:obj             = dword ptr  8
+' AsmToECode代码:add [ebp+obj],4
+' AsmToECode代码:push    ecx
+' AsmToECode代码:mov     ecx, [ebp+obj]
+' AsmToECode代码:mov     edx, [ecx+9C0h]
+' AsmToECode代码:lea     eax, [edx+1]
+' AsmToECode代码:mov     [ecx+9C0h], eax
+' AsmToECode代码:cmp     edx, 270h
+' AsmToECode代码:jb      short skip_twist
+' AsmToECode代码: mov     edi, 18Dh
+' AsmToECode代码: mov     [ebp+var_i], 270h
+' AsmToECode代码: mov     ebx, ecx
+' AsmToECode代码: mov     [ebp+obj], 270h
+' AsmToECode代码: loop_twist:
+' AsmToECode代码:  xor     edx, edx
+' AsmToECode代码:  lea     eax, [edi-18Ch]
+' AsmToECode代码:  div     [ebp+obj]
+' AsmToECode代码:  lea     ebx, [ebx+4]
+' AsmToECode代码:  mov     edx, [ecx+edx*4]
+' AsmToECode代码:  xor     edx, [ebx-4]
+' AsmToECode代码:  and     edx, 7FFFFFFFh
+' AsmToECode代码:  xor     edx, [ebx-4]
+' AsmToECode代码:  mov     eax, edx
+' AsmToECode代码:  shr     eax, 1
+' AsmToECode代码:  mov     esi, eax
+' AsmToECode代码:  xor     esi, 9908B0DFh
+' AsmToECode代码:  and     dl, 1
+' AsmToECode代码:  cmovz   esi, eax
+' AsmToECode代码:  mov     eax, edi
+' AsmToECode代码:  xor     edx, edx
+' AsmToECode代码:  inc     edi
+' AsmToECode代码:  div     [ebp+obj]
+' AsmToECode代码:  xor     esi, [ecx+edx*4]
+' AsmToECode代码:  sub     [ebp+var_i], 1
+' AsmToECode代码:  mov     [ebx-4], esi
+' AsmToECode代码:  jnz     short loop_twist
+' AsmToECode代码: xor     edx, edx
+' AsmToECode代码: mov     dword ptr [ecx+9C0h], 1
+' AsmToECode代码: skip_twist:
+' AsmToECode代码:mov     ecx, [ecx+edx*4]
+' AsmToECode代码:mov     eax, ecx
+' AsmToECode代码:shr     eax, 0Bh
+' AsmToECode代码:xor     ecx, eax
+' AsmToECode代码:mov     eax, ecx
+' AsmToECode代码:and     eax, 0FF3A58ADh
+' AsmToECode代码:shl     eax, 7
+' AsmToECode代码:xor     ecx, eax
+' AsmToECode代码:mov     eax, ecx
+' AsmToECode代码:and     eax, 0FFFFDF8Ch
+' AsmToECode代码:shl     eax, 0Fh
+' AsmToECode代码:xor     ecx, eax
+' AsmToECode代码:mov     eax, ecx
+' AsmToECode代码:shr     eax, 12h
+' AsmToECode代码:xor     eax, ecx
+' AsmToECode代码:leave
+' AsmToECode代码:retn    4
+置入代码 ({131, 69, 8, 4, 81, 139, 77, 8, 139, 145, 192, 9, 0, 0, 141, 66, 1, 137, 129, 192, 9, 0, 0, 129, 250, 112, 2, 0, 0, 114, 100, 191, 141, 1, 0, 0, 199, 69, 252, 112, 2, 0, 0, 139, 217, 199, 69, 8, 112, 2, 0, 0, 51, 210, 141, 135, 116, 254, 255, 255, 247, 117, 8, 141, 91, 4, 139, 20, 145, 51, 83, 252, 129, 226, 255, 255, 255, 127, 51, 83, 252, 139, 194, 209, 232, 139, 240, 129, 246, 223, 176, 8, 153, 128, 226, 1, 15, 68, 240, 139, 199, 51, 210, 71, 247, 117, 8, 51, 52, 145, 131, 109, 252, 1, 137, 115, 252, 117, 189, 51, 210, 199, 129, 192, 9, 0, 0, 1, 0, 0, 0, 139, 12, 145, 139, 193, 193, 232, 11, 51, 200, 139, 193, 37, 173, 88, 58, 255, 193, 224, 7, 51, 200, 139, 193, 37, 140, 223, 255, 255, 193, 224, 15, 51, 200, 139, 193, 193, 232, 18, 51, 193, 201, 194, 4, 0})
+返回 (0)
+.子程序 随机数_原始随机整数, 整数型, 公开
+.参数 obj, 整数型
+
+' AsmToECode代码:leave
+' AsmToECode代码:mov eax,[esp+4]
+' AsmToECode代码:jmp dword ptr [eax]
+置入代码 ({201, 139, 68, 36, 4, 255, 32})
+返回 (0)
+.子程序 随机数_均匀分布整数, 整数型, 公开
+.参数 obj, 整数型
+.参数 min, 整数型
+.参数 max, 整数型
+
+' AsmToECode代码:@arg self
+' AsmToECode代码:@arg min
+' AsmToECode代码:@arg max
+' AsmToECode代码:mov eax, [min]
+' AsmToECode代码:mov esi, [max]
+' AsmToECode代码:mov edi, [self]
+' AsmToECode代码:sub esi, eax
+' AsmToECode代码:add esi, 1
+' AsmToECode代码:mov [max], esi
+' AsmToECode代码:mov ebx, [edi]
+' AsmToECode代码:jnz needToScale
+' AsmToECode代码:push edi
+' AsmToECode代码:call ebx
+' AsmToECode代码:pop ebp
+' AsmToECode代码:retn 0Ch
+' AsmToECode代码:
+' AsmToECode代码:needToScale:
+' AsmToECode代码:cmp esi, 1
+' AsmToECode代码:je rangeIsOne
+' AsmToECode代码:
+' AsmToECode代码:xor edx,edx
+' AsmToECode代码:xor eax,eax
+' AsmToECode代码:inc edx
+' AsmToECode代码:div esi
+' AsmToECode代码:not edx ; edx = 0xFFFFFFFF - edx
+' AsmToECode代码:mov esi, edx
+' AsmToECode代码:
+' AsmToECode代码:tooBig:
+' AsmToECode代码:push edi
+' AsmToECode代码:call ebx
+' AsmToECode代码:cmp eax, esi
+' AsmToECode代码:ja tooBig
+' AsmToECode代码:
+' AsmToECode代码:xor edx, edx
+' AsmToECode代码:div [max]
+' AsmToECode代码:add edx, [min]
+' AsmToECode代码:mov eax, edx
+' AsmToECode代码:
+' AsmToECode代码:rangeIsOne:
+' AsmToECode代码:;eax == min
+' AsmToECode代码:pop ebp
+' AsmToECode代码:retn 0Ch
+置入代码 ({139, 69, 12, 139, 117, 16, 139, 125, 8, 43, 240, 131, 198, 1, 137, 117, 16, 139, 31, 117, 7, 87, 255, 211, 93, 194, 12, 0, 131, 254, 1, 116, 28, 51, 210, 51, 192, 66, 247, 246, 247, 210, 139, 242, 87, 255, 211, 59, 198, 119, 249, 51, 210, 247, 117, 16, 3, 85, 12, 139, 194, 93, 194, 12, 0})
+返回 (0)

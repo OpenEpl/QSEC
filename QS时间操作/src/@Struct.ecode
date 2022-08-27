@@ -1,0 +1,42 @@
+﻿.数据类型 SYSTEMTIME
+    .成员 wYear, 短整数型
+    .成员 wMonth, 短整数型
+    .成员 wDayOfWeek, 短整数型
+    .成员 wDay, 短整数型
+    .成员 wHour, 短整数型
+    .成员 wMinute, 短整数型
+    .成员 wSecond, 短整数型
+    .成员 wMilliseconds, 短整数型
+
+.数据类型 WSADATA
+    .成员 wVersion, 短整数型, , , 版本
+    .成员 wHighVersion, 短整数型, , , 最高版本
+    .成员 szDescription, 字节型, , "257", 描述
+    .成员 szSystemStatus, 字节型, , "129", 状态
+    .成员 iMaxSockets, 短整数型, , , 单个进程能够打开的socket的最大数目
+    .成员 iMaxUdpDg, 短整数型, , , 最大（UDP）的数据包大小
+    .成员 lpVendporInfo, 整数型, , , 指向销售商的数据结构的指针
+
+.数据类型 NtpBasicInfo
+    .成员 LiVnMode, 字节型
+    .成员 Stratum, 字节型
+    .成员 Poll, 字节型
+    .成员 Precision, 字节型
+    .成员 RootDelay, 整数型
+    .成员 RootDispersion, 整数型
+    .成员 ReferenceID, 整数型
+    .成员 ReferenceTime, 长整数型
+    .成员 OriginateTime, 长整数型
+    .成员 ReceiveTime, 长整数型
+    .成员 TransmitTime, 长整数型
+
+.数据类型 addrinfo
+    .成员 ai_flags, 整数型
+    .成员 ai_family, 整数型
+    .成员 ai_socktype, 整数型
+    .成员 ai_protocol, 整数型
+    .成员 ai_addrlen, 整数型
+    .成员 ai_canonname, 整数型
+    .成员 ai_addr, 整数型
+    .成员 ai_next, 整数型
+

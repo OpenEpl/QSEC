@@ -1,0 +1,12 @@
+{
+  "name": "gencode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gencode.js",
+  "scripts": {},
+  "author": "OpenEpl",
+  "dependencies": {
+    "ejs": "^3.1.8",
+    "json5": "^2.2.1"
+  }
+}

@@ -1,0 +1,9 @@
+﻿.DLL命令 QueryPerformanceFrequency, 整数型, kernel32.dll, QueryPerformanceFrequency, , 返回计数频率
+    .参数 lpFrequency, 长整数型, 传址
+
+.DLL命令 QueryPerformanceCounter, 整数型, kernel32.dll, QueryPerformanceCounter, , 获取计数值
+    .参数 lpPerformanceCount, 长整数型, 传址
+
+.DLL命令 OutputDebugString, , kernel32.dll, OutputDebugStringA, , 向调试发送字符串
+    .参数 lpOutputString, 文本型
+

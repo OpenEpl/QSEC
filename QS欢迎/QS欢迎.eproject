@@ -1,0 +1,16 @@
+﻿{
+  "Name": "QS欢迎",
+  "Version": "1.0.0.0",
+  "ProjectType": "WindowsECom",
+  "SourceSet": "src",
+  "OutFile": "../_IntermediateBuild/QS欢迎.ec",
+  "Dependencies": [
+    {
+      "Kind": "ELib",
+      "Name": "系统核心支持库",
+      "FileName": "krnln",
+      "Guid": "d09f2340818511d396f6aaf844c7e325",
+      "Version": "5.7"
+    }
+  ]
+}

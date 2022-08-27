@@ -1,0 +1,4 @@
+﻿.常量 HEAP_ZERO_MEMORY, "8"
+.常量 HEAP_GENERATE_EXCEPTIONS, "4"
+.常量 底层哈希表_内存大小, "32", 公开
+.常量 底层哈希表_元素_内存大小, "16", 公开

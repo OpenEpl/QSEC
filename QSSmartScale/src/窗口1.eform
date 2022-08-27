@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<窗口 名称="窗口1" 左边="50" 顶边="50" 宽度="436" 高度="241" 鼠标指针="AAAAAA==" 可停留焦点="假" 扩展属性数据="BgAAAAAAAAABAAAAAAAA/wAAAAABAAAAAQAAAAEAAAABAAAAAAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==">
+  <窗口.菜单>
+    <菜单 名称="a" 标题="a" 可视="假">
+      <菜单 名称="b" 标题="b" />
+    </菜单>
+  </窗口.菜单>
+  <按钮 名称="按钮1" 左边="72" 顶边="40" 宽度="216" 高度="48" 鼠标指针="AAAAAA==" 可停留焦点="真" 扩展属性数据="" />
+  <图片框 名称="图片框1" 左边="328" 顶边="120" 宽度="24" 高度="72" 鼠标指针="AAAAAA==" 可停留焦点="假" 扩展属性数据="" />
+</窗口>

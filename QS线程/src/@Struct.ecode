@@ -1,0 +1,8 @@
+﻿.数据类型 CRITICAL_SECTION
+    .成员 DebugInfo, 整数型
+    .成员 LockCount, 整数型
+    .成员 RecursionCount, 整数型
+    .成员 OwningThread, 整数型
+    .成员 LockSemaphore, 整数型
+    .成员 SpinCount, 整数型
+

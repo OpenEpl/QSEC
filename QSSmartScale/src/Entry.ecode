@@ -1,0 +1,263 @@
+﻿.程序集 Entry
+
+.子程序 _启动子程序, 整数型, , 请在本子程序中放置易模块初始化代码
+
+
+_临时子程序 ()  ' 在初始化代码执行完毕后调用测试代码
+返回 (0)  ' 可以根据您的需要返回任意数值
+.子程序 _临时子程序
+
+' 本名称子程序用作测试程序用，仅在开发及调试环境中有效，编译发布程序前将被系统自动清空，请将所有用作测试的临时代码放在本子程序中。 ***注意不要修改本子程序的名称、参数及返回值类型。
+DpiAwarePerMonitorV2OrCompatible ()
+载入 (窗口1, , 真)
+.子程序 指针到短整数, 短整数型
+.参数 指针, 整数型
+
+置入代码 ({139, 69, 8, 15, 183, 0, 201, 194, 4, 0})
+返回 (0)
+.子程序 RecordWindowsInfo, , 公开
+.参数 hParent, 整数型
+.参数 data, WindowRecord, 参考
+.参数 clientWidth96, 整数型, 可空, pixels in dpi 96, 0 for auto detection
+.参数 clientHeight96, 整数型, 可空, pixels in dpi 96, 0 for auto detection
+.局部变量 rect, RECT
+.局部变量 eplControlMap, EplControlMap
+.局部变量 eplFontPropertyIdsMap, EplFontPropertyIdsMap
+.局部变量
+.局部变量 style, 整数型
+.局部变量 hMenu, 整数型
+.局部变量 bMenu, 整数型
+.局部变量 exStyle, 整数型
+.局部变量 clientOffest, RECT
+.局部变量 systemDpi, 整数型
+.局部变量
+.局部变量 pAdjustWindowRectExForDpi, 整数型
+
+style = GetWindowLong (hParent, #GWL_STYLE)
+hMenu = GetMenu (hParent)
+.如果真 (hMenu != 0)
+    .如果真 (GetMenuItemCount (hMenu) != 0)
+        bMenu = 1
+    .如果真结束
+    
+.如果真结束
+exStyle = GetWindowLong (hParent, #GWL_EXSTYLE)
+systemDpi = GetDpiForSystem ()
+
+pAdjustWindowRectExForDpi = GetProcAddress (GetModuleHandle (“user32.dll”), “AdjustWindowRectExForDpi”)
+.如果 (pAdjustWindowRectExForDpi != 0)
+    Call_5 (pAdjustWindowRectExForDpi, 取变量地址 (clientOffest.left), style, bMenu, exStyle, #USER_DEFAULT_SCREEN_DPI)
+.否则
+    AdjustWindowRectEx (clientOffest, style, bMenu, exStyle)
+    clientOffest.left = 四舍五入 (clientOffest.left / systemDpi * #USER_DEFAULT_SCREEN_DPI, )
+    clientOffest.top = 四舍五入 (clientOffest.top / systemDpi * #USER_DEFAULT_SCREEN_DPI, )
+    clientOffest.right = 四舍五入 (clientOffest.right / systemDpi * #USER_DEFAULT_SCREEN_DPI, )
+    clientOffest.bottom = 四舍五入 (clientOffest.bottom / systemDpi * #USER_DEFAULT_SCREEN_DPI, )
+.如果结束
+
+GetWindowRect (hParent, rect)
+data.hWnd = hParent
+
+.如果 (clientWidth96 != 0)
+    data.ClientWidth96 = clientWidth96
+.否则
+    data.ClientWidth96 = rect.right - rect.left + clientOffest.left - clientOffest.right
+    .如果真 (data.ClientWidth96 == 0)
+        data.ClientWidth96 = 1
+    .如果真结束
+    
+.如果结束
+
+.如果 (clientHeight96 != 0)
+    data.ClientHeight96 = clientHeight96
+.否则
+    data.ClientHeight96 = rect.bottom - rect.top + clientOffest.top - clientOffest.bottom
+    .如果真 (data.ClientHeight96 == 0)
+        data.ClientHeight96 = 1
+    .如果真结束
+    
+.如果结束
+
+data.Controls.Clear ()
+eplControlMap.LoadAll ()
+CollectControlRecord (hParent, data.Controls, eplControlMap, eplFontPropertyIdsMap, data.ClientWidth96, data.ClientHeight96)
+.子程序 RecordEplFontProperties
+.参数 dataType, 整数型
+.参数 cWnd, 整数型
+.参数 record, EplFontPropertiesRecord, 参考
+.参数 eplFontPropertyIdsMap, EplFontPropertyIdsMap
+.局部变量 i, 整数型
+.局部变量 count, 整数型
+.局部变量 succeedToGetProperty, 整数型
+.局部变量 dataBlock, DataBlock
+
+record.CWnd = cWnd
+eplFontPropertyIdsMap.Get (dataType, record.Getter, record.Setter, record.PropertyIds)
+count = 取数组下标 (record.PropertyIds, )
+重定义数组 (record.FontSizes, 假, count)
+i = 1
+.判断循环首 (i <= count)
+    succeedToGetProperty = Call_3 (record.Getter, record.CWnd, record.PropertyIds[i], 取变量地址 (dataBlock.addr))
+    .如果 (succeedToGetProperty == 0 || dataBlock.addr == 0 || dataBlock.length != 60)
+        record.FontSizes[i] = GetEmSize ()
+    .否则
+        record.FontSizes[i] = 四舍五入 (取绝对值 (指针到整数 (dataBlock.addr)) * 72 / #USER_DEFAULT_SCREEN_DPI, )
+    .如果结束
+    i = i + 1
+.判断循环尾 ()
+.子程序 ScaleForDpi, , 公开
+.参数 data, WindowRecord, 参考
+.参数 fontPool, FontPool
+.局部变量 dpi, 整数型
+
+dpi = GetDpiForWindow (data.hWnd)
+SetClientSize (data.hWnd, 四舍五入 (data.ClientWidth96 * dpi / #USER_DEFAULT_SCREEN_DPI, ), 四舍五入 (data.ClientHeight96 * dpi / #USER_DEFAULT_SCREEN_DPI, ))
+ScaleControlFont (data, dpi, fontPool)
+ScaleControlSize (data)
+.子程序 ScaleControlFont, , 公开
+.参数 data, WindowRecord, 参考
+.参数 dpi, 整数型
+.参数 fontPool, FontPool
+.局部变量 count, 整数型
+.局部变量 i, 整数型
+.局部变量 control, ControlRecord
+.局部变量 font, LOGFONTW
+.局部变量 hFont, 整数型
+.局部变量 hNewFont, 整数型
+
+count = data.Controls.Count ()
+.计次循环首 (count, i)
+    control = data.Controls.Get (i)
+    ScaleForEplFontProperties (control.EplFontProperties, dpi)
+    .如果真 (control.FontSize != 0)
+        hFont = SendMessage (control.hWnd, #WM_GETFONT, 0, 0)
+        GetFontInfo (hFont, font)
+        font.lfHeight = -四舍五入 (control.FontSize * dpi / 72, )
+        hNewFont = fontPool.Get (font)
+        SendMessage (control.hWnd, #WM_SETFONT, hNewFont, 0)
+    .如果真结束
+    
+.计次循环尾 ()
+
+.子程序 ScaleForEplFontProperties
+.参数 record, EplFontPropertiesRecord
+.参数 dpi, 整数型
+.局部变量 count, 整数型
+.局部变量 i, 整数型
+
+count = 取数组下标 (record.PropertyIds, )
+.计次循环首 (count, i)
+    SetEplFontSizeProperty (record.CWnd, record.Getter, record.Setter, record.PropertyIds[i], record.FontSizes[i], dpi)
+.计次循环尾 ()
+.子程序 SetEplFontSizeProperty
+.参数 cWnd, 整数型
+.参数 getter, 整数型
+.参数 setter, 整数型
+.参数 propertyId, 整数型
+.参数 fontSize, 整数型
+.参数 dpi, 整数型
+.局部变量 succeedToGetProperty, 整数型
+.局部变量 dataBlock, DataBlock
+.局部变量 newDataBlock, DataBlock
+.局部变量 hProcessHeap, 整数型
+.局部变量 newFontHeightPx, 整数型
+
+succeedToGetProperty = Call_3 (getter, cWnd, propertyId, 取变量地址 (dataBlock.addr))
+hProcessHeap = GetProcessHeap ()
+newDataBlock.addr = HeapAlloc (hProcessHeap, 0, 60)
+newDataBlock.length = 60
+.如果 (succeedToGetProperty == 0 || dataBlock.addr == 0 || dataBlock.length != 60)
+    GetObject (GetStockObject (#DEFAULT_GUI_FONT), 60, newDataBlock.addr)
+.否则
+    memcpy (newDataBlock.addr, dataBlock.addr, 60)
+.如果结束
+newFontHeightPx = -四舍五入 (fontSize * dpi / 72, )
+写到内存 (newFontHeightPx, newDataBlock.addr, 4)
+Call_4 (setter, cWnd, propertyId, 取变量地址 (newDataBlock.addr), 0)
+HeapFree (hProcessHeap, 0, newDataBlock.addr)
+.子程序 ScaleControlSize, , 公开
+.参数 data, WindowRecord, 参考
+.局部变量 control, ControlRecord
+.局部变量 rect, RECT
+.局部变量 count, 整数型
+.局部变量 i, 整数型
+.局部变量 x, 整数型
+.局部变量 y, 整数型
+.局部变量 cx, 整数型
+.局部变量 cy, 整数型
+
+count = data.Controls.Count ()
+.计次循环首 (count, i)
+    control = data.Controls.Get (i)
+    GetClientRect (control.hParent, rect)
+    x = 四舍五入 (control.RelativeLeft * rect.right, )
+    y = 四舍五入 (control.RelativeTop * rect.bottom, )
+    cx = 四舍五入 (control.RelativeWidth * rect.right, )
+    cy = 四舍五入 (control.RelativeHeight * rect.bottom, )
+    SetWindowPos (control.hWnd, 0, x, y, cx, cy, 位或 (#SWP_NOZORDER, #SWP_NOOWNERZORDER, #SWP_NOACTIVATE))
+.计次循环尾 ()
+.子程序 CollectControlRecord
+.参数 hParent, 整数型
+.参数 list, ArrayListOfControlInfos, 参考
+.参数 eplControlMap, EplControlMap
+.参数 eplFontPropertyIdsMap, EplFontPropertyIdsMap
+.参数 clientWidth, 整数型
+.参数 clientHeight, 整数型
+.局部变量 control, ControlRecord
+.局部变量 hChild, 整数型
+.局部变量 rect, RECT
+.局部变量 childClientRect, RECT
+.局部变量 position, POINT
+.局部变量 hFont, 整数型
+.局部变量 font, LOGFONTW
+.局部变量 defaultFont, 整数型
+.局部变量 eplDataType, 整数型
+.局部变量 eplCWnd, 整数型
+
+hChild = GetWindow (hParent, #GW_CHILD)
+defaultFont = GetStockObject (#DEFAULT_GUI_FONT)
+.判断循环首 (hChild != 0)
+    control.hWnd = hChild
+    control.hParent = hParent
+    
+    GetWindowRect (hChild, rect)
+    position.x = rect.left
+    position.y = rect.top
+    ScreenToClient (hParent, position)
+    control.RelativeLeft = position.x / clientWidth
+    control.RelativeTop = position.y / clientHeight
+    control.RelativeWidth = (rect.right - rect.left) / clientWidth
+    control.RelativeHeight = (rect.bottom - rect.top) / clientHeight
+    control.FontSize = 0
+    .如果 (eplControlMap.Get (hChild, eplDataType, eplCWnd))
+        RecordEplFontProperties (eplDataType, eplCWnd, control.EplFontProperties, eplFontPropertyIdsMap)
+    .否则
+        清除数组 (control.EplFontProperties.PropertyIds)
+        清除数组 (control.EplFontProperties.FontSizes)
+        hFont = SendMessage (hChild, #WM_GETFONT, 0, 0)
+        .如果真 (hFont != 0)
+            GetFontInfo (hFont, font)
+            .如果 (hFont == defaultFont)
+                control.FontSize = GetEmSize ()
+            .否则
+                control.FontSize = 四舍五入 (取绝对值 (font.lfHeight) * 72 / #USER_DEFAULT_SCREEN_DPI, )
+            .如果结束
+            
+        .如果真结束
+        
+    .如果结束
+    
+    list.Add (control)
+    GetClientRect (hChild, childClientRect)
+    CollectControlRecord (hChild, list, eplControlMap, eplFontPropertyIdsMap, childClientRect.right, childClientRect.bottom)
+    hChild = GetWindow (hChild, #GW_HWNDNEXT)
+.判断循环尾 ()
+.子程序 GetFontInfo
+.参数 hFont, 整数型
+.参数 result, LOGFONTW
+
+GetObject_LOGFONTW (hFont, #SizeOfLogFontW, result)
+.子程序 EmptyWindowRecord, WindowRecord, 公开
+.局部变量 r, WindowRecord
+
+返回 (r)

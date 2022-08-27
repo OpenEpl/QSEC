@@ -1,0 +1,241 @@
+﻿.程序集 SNTP
+
+.子程序 时间_取网络时间_FileTime, 长整数型, 公开, 为了提高精确度，可多次从不同Ntp服务器获取信息，减少估计出的网络延迟与真实值的误差
+.参数 NtpServer, 文本型, 可空, NTPv3协议网络时间服务器，默认为“pool.ntp.org”
+.参数 Success, 逻辑型, 参考 可空
+.参数 LocalClockOffset, 长整数型, 参考 可空, 单位：1e-7秒(s)。受限于系统时间精度及网络延迟估计值误差，实际准确度并没有这么高。
+.局部变量 WSAData, WSADATA
+.局部变量 hSocket, 整数型
+.局部变量 NtpPacket, NtpBasicInfo
+.局部变量 TransmitFileTime, 长整数型
+.局部变量 TransmitNtpTime, 长整数型
+.局部变量 TransmitPerformanceCounter, 长整数型
+.局部变量 DestinationPerformanceCounter, 长整数型
+.局部变量 DestinationFileTime, 长整数型
+.局部变量 DestinationNtpTime, 长整数型
+.局部变量 addrhint, addrinfo
+.局部变量 addrResult, 整数型
+.局部变量 addr, 整数型
+.局部变量 PerformanceFrequency, 长整数型
+
+.如果真 (NtpServer == “”)
+    NtpServer = “pool.ntp.org”
+.如果真结束
+QueryPerformanceFrequency (PerformanceFrequency)
+WSAStartup (合并短整数 (2, 2), WSAData)
+addrhint.ai_family = #AF_UNSPEC
+addrhint.ai_socktype = #SOCK_DGRAM
+addrhint.ai_protocol = #IPPROTO_UDP
+getaddrinfo (NtpServer, “123”, addrhint, addrResult)
+addr = addrResult
+.判断循环首 (addr != 0)
+    hSocket = socket (指针到整数 (addr + 4), 指针到整数 (addr + 8), 指针到整数 (addr + 12))
+    .如果真 (connect (hSocket, 指针到整数 (addr + 24), 指针到整数 (addr + 16)) == 0)
+        NtpPacket.LiVnMode = 27
+        GetSystemTimeAsFileTime_UsingUInt64 (TransmitFileTime)
+        QueryPerformanceCounter (TransmitPerformanceCounter)
+        TransmitNtpTime = 时间_FileTime到NtpTime (TransmitFileTime)
+        NtpPacket.TransmitTime = 交换字节序_长整数型 (TransmitNtpTime)
+        .如果真 (sendNtpBasicInfo (hSocket, NtpPacket, 48, 0) == 48)
+            setsockopt_int (hSocket, #SOL_SOCKET, #SO_RCVTIMEO, 10000, 4)
+            .如果真 (recvNtpBasicInfo (hSocket, NtpPacket, 48, 0) == 48)
+                QueryPerformanceCounter (DestinationPerformanceCounter)
+                GetDestinationTimeFromPerformanceCounter (TransmitPerformanceCounter, DestinationPerformanceCounter, PerformanceFrequency, TransmitNtpTime, DestinationNtpTime, TransmitFileTime, DestinationFileTime)
+                ' GetSystemTimeAsFileTime_UsingUInt64 (DestinationFileTime)
+                ' DestinationNtpTime ＝ 时间_FileTime到NtpTime (DestinationFileTime)
+                closesocket (hSocket)
+                跳出循环 ()
+            .如果真结束
+            
+        .如果真结束
+        
+    .如果真结束
+    closesocket (hSocket)
+    hSocket = 0
+    addr = 指针到整数 (addr + 28)
+.判断循环尾 ()
+freeaddrinfo (addrResult)
+WSACleanup ()
+Success = hSocket != 0
+.如果真 (hSocket == 0)
+    返回 (0)
+.如果真结束
+LocalClockOffset = GetClockOffset_FileTimeForamt (交换字节序_长整数型 (NtpPacket.ReceiveTime), 交换字节序_长整数型 (NtpPacket.OriginateTime), 交换字节序_长整数型 (NtpPacket.TransmitTime), DestinationNtpTime)
+返回 (AddLong (DestinationFileTime, LocalClockOffset))
+.子程序 AddLong, 长整数型
+.参数 a, 长整数型
+.参数 b, 长整数型
+
+置入代码 ({139, 69, 8, 139, 85, 12, 3, 69, 16, 19, 85, 20, 201, 194, 16, 0})
+' mov eax,[ebp+8]
+' mov edx,[ebp+12]
+' add eax,[ebp+16]
+' adc edx,[ebp+20]
+' leave
+' retn 16
+返回 (0)
+.子程序 交换字节序_长整数型, 长整数型
+.参数 a, 长整数型
+
+' AsmToECode代码:@arg a:qword
+' AsmToECode代码:mov edx,dword ptr [a]
+' AsmToECode代码:bswap edx
+' AsmToECode代码:mov eax,dword ptr [a+4]
+' AsmToECode代码:bswap eax
+' AsmToECode代码:@ret
+置入代码 ({139, 85, 8, 15, 202, 139, 69, 12, 15, 200, 201, 194, 8, 0})
+返回 (0)
+.子程序 GetClockOffset_FileTimeForamt, 长整数型
+.参数 ReceiveTime, 长整数型
+.参数 OriginateTime, 长整数型
+.参数 TransmitTime, 长整数型
+.参数 DestinationTime, 长整数型
+
+' AsmToECode代码:@arg ReceiveTime:qword
+' AsmToECode代码:@arg OriginateTime:qword
+' AsmToECode代码:@arg TransmitTime:qword
+' AsmToECode代码:@arg DestinationTime:qword
+' AsmToECode代码:; [SInt]ClockOffset_NtpTimeForamt = ((ReceiveTime - OriginateTime) + (TransmitTime - DestinationTime)) / 2
+' AsmToECode代码:; [SInt]ClockOffset_FileTimeForamt = [SInt]ClockOffset_NtpTimeForamt * 10000000 / 2**32
+' AsmToECode代码:mov eax,dword ptr [ReceiveTime]
+' AsmToECode代码:sub eax,dword ptr [OriginateTime]
+' AsmToECode代码:mov edx,dword ptr [ReceiveTime+4]
+' AsmToECode代码:sbb edx,dword ptr [OriginateTime+4]
+' AsmToECode代码:mov ebx,dword ptr [TransmitTime]
+' AsmToECode代码:sub ebx,dword ptr [DestinationTime]
+' AsmToECode代码:mov ecx,dword ptr [TransmitTime+4]
+' AsmToECode代码:sbb ecx,dword ptr [DestinationTime+4]
+' AsmToECode代码:add ebx,eax
+' AsmToECode代码:adc ecx,edx
+' AsmToECode代码:xor edi,edi
+' AsmToECode代码:shrd ebx,ecx,1
+' AsmToECode代码:sar ecx,1
+' AsmToECode代码:; now, the ClockOffset_NtpTimeForamt is ECX:EBX
+' AsmToECode代码:; and EDI is 0
+' AsmToECode代码:
+' AsmToECode代码:jns notSign
+' AsmToECode代码:inc edi
+' AsmToECode代码:neg ecx
+' AsmToECode代码:neg ebx
+' AsmToECode代码:sbb ecx, 0
+' AsmToECode代码:notSign:
+' AsmToECode代码:
+' AsmToECode代码:mov eax,10000000
+' AsmToECode代码:mul ebx
+' AsmToECode代码:mov ebx,edx
+' AsmToECode代码:mov eax,10000000
+' AsmToECode代码:mul ecx
+' AsmToECode代码:add eax,ebx
+' AsmToECode代码:adc edx,0
+' AsmToECode代码:
+' AsmToECode代码:or edi,edi
+' AsmToECode代码:jz notSetSign
+' AsmToECode代码:neg     edx
+' AsmToECode代码:neg     eax
+' AsmToECode代码:sbb     edx, 0
+' AsmToECode代码:notSetSign:
+' AsmToECode代码:@ret
+置入代码 ({139, 69, 8, 43, 69, 16, 139, 85, 12, 27, 85, 20, 139, 93, 24, 43, 93, 32, 139, 77, 28, 27, 77, 36, 3, 216, 19, 202, 51, 255, 15, 172, 203, 1, 209, 249, 121, 8, 71, 247, 217, 247, 219, 131, 217, 0, 184, 128, 150, 152, 0, 247, 227, 139, 218, 184, 128, 150, 152, 0, 247, 225, 3, 195, 131, 210, 0, 11, 255, 116, 7, 247, 218, 247, 216, 131, 218, 0, 201, 194, 32, 0})
+返回 (0)
+.子程序 时间_FileTime到NtpTime, 长整数型, 公开
+.参数 FileTime, 长整数型, , 必须大于等于94354848000000000
+
+' [UInt]NtpTime = ([UInt]FileTime - 94354848000000000) * 2**32 / 10000000
+
+' AsmToECode代码:@arg FileTime
+' AsmToECode代码:xor edx,edx
+' AsmToECode代码:mov ecx, dword ptr [FileTime]
+' AsmToECode代码:mov ebx,10000000
+' AsmToECode代码:mov eax, dword ptr [FileTime+4]
+' AsmToECode代码:sub ecx, 0FDE04000h
+' AsmToECode代码:sbb eax, 14F373Bh
+' AsmToECode代码:div ebx
+' AsmToECode代码:mov eax,ecx
+' AsmToECode代码:div ebx
+' AsmToECode代码:mov ecx,eax
+' AsmToECode代码:xor eax,eax
+' AsmToECode代码:div ebx
+' AsmToECode代码:mov edx,ecx
+' AsmToECode代码:@ret
+置入代码 ({51, 210, 139, 77, 8, 187, 128, 150, 152, 0, 139, 69, 12, 129, 233, 0, 64, 224, 253, 29, 59, 55, 79, 1, 247, 243, 139, 193, 247, 243, 139, 200, 51, 192, 247, 243, 139, 209, 201, 194, 4, 0})
+返回 (0)
+.子程序 GetDestinationTimeFromPerformanceCounter
+.参数 TransmitPerformanceCounter, 长整数型
+.参数 DestinationPerformanceCounter, 长整数型
+.参数 PerformanceFrequency, 长整数型
+.参数 TransmitNtpTime, 长整数型
+.参数 Out_DestinationNtpTime, 长整数型, 参考
+.参数 TransmitFileTime, 长整数型
+.参数 Out_DestinationFileTime, 长整数型, 参考
+
+' AsmToECode代码:@arg TransmitPerformanceCounter:qword
+' AsmToECode代码:@arg DestinationPerformanceCounter:qword
+' AsmToECode代码:@arg PerformanceFrequency:qword
+' AsmToECode代码:@arg TransmitNtpTime:qword
+' AsmToECode代码:@arg Out_DestinationNtpTime
+' AsmToECode代码:@arg TransmitFileTime:qword
+' AsmToECode代码:@arg Out_DestinationFileTime
+' AsmToECode代码:
+' AsmToECode代码:xor eax,eax
+' AsmToECode代码:mov edx,dword ptr [DestinationPerformanceCounter]
+' AsmToECode代码:sub edx,dword ptr [TransmitPerformanceCounter]
+' AsmToECode代码:mov ebx,dword ptr [DestinationPerformanceCounter+4]
+' AsmToECode代码:sbb ebx,dword ptr [TransmitPerformanceCounter+4]
+' AsmToECode代码:xor esi,esi
+' AsmToECode代码:xor edi,edi
+' AsmToECode代码:
+' AsmToECode代码:;Remainder = EDI:ESI
+' AsmToECode代码:;Quotient = EBX:EDX:EAX (at first, it is Dividend)
+' AsmToECode代码:mov ecx,96
+' AsmToECode代码:.repeat
+' AsmToECode代码: shl eax,1
+' AsmToECode代码: rcl edx,1
+' AsmToECode代码: rcl ebx,1
+' AsmToECode代码: rcl esi,1
+' AsmToECode代码: rcl edi,1
+' AsmToECode代码:
+' AsmToECode代码: cmp edi,dword ptr [PerformanceFrequency+4]
+' AsmToECode代码: ja _RemainderNotBelowDivisor
+' AsmToECode代码: jb _RemainderBelowDivisor
+' AsmToECode代码: cmp esi,dword ptr [PerformanceFrequency]
+' AsmToECode代码: jb _RemainderBelowDivisor
+' AsmToECode代码: _RemainderNotBelowDivisor:
+' AsmToECode代码: sub esi,dword ptr [PerformanceFrequency]
+' AsmToECode代码: sbb edi,dword ptr [PerformanceFrequency+4]
+' AsmToECode代码: or eax,1
+' AsmToECode代码: _RemainderBelowDivisor:
+' AsmToECode代码:
+' AsmToECode代码: dec ecx
+' AsmToECode代码:.until zero?
+' AsmToECode代码:
+' AsmToECode代码:;DestinationNtpTime
+' AsmToECode代码:mov ecx,Out_DestinationNtpTime
+' AsmToECode代码:.if ecx
+' AsmToECode代码: mov ebx,dword ptr [TransmitNtpTime]
+' AsmToECode代码: add ebx,eax
+' AsmToECode代码: mov [ecx],ebx
+' AsmToECode代码: mov ebx,dword ptr [TransmitNtpTime+4]
+' AsmToECode代码: adc ebx,edx
+' AsmToECode代码: mov [ecx+4],ebx
+' AsmToECode代码:.endif
+' AsmToECode代码:
+' AsmToECode代码:;DestinationFileTime
+' AsmToECode代码:mov ecx,edx
+' AsmToECode代码:mov ebx,10000000
+' AsmToECode代码:mul ebx
+' AsmToECode代码:mov ebx,edx
+' AsmToECode代码:mov eax,10000000
+' AsmToECode代码:mul ecx
+' AsmToECode代码:add eax,ebx
+' AsmToECode代码:adc edx,0
+' AsmToECode代码:mov ecx,Out_DestinationFileTime
+' AsmToECode代码:.if ecx
+' AsmToECode代码: mov ebx,dword ptr [TransmitFileTime]
+' AsmToECode代码: add ebx,eax
+' AsmToECode代码: mov [ecx],ebx
+' AsmToECode代码: mov ebx,dword ptr [TransmitFileTime+4]
+' AsmToECode代码: adc ebx,edx
+' AsmToECode代码: mov [ecx+4],ebx
+' AsmToECode代码:.endif
+' AsmToECode代码:@ret
+置入代码 ({51, 192, 139, 85, 16, 43, 85, 8, 139, 93, 20, 27, 93, 12, 51, 246, 51, 255, 185, 96, 0, 0, 0, 209, 224, 209, 210, 209, 211, 209, 214, 209, 215, 59, 125, 28, 119, 7, 114, 14, 59, 117, 24, 114, 9, 43, 117, 24, 27, 125, 28, 131, 200, 1, 73, 117, 222, 139, 77, 40, 11, 201, 116, 15, 139, 93, 32, 3, 216, 137, 25, 139, 93, 36, 19, 218, 137, 89, 4, 139, 202, 187, 128, 150, 152, 0, 247, 227, 139, 218, 184, 128, 150, 152, 0, 247, 225, 3, 195, 131, 210, 0, 139, 77, 52, 11, 201, 116, 15, 139, 93, 44, 3, 216, 137, 25, 139, 93, 48, 19, 218, 137, 89, 4, 201, 194, 48, 0})

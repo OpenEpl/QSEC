@@ -1,0 +1,42 @@
+﻿{
+  "Name": "QSSmartScale",
+  "Version": "1.0.0.0",
+  "ProjectType": "WindowsECom",
+  "SourceSet": "src",
+  "Author": "QQ1354092549",
+  "OutFile": "../_Build/QSSmartScale.ec",
+  "Dependencies": [
+    {
+      "Kind": "ELib",
+      "Name": "系统核心支持库",
+      "FileName": "krnln",
+      "Guid": "d09f2340818511d396f6aaf844c7e325",
+      "Version": "5.7"
+    },
+    {
+      "Kind": "ELib",
+      "Name": "特殊功能支持库",
+      "FileName": "spec",
+      "Guid": "A512548E76954B6E92C21055517615B0",
+      "Version": "3.1"
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QS哈希表_字节集_整数型",
+      "Path": "../_Build/QS哈希表/QS哈希表_字节集_整数型.ec",
+      "ReExport": false
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QS哈希表_整数型_字节集",
+      "Path": "../_Build/QS哈希表/QS哈希表_整数型_字节集.ec",
+      "ReExport": false
+    },
+    {
+      "Kind": "ECom",
+      "Name": "ArrayList",
+      "Path": "../_IntermediateBuild/ArrayList.ec",
+      "ReExport": false
+    }
+  ]
+}

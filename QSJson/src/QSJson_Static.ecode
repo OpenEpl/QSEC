@@ -1,0 +1,67 @@
+﻿.程序集 QSJson_Static
+
+.子程序 QSJson_文本, QSJson_Ref, 公开
+.参数 String, 文本型
+.局部变量 ReturnValue, QSJson_Ref
+
+ReturnValue.置文本 (String)
+置入代码 ({139, 69, 252, 201, 194, 4, 0})
+' mov eax,[ebp-4]
+' leave
+' retn 4
+
+' 由于易的返回会做无用的复制操作（返回值 = 复制(ReturnValue) | 销毁(ReturnValue) | 返回）
+' 所以直接汇编里返回
+返回 (ReturnValue)
+.子程序 QSJson_长整数, QSJson_Ref, 公开
+.参数 Long, 长整数型
+.局部变量 ReturnValue, QSJson_Ref
+
+ReturnValue.置长整数 (Long)
+置入代码 ({139, 69, 252, 201, 194, 8, 0})
+' mov eax,[ebp-4]
+' leave
+' retn 8
+
+' 由于易的返回会做无用的复制操作（返回值 = 复制(ReturnValue) | 销毁(ReturnValue) | 返回）
+' 所以直接汇编里返回
+返回 (ReturnValue)
+.子程序 QSJson_双精度小数, QSJson_Ref, 公开
+.参数 Double, 双精度小数型
+.局部变量 ReturnValue, QSJson_Ref
+
+ReturnValue.置双精度小数 (Double)
+置入代码 ({139, 69, 252, 201, 194, 8, 0})
+' mov eax,[ebp-4]
+' leave
+' retn 8
+
+' 由于易的返回会做无用的复制操作（返回值 = 复制(ReturnValue) | 销毁(ReturnValue) | 返回）
+' 所以直接汇编里返回
+返回 (ReturnValue)
+.子程序 QSJson_逻辑, QSJson_Ref, 公开
+.参数 Bool, 逻辑型
+.局部变量 ReturnValue, QSJson_Ref
+
+ReturnValue.置逻辑 (Bool)
+置入代码 ({139, 69, 252, 201, 194, 4, 0})
+' mov eax,[ebp-4]
+' leave
+' retn 4
+
+' 由于易的返回会做无用的复制操作（返回值 = 复制(ReturnValue) | 销毁(ReturnValue) | 返回）
+' 所以直接汇编里返回
+返回 (ReturnValue)
+.子程序 QSJson_Json空值, QSJson_Ref, 公开
+.局部变量 ReturnValue, QSJson_Ref
+
+' 默认为Null
+
+置入代码 ({139, 69, 252, 201, 195})
+' mov eax,[ebp-4]
+' leave
+' retn
+
+' 由于易的返回会做无用的复制操作（返回值 = 复制(ReturnValue) | 销毁(ReturnValue) | 返回）
+' 所以直接汇编里返回
+返回 (ReturnValue)

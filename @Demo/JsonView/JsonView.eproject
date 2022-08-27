@@ -1,0 +1,44 @@
+﻿{
+  "Name": "JsonView",
+  "Version": "1.0.0.0",
+  "ProjectType": "WindowsApp",
+  "SourceSet": "src",
+  "OutFile": "..\\..\\_DemoBuild\\JsonView.exe",
+  "Description": "JsonView",
+  "Author": "QIQI",
+  "Dependencies": [
+    {
+      "Kind": "ELib",
+      "Name": "系统核心支持库",
+      "FileName": "krnln",
+      "Guid": "d09f2340818511d396f6aaf844c7e325",
+      "Version": "5.7"
+    },
+    {
+      "Kind": "ELib",
+      "Name": "扩展界面支持库一",
+      "FileName": "iext",
+      "Guid": "27bb20fdd3e145e4bee3db39ddd6e64c",
+      "Version": "2.0"
+    },
+    {
+      "Kind": "ELib",
+      "Name": "特殊功能支持库",
+      "FileName": "spec",
+      "Guid": "A512548E76954B6E92C21055517615B0",
+      "Version": "3.1"
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QSJson",
+      "Path": "../../_Build/QSJson.ec",
+      "ReExport": false
+    },
+    {
+      "Kind": "ECom",
+      "Name": "QS速度测试",
+      "Path": "../../_Build/QS速度测试.ec",
+      "ReExport": false
+    }
+  ]
+}

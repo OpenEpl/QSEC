@@ -1,0 +1,94 @@
+﻿.程序集 SmartScale, <对象>, 公开
+.程序集变量 record, WindowRecord
+.程序集变量 fontPool, FontPool
+.程序集变量 pSubclassProcHelper, 整数型
+.程序集变量 dpiChangedListeners, 整数型, , "0"
+
+.子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
+
+pSubclassProcHelper = 到整数 (&SmartScale_SubclassProcHelper)
+.子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
+
+
+.子程序 SubclassProc, 整数型, , 注意位置不要改变，汇编代码依赖虚函数表中位置定位函数
+.参数 hWnd, 整数型
+.参数 uMsg, 整数型
+.参数 wParam, 整数型
+.参数 lParam, 整数型
+.参数 dwRefData, 整数型
+.局部变量 rect, RECT
+
+.判断开始 (uMsg == #WM_DPICHANGED)
+    .如果真 (record.hWnd == hWnd)  ' check
+        memcpy (取变量地址 (rect.left), lParam, 16)
+        OnDpiChanged (位与 (wParam, 65535), rect)
+    .如果真结束
+    
+.判断 (uMsg == #WM_NCDESTROY)
+    .如果真 (record.hWnd == hWnd)  ' check
+        record = EmptyWindowRecord ()
+        RemoveWindowSubclass (hWnd, pSubclassProcHelper, ThisPtr ())
+    .如果真结束
+    
+.判断 (uMsg == #WM_SIZE)
+    .如果真 (record.hWnd == hWnd)  ' check
+        ScaleControlSize (record)
+    .如果真结束
+    
+.判断 (uMsg == #WM_CTLCOLORSTATIC)
+    
+.默认
+    
+.判断结束
+
+返回 (DefSubclassProc (hWnd, uMsg, wParam, lParam))
+.子程序 OnDpiChanged
+.参数 dpi, 整数型
+.参数 rect, RECT
+.局部变量 i, 整数型
+
+ScaleControlFont (record, dpi, fontPool)
+SetWindowPos (record.hWnd, 0, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, 位或 (#SWP_NOZORDER, #SWP_NOOWNERZORDER, #SWP_NOACTIVATE))
+.计次循环首 (取数组下标 (dpiChangedListeners, ), i)
+    Call_2 (dpiChangedListeners[i], ThisPtr (), dpi)
+.计次循环尾 ()
+.子程序 ThisPtr, 整数型, 公开
+
+置入代码 ({139, 69, 8, 139, 0, 201, 194, 4, 0})
+' mov eax,[ebp+8]
+' mov eax,[eax]
+' leave
+' retn 4
+返回 (0)
+.子程序 Init, , 公开, won't notify dpi changed listeners
+.参数 hWnd, 整数型
+.参数 clientWidth96, 整数型, 可空, pixels in dpi 96, 0 for auto detection
+.参数 clientHeight96, 整数型, 可空, pixels in dpi 96, 0 for auto detection
+
+.如果真 (record.hWnd == hWnd)
+    返回 ()
+.如果真结束
+.如果真 (record.hWnd != 0)
+    record = EmptyWindowRecord ()
+    RemoveWindowSubclass (record.hWnd, pSubclassProcHelper, ThisPtr ())
+.如果真结束
+RecordWindowsInfo (hWnd, record, clientWidth96, clientHeight96)
+ScaleForDpi (record, fontPool)
+SetWindowSubclass (hWnd, pSubclassProcHelper, ThisPtr (), 0)
+.子程序 AddDpiChangedListener, , 公开
+.参数 listener, 整数型, , void* thiz, int dpi
+
+加入成员 (dpiChangedListeners, listener)
+.子程序 MoveToCenter, , 公开
+.局部变量 rect, RECT
+.局部变量 width, 整数型
+.局部变量 height, 整数型
+.局部变量 x, 整数型
+.局部变量 y, 整数型
+
+GetWindowRect (record.hWnd, rect)
+width = rect.right - rect.left
+height = rect.bottom - rect.top
+x = 右移 (取屏幕宽度 () - width, 1)
+y = 右移 (取屏幕高度 () - height, 1)
+MoveWindow (record.hWnd, x, y, width, height, 0)
