@@ -1,4 +1,5 @@
-﻿& "$PSScriptRoot/Task_Build.ps1"
+﻿Try { Set-ExecutionPolicy -ExecutionPolicy 'ByPass' -Scope 'Process' -Force -ErrorAction 'Stop' } Catch {}
+& "$PSScriptRoot/Task_Build.ps1"
 $PackageName = "QSEC_Build_" + (Get-Date).ToUniversalTime().ToString('yyyyMMdd')
 New-Item -Type Directory $PSScriptRoot/$PackageName -Force | Out-Null
 Copy-Item $PSScriptRoot/_Build -Destination "$PSScriptRoot/$PackageName/模块" -Recurse -Force
