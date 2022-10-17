@@ -3,6 +3,8 @@
 .程序集变量 fontPool, FontPool
 .程序集变量 pSubclassProcHelper, 整数型
 .程序集变量 dpiChangedListeners, 整数型, , "0"
+.程序集变量 m_fixedLayout, 逻辑型
+.程序集变量 oldDpi, 整数型
 
 .子程序 _初始化, , , 当基于本类的对象被创建后，此方法会被自动调用
 
@@ -18,20 +20,19 @@ pSubclassProcHelper = 到整数 (&SmartScale_SubclassProcHelper)
 .参数 dwRefData, 整数型
 .局部变量 rect, RECT
 
+.如果真 (record.hWnd != hWnd)
+    返回 (DefSubclassProc (hWnd, uMsg, wParam, lParam))
+.如果真结束
 .判断开始 (uMsg == #WM_DPICHANGED)
-    .如果真 (record.hWnd == hWnd)  ' check
-        memcpy (取变量地址 (rect.left), lParam, 16)
-        OnDpiChanged (位与 (wParam, 65535), rect)
-    .如果真结束
+    memcpy (取变量地址 (rect.left), lParam, 16)
+    OnDpiChanged (位与 (wParam, 65535), rect)
     
 .判断 (uMsg == #WM_NCDESTROY)
-    .如果真 (record.hWnd == hWnd)  ' check
-        record = EmptyWindowRecord ()
-        RemoveWindowSubclass (hWnd, pSubclassProcHelper, ThisPtr ())
-    .如果真结束
+    record = EmptyWindowRecord ()
+    RemoveWindowSubclass (hWnd, pSubclassProcHelper, ThisPtr ())
     
 .判断 (uMsg == #WM_SIZE)
-    .如果真 (record.hWnd == hWnd)  ' check
+    .如果真 (m_fixedLayout)
         ScaleControlSize (record)
     .如果真结束
     
@@ -47,11 +48,20 @@ pSubclassProcHelper = 到整数 (&SmartScale_SubclassProcHelper)
 .参数 rect, RECT
 .局部变量 i, 整数型
 
+.如果真 (取反 (m_fixedLayout))
+    ' refresh automatically
+    RecordWindowsInfo (record.hWnd, record, , , oldDpi)
+.如果真结束
 ScaleControlFont (record, dpi, fontPool)
 SetWindowPos (record.hWnd, 0, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, 位或 (#SWP_NOZORDER, #SWP_NOOWNERZORDER, #SWP_NOACTIVATE))
+.如果真 (取反 (m_fixedLayout))
+    ' for fixed layout, controls are to be scaled when WM_SIZE is received
+    ScaleControlSize (record)
+.如果真结束
 .计次循环首 (取数组下标 (dpiChangedListeners, ), i)
     Call_2 (dpiChangedListeners[i], ThisPtr (), dpi)
 .计次循环尾 ()
+oldDpi = dpi
 .子程序 ThisPtr, 整数型, 公开
 
 置入代码 ({139, 69, 8, 139, 0, 201, 194, 4, 0})
@@ -62,8 +72,10 @@ SetWindowPos (record.hWnd, 0, rect.left, rect.top, rect.right - rect.left, rect.
 返回 (0)
 .子程序 Init, , 公开, won't notify dpi changed listeners
 .参数 hWnd, 整数型
-.参数 clientWidth96, 整数型, 可空, pixels in dpi 96, 0 for auto detection
-.参数 clientHeight96, 整数型, 可空, pixels in dpi 96, 0 for auto detection
+.参数 clientWidth, 整数型, 可空, pixels in [baseDpi], 0 for auto detection
+.参数 clientHeight, 整数型, 可空, pixels in [baseDpi], 0 for auto detection
+.参数 baseDpi, 整数型, 可空, default: 96
+.参数 fixedLayout, 逻辑型, 可空, default: true. if [fixedLayout] is false, then only dpi changing is handled.
 
 .如果真 (record.hWnd == hWnd)
     返回 ()
@@ -72,8 +84,16 @@ SetWindowPos (record.hWnd, 0, rect.left, rect.top, rect.right - rect.left, rect.
     RemoveWindowSubclass (record.hWnd, pSubclassProcHelper, ThisPtr ())
     record = EmptyWindowRecord ()
 .如果真结束
-RecordWindowsInfo (hWnd, record, clientWidth96, clientHeight96)
+.如果真 (是否为空 (baseDpi))
+    baseDpi = #USER_DEFAULT_SCREEN_DPI
+.如果真结束
+.如果真 (是否为空 (fixedLayout))
+    fixedLayout = 真
+.如果真结束
+RecordWindowsInfo (hWnd, record, clientWidth, clientHeight, baseDpi)
 ScaleForDpi (record, fontPool)
+oldDpi = GetDpiForWindow (record.hWnd)
+m_fixedLayout = fixedLayout
 SetWindowSubclass (hWnd, pSubclassProcHelper, ThisPtr (), 0)
 .子程序 AddDpiChangedListener, , 公开
 .参数 listener, 整数型, , void* thiz, int dpi

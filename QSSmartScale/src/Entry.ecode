@@ -18,8 +18,9 @@ DpiAwarePerMonitorV2OrCompatible ()
 .子程序 RecordWindowsInfo, , 公开
 .参数 hParent, 整数型
 .参数 data, WindowRecord, 参考
-.参数 clientWidth96, 整数型, 可空, pixels in dpi 96, 0 for auto detection
-.参数 clientHeight96, 整数型, 可空, pixels in dpi 96, 0 for auto detection
+.参数 clientWidth, 整数型, 可空, pixels in [baseDpi], 0 for auto detection
+.参数 clientHeight, 整数型, 可空, pixels in [baseDpi], 0 for auto detection
+.参数 baseDpi, 整数型, 可空, default: 96
 .局部变量 rect, RECT
 .局部变量 eplControlMap, EplControlMap
 .局部变量 eplFontPropertyIdsMap, EplFontPropertyIdsMap
@@ -43,49 +44,51 @@ hMenu = GetMenu (hParent)
 .如果真结束
 exStyle = GetWindowLong (hParent, #GWL_EXSTYLE)
 systemDpi = GetDpiForSystem ()
-
+.如果真 (是否为空 (baseDpi))
+    baseDpi = #USER_DEFAULT_SCREEN_DPI
+.如果真结束
 pAdjustWindowRectExForDpi = GetProcAddress (GetModuleHandle (“user32.dll”), “AdjustWindowRectExForDpi”)
 .如果 (pAdjustWindowRectExForDpi != 0)
-    Call_5 (pAdjustWindowRectExForDpi, 取变量地址 (clientOffest.left), style, bMenu, exStyle, #USER_DEFAULT_SCREEN_DPI)
+    Call_5 (pAdjustWindowRectExForDpi, 取变量地址 (clientOffest.left), style, bMenu, exStyle, baseDpi)
 .否则
     AdjustWindowRectEx (clientOffest, style, bMenu, exStyle)
-    clientOffest.left = 四舍五入 (clientOffest.left / systemDpi * #USER_DEFAULT_SCREEN_DPI, )
-    clientOffest.top = 四舍五入 (clientOffest.top / systemDpi * #USER_DEFAULT_SCREEN_DPI, )
-    clientOffest.right = 四舍五入 (clientOffest.right / systemDpi * #USER_DEFAULT_SCREEN_DPI, )
-    clientOffest.bottom = 四舍五入 (clientOffest.bottom / systemDpi * #USER_DEFAULT_SCREEN_DPI, )
+    clientOffest.left = 四舍五入 (clientOffest.left / systemDpi * baseDpi, )
+    clientOffest.top = 四舍五入 (clientOffest.top / systemDpi * baseDpi, )
+    clientOffest.right = 四舍五入 (clientOffest.right / systemDpi * baseDpi, )
+    clientOffest.bottom = 四舍五入 (clientOffest.bottom / systemDpi * baseDpi, )
 .如果结束
 
 GetWindowRect (hParent, rect)
 data.hWnd = hParent
 
-.如果 (clientWidth96 != 0)
-    data.ClientWidth96 = clientWidth96
-.否则
-    data.ClientWidth96 = rect.right - rect.left + clientOffest.left - clientOffest.right
-    .如果真 (data.ClientWidth96 == 0)
-        data.ClientWidth96 = 1
+.如果真 (clientWidth == 0)
+    clientWidth = rect.right - rect.left + clientOffest.left - clientOffest.right
+    .如果真 (clientWidth == 0)
+        clientWidth = 1
     .如果真结束
     
-.如果结束
+.如果真结束
 
-.如果 (clientHeight96 != 0)
-    data.ClientHeight96 = clientHeight96
-.否则
-    data.ClientHeight96 = rect.bottom - rect.top + clientOffest.top - clientOffest.bottom
-    .如果真 (data.ClientHeight96 == 0)
-        data.ClientHeight96 = 1
+.如果真 (clientHeight == 0)
+    clientHeight = rect.bottom - rect.top + clientOffest.top - clientOffest.bottom
+    .如果真 (clientHeight == 0)
+        clientHeight = 1
     .如果真结束
     
-.如果结束
+.如果真结束
+
+data.ClientWidth96 = clientWidth / baseDpi * #USER_DEFAULT_SCREEN_DPI
+data.ClientHeight96 = clientHeight / baseDpi * #USER_DEFAULT_SCREEN_DPI
 
 data.Controls.Clear ()
 eplControlMap.LoadAll ()
-CollectControlRecord (hParent, data.Controls, eplControlMap, eplFontPropertyIdsMap, data.ClientWidth96, data.ClientHeight96)
+CollectControlRecord (hParent, data.Controls, eplControlMap, eplFontPropertyIdsMap, clientWidth, clientHeight, baseDpi)
 .子程序 RecordEplFontProperties
 .参数 dataType, 整数型
 .参数 cWnd, 整数型
 .参数 record, EplFontPropertiesRecord, 参考
 .参数 eplFontPropertyIdsMap, EplFontPropertyIdsMap
+.参数 baseDpi, 整数型
 .局部变量 i, 整数型
 .局部变量 count, 整数型
 .局部变量 succeedToGetProperty, 整数型
@@ -101,7 +104,7 @@ i = 1
     .如果 (succeedToGetProperty == 0 || dataBlock.addr == 0 || dataBlock.length != 60)
         record.FontSizes[i] = GetEmSize ()
     .否则
-        record.FontSizes[i] = 四舍五入 (取绝对值 (指针到整数 (dataBlock.addr)) * 72 / #USER_DEFAULT_SCREEN_DPI, )
+        record.FontSizes[i] = 四舍五入 (取绝对值 (指针到整数 (dataBlock.addr)) * 72 / baseDpi, )
     .如果结束
     i = i + 1
 .判断循环尾 ()
@@ -201,8 +204,9 @@ count = data.Controls.Count ()
 .参数 list, ArrayListOfControlInfos, 参考
 .参数 eplControlMap, EplControlMap
 .参数 eplFontPropertyIdsMap, EplFontPropertyIdsMap
-.参数 clientWidth, 整数型
-.参数 clientHeight, 整数型
+.参数 clientWidth, 整数型, , pixels in [baseDpi]
+.参数 clientHeight, 整数型, , pixels in [baseDpi]
+.参数 baseDpi, 整数型
 .局部变量 control, ControlRecord
 .局部变量 hChild, 整数型
 .局部变量 rect, RECT
@@ -230,7 +234,7 @@ defaultFont = GetStockObject (#DEFAULT_GUI_FONT)
     control.RelativeHeight = (rect.bottom - rect.top) / clientHeight
     control.FontSize = 0
     .如果 (eplControlMap.Get (hChild, eplDataType, eplCWnd))
-        RecordEplFontProperties (eplDataType, eplCWnd, control.EplFontProperties, eplFontPropertyIdsMap)
+        RecordEplFontProperties (eplDataType, eplCWnd, control.EplFontProperties, eplFontPropertyIdsMap, baseDpi)
     .否则
         清除数组 (control.EplFontProperties.PropertyIds)
         清除数组 (control.EplFontProperties.FontSizes)
@@ -240,7 +244,7 @@ defaultFont = GetStockObject (#DEFAULT_GUI_FONT)
             .如果 (hFont == defaultFont)
                 control.FontSize = GetEmSize ()
             .否则
-                control.FontSize = 四舍五入 (取绝对值 (font.lfHeight) * 72 / #USER_DEFAULT_SCREEN_DPI, )
+                control.FontSize = 四舍五入 (取绝对值 (font.lfHeight) * 72 / baseDpi, )
             .如果结束
             
         .如果真结束
@@ -249,7 +253,7 @@ defaultFont = GetStockObject (#DEFAULT_GUI_FONT)
     
     list.Add (control)
     GetClientRect (hChild, childClientRect)
-    CollectControlRecord (hChild, list, eplControlMap, eplFontPropertyIdsMap, childClientRect.right, childClientRect.bottom)
+    CollectControlRecord (hChild, list, eplControlMap, eplFontPropertyIdsMap, childClientRect.right, childClientRect.bottom, baseDpi)
     hChild = GetWindow (hChild, #GW_HWNDNEXT)
 .判断循环尾 ()
 .子程序 GetFontInfo
