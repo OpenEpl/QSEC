@@ -69,8 +69,8 @@ SetWindowPos (record.hWnd, 0, rect.left, rect.top, rect.right - rect.left, rect.
     返回 ()
 .如果真结束
 .如果真 (record.hWnd != 0)
-    record = EmptyWindowRecord ()
     RemoveWindowSubclass (record.hWnd, pSubclassProcHelper, ThisPtr ())
+    record = EmptyWindowRecord ()
 .如果真结束
 RecordWindowsInfo (hWnd, record, clientWidth96, clientHeight96)
 ScaleForDpi (record, fontPool)
