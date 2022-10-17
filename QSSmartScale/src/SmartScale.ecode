@@ -11,6 +11,9 @@
 pSubclassProcHelper = 到整数 (&SmartScale_SubclassProcHelper)
 .子程序 _销毁, , , 当基于本类的对象被销毁前，此方法会被自动调用
 
+.如果真 (record.hWnd != 0)
+    RemoveWindowSubclass (record.hWnd, pSubclassProcHelper, ThisPtr ())
+.如果真结束
 
 .子程序 SubclassProc, 整数型, , 注意位置不要改变，汇编代码依赖虚函数表中位置定位函数
 .参数 hWnd, 整数型
